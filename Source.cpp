@@ -306,8 +306,8 @@ int main(int argc, char* argv[])
 	output.printWScale(mParams.processedWeightScale);
 
 	// SURVEY
-  cParams.files.push_back("40963_oj287_jul_30_1230.fits");
-  Survey survey(sParams, cParams, "40963_oj287_jul_30_1230.fits");
+  cParams.files.push_back(skynet_filename);
+  Survey survey(sParams, cParams, skynet_filename);
   surveyHold.push_back(survey);
 
   int i;
