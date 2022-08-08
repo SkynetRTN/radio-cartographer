@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Working directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
+DIR=pwd
+# "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo pwd
 # Files to be processed in the directory
-FILES=*.fits        # arg 1  =  Filename                    The file(s) to be processed
+FILES=testing/good-test-file.cyb.fits        # arg 1  =  Filename                    The file(s) to be processed
 # *_2.txt this was good when we tested it using .txt
 
 # The following are the processing parameters
