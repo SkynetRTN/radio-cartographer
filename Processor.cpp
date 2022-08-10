@@ -14,11 +14,8 @@
 #include "ProcessorThetaGap.h"
 #include "ProcessorTS.h"
 
-
 static double toRad = M_PI / 180.0;
 static double toDeg = 180.0 / M_PI;
-
-
 
 class LinearModel : public FunctionalForm
 {
@@ -35,7 +32,6 @@ public:
 	std::vector<double> regression();
 	void getAverage();
 	~LinearModel();
-
 };
 
 std::vector<std::vector<double>> spawnNewRCRThread(std::vector<double> w, std::vector<double> y)
@@ -57,7 +53,6 @@ std::vector<std::vector<double>> spawnNewRCRThread(std::vector<double> w, std::v
 	return rcrOutput;
 }
 
-
 Processor::Processor()
 {
 	globalMaxDec = -999999;
@@ -73,7 +68,7 @@ Processor::Processor(Survey &survey)
 	this->pCoordinate = survey.getProcessingCoordinate();
 	this->mCoordinate = survey.getMappingCoordinate();
 }
-Processor::Processor(ProcessorParameters & procParams)
+Processor::Processor(ProcessorParameters &procParams)
 {
 	globalMaxDec = -999999;
 	globalMinDec = 999999;
@@ -85,10 +80,9 @@ Processor::Processor(ProcessorParameters & procParams)
 	timeShift = procParams.timeShift;
 	wCorrMap = procParams.wCorrMap;
 	lssProc = procParams.lssProc;
-
 }
 
-//processing commands
+// processing commands
 void Processor::performBGSubtractionMulti(Survey &survey)
 {
 	int counter = 0, completedThreads = 0, liveThreads = 0;
@@ -109,7 +103,7 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 		{
 			Debugger::print("Info", i);
 			bgCuda = BackgroundCUDA(scans[i], false);
-			futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW*psfFWHM);
+			futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW * psfFWHM);
 			counter++;
 			liveThreads++;
 
@@ -130,7 +124,6 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 			scans[i].removeBG(results);
 		}
 	}
-
 
 	Debugger::clockTime(false);
 	survey.setScans(scans);
@@ -214,7 +207,6 @@ void Processor::performTimeShifting(Survey &survey)
 		t_int = procTS.find_tInt();
 	}
 
-
 	Output output;
 	output.printTimeShiftInfo(timeShift, t_int);
 
@@ -234,7 +226,6 @@ void Processor::performTimeShifting(Survey &survey)
 	PartitionSet partSet = determineProcSurveyDimensions(survey, false);
 	survey.setPartSetProcSSS(partSet);
 	classifySSS(survey);
-
 }
 void Processor::processLargeScaleStructure(Survey &survey)
 {
@@ -254,10 +245,10 @@ void Processor::processLargeScaleStructure(Survey &survey)
 		lssDropCorrection(survey);
 		lssSet2DScatter(survey);
 		lssPolynomialRFISubtraction(survey, bgScaleBW, wScaleBW);
-		//lssElevationSubtraction(survey);
+		// lssElevationSubtraction(survey);
 	}
 }
-void Processor::set2DScatter(Survey& survey)
+void Processor::set2DScatter(Survey &survey)
 {
 	scans = survey.getScans();
 	RCR rcr = RCR(LS_MODE_DL);
@@ -386,7 +377,7 @@ void Processor::set2DScatter(Survey& survey)
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getDec(jAfter);
 					angleMid = scans[i].getDec(j);
@@ -394,7 +385,7 @@ void Processor::set2DScatter(Survey& survey)
 				}
 				else
 				{
-					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getRa(jAfter);
 					angleMid = scans[i].getRa(j);
@@ -409,7 +400,6 @@ void Processor::set2DScatter(Survey& survey)
 				weight += pow(((angleLow - xBar) * (angleHigh - angleLow)), 2.0) / weightHigh;
 				weight += pow(((angleMid - xBar) * (angleHigh - angleLow)), 2.0) * ((1.0 / weightHigh) + (1.0 / weightLow));
 				weights.push_back(1.0 / weight);
-
 			}
 			rcr.performBulkRejection(delta);
 			scatter2dTemp.push_back(std::sqrt(rcr.result.mu * rcr.result.mu + rcr.result.sigma * rcr.result.sigma));
@@ -448,7 +438,7 @@ void Processor::set2DScatter(Survey& survey)
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getDec(jAfter);
 					angleMid = scans[i].getDec(j);
@@ -456,7 +446,7 @@ void Processor::set2DScatter(Survey& survey)
 				}
 				else
 				{
-					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getFlux(j) - (scans[i - 1].getFlux(jBefore) + (scans[i + 1].getFlux(jAfter) - scans[i - 1].getFlux(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getRa(jAfter);
 					angleMid = scans[i].getRa(j);
@@ -471,7 +461,6 @@ void Processor::set2DScatter(Survey& survey)
 				weight += pow(((angleLow - xBar) * (angleHigh - angleLow)), 2.0) / weightHigh;
 				weight += pow(((angleMid - xBar) * (angleHigh - angleLow)), 2.0) * ((1.0 / weightHigh) + (1.0 / weightLow));
 				weights.push_back(1.0 / weight);
-
 			}
 			rcr.performBulkRejection(delta);
 			scatter2dTemp.push_back(std::sqrt(rcr.result.mu * rcr.result.mu + rcr.result.sigma * rcr.result.sigma));
@@ -486,7 +475,6 @@ void Processor::set2DScatter(Survey& survey)
 	{
 		dumpSums.push_back(scans[i].getDumpSum());
 		indices.push_back(i);
-
 	}
 	for (int i = 0; i < scatter2dTemp.size(); i++)
 	{
@@ -547,7 +535,7 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 
 	double rfiScaleDeg = rfiScaleBW * psfFWHM;
 	double rfiScaleRad = rfiScaleDeg * M_PI / 180.0;
-	
+
 	std::vector<MapTypes> mapHolder;
 	mapHolder.resize(surveys.size());
 	for (int i = 0; i < surveys.size(); i++)
@@ -562,7 +550,7 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 		standardGapTemp = standardGaps[i];
 		if (mapHolder[i] == DAISY)
 		{
-			standardGapTemp = (standardGapTemp / 2)*scans.size();
+			standardGapTemp = (standardGapTemp / 2) * scans.size();
 		}
 		if (standardGapTemp < standardGap)
 		{
@@ -573,28 +561,31 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 	Output output;
 	output.printRfiInfo(rfiScaleBW);
 	std::vector<std::vector<double>> rfiSubtracted;
-
 	if (rfiScaleBW != 0.0)
 	{
+		Debugger::print("Info", "rfiScaleBW not 0");
 		RFIParameters rfiParams;
 		rfiParams.correlatedWeightMap = wCorrMap;
 		rfiParams.psfFWHM = psfFWHM;
 		rfiParams.rfiScaleBW = rfiScaleBW;
 		rfiParams.standardGap = standardGap;
 		rfiParams.partSetProcSSS = partSetProcSSS;
-
+		Debugger::print("Info", "Set rfiParams finished");
 		ProcessorRFI processorRFI(scans, rfiParams, scatter2dSSS, classificationsSSS);
 		rfiSubtracted = processorRFI.getRFISubtracted();
+		Debugger::print("Info", "RFI subtraction computed");
 		centroidLocations = processorRFI.getCentroidLocations();
-
+		Debugger::print("Info", "Process rfiParams finished");
 		for (int i = 0; i < scans.size(); i++)
 		{
-			scans[i].removeRFI(rfiSubtracted[i]); //resets the working channel
-												  //scans[i].removePoints(flags[i]); // removes flagged points (this is also used in trimming edges, so we might be able to just rewrite this as a clip RFI Data Function that takes in the RFISubtractedVector
+			Debugger::print("Info", "Scan RFI Subtracted");
+			Debugger::print("Info", i);
+			scans[i].removeRFI(rfiSubtracted[i]); // resets the working channel
+												  // scans[i].removePoints(flags[i]); // removes flagged points (this is also used in trimming edges, so we might be able to just rewrite this as a clip RFI Data Function that takes in the RFISubtractedVector
+			Debugger::print("Info", "RFI Subtraction done");
 			scans[i].updateAngDistTemp(partSetProcSSS.centerDecDeg);
 		}
 	}
-
 	composite.setScans(scans);
 	repartitionScans(composite, surveys);
 	composite.setScans(scans);
@@ -603,9 +594,8 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 	composite.setCompPartSetProcSSS(partSet);
 	classifySSS(composite);
 }
-void Processor::calculateProcThetaGapMulti(Composite & composite)
+void Processor::calculateProcThetaGapMulti(Composite &composite)
 {
-	Debugger::print("Info", "Starting Theta Gap");
 	std::vector<double> thetaGapVec;
 	std::vector<std::vector<double>> thetaGapGridSSS, thetaGapGridLSS;
 	std::vector<std::future<double>> futureVec;
@@ -613,9 +603,9 @@ void Processor::calculateProcThetaGapMulti(Composite & composite)
 	scans = composite.getScans();
 	classificationsSSS = composite.getClassificationsSSS();
 	classificationsLSS = composite.getClassificationsLSS();
-	
+
 	ProcessorThetaGap processorTG(scans, psfFWHM, partSetProcSSS, partSetProcLSS, classificationsSSS, classificationsLSS);
-	
+
 	if (LSSProcessing)
 	{
 		thetaGapGridSSS = processorTG.calculateThetaGapSSS();
@@ -684,7 +674,7 @@ void Processor::calculateProcThetaGapMulti(Composite & composite)
 	composite.setScans(scans);
 }
 
-//data pre-processing
+// data pre-processing
 void Processor::characterizeSurvey(Survey &survey)
 {
 	mapType = survey.getMapType();
@@ -711,7 +701,7 @@ void Processor::determineDataBoundaries(Survey &survey)
 
 	if (true)
 	{
-		//throw std::invalid_argument(std::string("error message here"));
+		// throw std::invalid_argument(std::string("error message here"));
 	}
 
 	for (int i = 0; i < scans.size(); i++)
@@ -725,7 +715,7 @@ void Processor::determineDataBoundaries(Survey &survey)
 		}
 	}
 
-	//IF OVERLAYING IMAGES, EACH SURVEY SHOULD BE CENTERED ABOUT 0 WHEN DEC TRANSFORMED
+	// IF OVERLAYING IMAGES, EACH SURVEY SHOULD BE CENTERED ABOUT 0 WHEN DEC TRANSFORMED
 	rcr.performBulkRejection(decAll);
 	survey.setMedianDec(rcr.result.mu);
 
@@ -757,7 +747,6 @@ void Processor::determineDataBoundaries(Survey &survey)
 				minRaVals.push_back(scanRaMin);
 				maxRaVals.push_back(scanRaMax);
 			}
-
 		}
 		else
 		{
@@ -782,9 +771,7 @@ void Processor::determineDataBoundaries(Survey &survey)
 				minDecVals.push_back(scanDecMin);
 				maxDecVals.push_back(scanDecMax);
 			}
-
 		}
-
 
 		rcr.performBulkRejection(minDecVals);
 		if (globalMinDec > rcr.result.mu)
@@ -817,9 +804,9 @@ void Processor::determineDataBoundaries(Survey &survey)
 		{
 			for (int j = 0; j < scans[i].getSize(); j++)
 			{
-				//scans[i].cosDecTransform(0, survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec());
-				radii.push_back(Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j)*cos(survey.getMedianDec()), survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec())*toDeg);//THIS IS WRONG: DAISYS ARE DAISIES WHEN IN RA*C0S(DEC) SPACE, BUT WHEN STILL RAW RA AND DEC, THEY ARE ELONGATED ALONG THE RA AXIS, SO WE ARE TRYING TO UNSTRETCH THEM TWICE...
-				//scans[i].undoCosTransform(survey.getMedianDec(), survey.getMedianDec(), survey.getMedianRa());
+				// scans[i].cosDecTransform(0, survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec());
+				radii.push_back(Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j) * cos(survey.getMedianDec()), survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec()) * toDeg); // THIS IS WRONG: DAISYS ARE DAISIES WHEN IN RA*C0S(DEC) SPACE, BUT WHEN STILL RAW RA AND DEC, THEY ARE ELONGATED ALONG THE RA AXIS, SO WE ARE TRYING TO UNSTRETCH THEM TWICE...
+																																																	   // scans[i].undoCosTransform(survey.getMedianDec(), survey.getMedianDec(), survey.getMedianRa());
 			}
 		}
 		RCR rcr2 = RCR(LS_MODE_DL);
@@ -844,16 +831,15 @@ void Processor::determineDataBoundaries(Survey &survey)
 		{
 			globalMinRa = survey.getMedianRa() - rcr2.result.mu;
 		}
-
 	}
 
-	globalCenterDec = 0.5*(globalMaxDec - globalMinDec) + globalMinDec;
-	globalCenterRa = 0.5*(globalMaxRa - globalMinRa) + globalMinRa;
+	globalCenterDec = 0.5 * (globalMaxDec - globalMinDec) + globalMinDec;
+	globalCenterRa = 0.5 * (globalMaxRa - globalMinRa) + globalMinRa;
 
 	partSetProcSSS.centerDecDeg = globalCenterDec;
 	partSetProcSSS.centerRaDeg = globalCenterRa;
-	
-	survey.setPartSetProcSSS(partSetProcSSS);//WE ONLY NEED SSS BECAUSE LSS CHANGES ONLY ONCE WE'VE REJECTED POINTS FROM SSS
+
+	survey.setPartSetProcSSS(partSetProcSSS); // WE ONLY NEED SSS BECAUSE LSS CHANGES ONLY ONCE WE'VE REJECTED POINTS FROM SSS
 }
 void Processor::characterizeData(Survey &survey)
 {
@@ -868,22 +854,22 @@ void Processor::characterizeData(Survey &survey)
 			scans[i].setScanInRa(scansInRa);
 		}
 	}
-		
+
 	for (int i = 0; i < scans.size(); i++)
 	{
-		//if (survey.getTracking())
+		// if (survey.getTracking())
 		//{
 		//	scans[i].cosDecTransform(survey.getTimeShift(), survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec());
 		//	scans[i].updateAngDistTemp(survey.getMedianDec());
-		//}
-		//else
+		// }
+		// else
 		//{
 		//	scans[i].cosDecTransform(survey.getTimeShift(), globalCenterDec, globalCenterRa, globalCenterDec);
 		//	scans[i].updateAngDistTemp(globalCenterDec);
-		//}
+		// }
 
-		 if (survey.getTracking())
-		 {
+		if (survey.getTracking())
+		{
 			if (survey.getProcessingCoordinate() == EQUATORIAL)
 			{
 				scans[i].dynamicCosDecTransform(survey.getTimeShift(), survey.getMedianDec(), survey.getMedianRa(), scans[i].getDec());
@@ -923,11 +909,10 @@ void Processor::characterizeData(Survey &survey)
 	else
 	{
 		partSetProcSSS.medianDec = survey.getMedianDec() - globalCenterDec;
-		partSetProcSSS.medianRa = (survey.getMedianRa() - globalCenterRa)*cos(globalCenterDec);
+		partSetProcSSS.medianRa = (survey.getMedianRa() - globalCenterRa) * cos(globalCenterDec);
 	}
 
 	survey.setPartSetProcSSS(partSetProcSSS);
-
 
 	switchChannels(survey.getChannel(), survey);
 	calculateScatter();
@@ -986,7 +971,7 @@ void Processor::calculateScatter()
 	}
 }
 
-//tools
+// tools
 int Processor::findPossSSS(double i_0, double j_0, double limit, std::vector<int> &toRet)
 {
 	std::vector<int> intFiller;
@@ -994,12 +979,11 @@ int Processor::findPossSSS(double i_0, double j_0, double limit, std::vector<int
 	double decTemp = i_0, RATemp = j_0, toRad = M_PI / 180.0;
 	double distance;
 	int pointCounter = 0, decCounter = (int)((decTemp - partSetProcSSS.minDec) / partSetProcSSS.subDecInc), RACounter = (int)((RATemp - partSetProcSSS.minRa) / partSetProcSSS.subRaInc), iHold, jHold;
-	//int pointCounter = 0;
-	//int decCounter = round(((decTemp - partSetProc.minDec) / partSetProc.subDecInc));
-	//int RACounter = round((RATemp - partSetProc.minRa) / partSetProc.subRaInc);
-	//int iHold, jHold;
+	// int pointCounter = 0;
+	// int decCounter = round(((decTemp - partSetProc.minDec) / partSetProc.subDecInc));
+	// int RACounter = round((RATemp - partSetProc.minRa) / partSetProc.subRaInc);
+	// int iHold, jHold;
 
-	
 	if (decCounter >= classificationsSSS.size())
 	{
 		decCounter = classificationsSSS.size() - 1;
@@ -1016,10 +1000,10 @@ int Processor::findPossSSS(double i_0, double j_0, double limit, std::vector<int
 	{
 		RACounter = 0;
 	}
-	//for (int i = Tools::max(decCounter - 1, 0); i < Tools::min((double)decCounter + 2, partSetProc.subDecRes); i++)
+	// for (int i = Tools::max(decCounter - 1, 0); i < Tools::min((double)decCounter + 2, partSetProc.subDecRes); i++)
 	for (int i = Tools::max(decCounter - 1, 0); i < Tools::min((double)decCounter + 2, partSetProcSSS.subDecRes); i++)
 	{
-		//for (int j = Tools::max(RACounter - 1, 0); j < Tools::min((double)RACounter + 2, partSetProc.subRaRes); j++)
+		// for (int j = Tools::max(RACounter - 1, 0); j < Tools::min((double)RACounter + 2, partSetProc.subRaRes); j++)
 		for (int j = Tools::max(RACounter - 1, 0); j < Tools::min((double)RACounter + 2, partSetProcSSS.subRaRes); j++)
 		{
 			for (int k = 0; k < classificationsSSS[i][j].size(); k += 2)
@@ -1027,9 +1011,9 @@ int Processor::findPossSSS(double i_0, double j_0, double limit, std::vector<int
 				iHold = classificationsSSS[i][j][k];
 				jHold = classificationsSSS[i][j][k + 1];
 
-				distance = Tools::getGCDistance(i_0, j_0, scans[iHold].getDec(jHold), scans[iHold].getRa(jHold), partSetProcSSS.centerDecDeg)*toDeg;
+				distance = Tools::getGCDistance(i_0, j_0, scans[iHold].getDec(jHold), scans[iHold].getRa(jHold), partSetProcSSS.centerDecDeg) * toDeg;
 
-				//if ((i_0 - limit <= scans[iHold].getDec(jHold))
+				// if ((i_0 - limit <= scans[iHold].getDec(jHold))
 				//	&& (scans[iHold].getDec(jHold) <= i_0 + limit)
 				//	&& (j_0 - limit <= scans[iHold].getRa(jHold))//THESE ARE ALREADY COSINE TRANSFORMED??
 				//	&& (scans[iHold].getRa(jHold) <= j_0 + limit))
@@ -1037,7 +1021,7 @@ int Processor::findPossSSS(double i_0, double j_0, double limit, std::vector<int
 				//&& (j_0*cos(i_0*toRad) - limit <= scans[iHold].getRa(jHold)*cos(i_0*toRad))//THESE ARE ALREADY COSINE TRANSFORMED??
 				//&& (scans[iHold].getRa(jHold)*cos(i_0*toRad) <= j_0*cos(i_0*toRad) + limit))
 
-				if(distance < limit)
+				if (distance < limit)
 				{
 					if (pointCounter < 50)
 					{
@@ -1061,13 +1045,12 @@ int Processor::findPossLSS(double i_0, double j_0, double limit, std::vector<int
 	std::vector<int> intFiller;
 	toRet.resize(100, 0);
 	double decTemp = i_0, RATemp = j_0, toRad = M_PI / 180.0;
-	//int pointCounter = 0, decCounter = (int)((decTemp - partSetProc.minDec) / partSetProc.subDecInc), RACounter = (int)((RATemp - partSetProc.minRa) / partSetProc.subRaInc), iHold, jHold;
+	// int pointCounter = 0, decCounter = (int)((decTemp - partSetProc.minDec) / partSetProc.subDecInc), RACounter = (int)((RATemp - partSetProc.minRa) / partSetProc.subRaInc), iHold, jHold;
 	int pointCounter = 0;
 	int decCounter = round(((decTemp - partSetProcLSS.minDec) / partSetProcLSS.subDecInc));
 	int RACounter = round((RATemp - partSetProcLSS.minRa) / partSetProcLSS.subRaInc);
 	int iHold, jHold;
 	int index = round(limit / partSetProcLSS.subRaInc);
-
 
 	if (decCounter >= classificationsLSS.size())
 	{
@@ -1085,24 +1068,21 @@ int Processor::findPossLSS(double i_0, double j_0, double limit, std::vector<int
 	{
 		RACounter = 0;
 	}
-	//for (int i = Tools::max(decCounter - 1, 0); i < Tools::min((double)decCounter + 2, partSetProc.subDecRes); i++)
+	// for (int i = Tools::max(decCounter - 1, 0); i < Tools::min((double)decCounter + 2, partSetProc.subDecRes); i++)
 	for (int i = Tools::max(decCounter - index, 0); i < Tools::min((double)decCounter + index + 1, partSetProcLSS.subDecRes); i++)
 	{
-		//for (int j = Tools::max(RACounter - 1, 0); j < Tools::min((double)RACounter + 2, partSetProc.subRaRes); j++)
+		// for (int j = Tools::max(RACounter - 1, 0); j < Tools::min((double)RACounter + 2, partSetProc.subRaRes); j++)
 		for (int j = Tools::max(RACounter - index, 0); j < Tools::min((double)RACounter + index + 1, partSetProcLSS.subRaRes); j++)
 		{
 			for (int k = 0; k < classificationsLSS[i][j].size(); k += 2)
 			{
 				iHold = classificationsLSS[i][j][k];
 				jHold = classificationsLSS[i][j][k + 1];
-				if ((i_0 - limit <= scans[iHold].getDec(jHold))
-					&& (scans[iHold].getDec(jHold) <= i_0 + limit)
-					&& (j_0 - limit <= scans[iHold].getRa(jHold))//THESE ARE ALREADY COSINE TRANSFORMED??
+				if ((i_0 - limit <= scans[iHold].getDec(jHold)) && (scans[iHold].getDec(jHold) <= i_0 + limit) && (j_0 - limit <= scans[iHold].getRa(jHold)) // THESE ARE ALREADY COSINE TRANSFORMED??
 					&& (scans[iHold].getRa(jHold) <= j_0 + limit))
 
-
-					//&& (j_0*cos(i_0*toRad) - limit <= scans[iHold].getRa(jHold)*cos(i_0*toRad))//THESE ARE ALREADY COSINE TRANSFORMED??
-					//&& (scans[iHold].getRa(jHold)*cos(i_0*toRad) <= j_0*cos(i_0*toRad) + limit))
+				//&& (j_0*cos(i_0*toRad) - limit <= scans[iHold].getRa(jHold)*cos(i_0*toRad))//THESE ARE ALREADY COSINE TRANSFORMED??
+				//&& (scans[iHold].getRa(jHold)*cos(i_0*toRad) <= j_0*cos(i_0*toRad) + limit))
 				{
 					if (pointCounter < 50)
 					{
@@ -1125,11 +1105,11 @@ void Processor::classifySSS(Survey &survey)
 {
 	scans = survey.getScans();
 	partSetProcSSS = survey.getPartSetProcSSS();
-	//std::vector<std::vector<std::vector<int> > > classificationsSSS;
+	// std::vector<std::vector<std::vector<int> > > classificationsSSS;
 	classificationsSSS = survey.getClassificationsSSS();
 
 	std::vector<int> intFiller;
-	std::vector<std::vector<int> > intFillerFiller;
+	std::vector<std::vector<int>> intFillerFiller;
 	std::vector<double> raHold, decHold;
 	int decCounter, raCounter;
 	double decTemp, raTemp;
@@ -1182,7 +1162,7 @@ void Processor::classifyLSS(Survey &survey)
 	classificationsLSS = survey.getClassificationsLSS();
 
 	std::vector<int> intFiller;
-	std::vector<std::vector<int> > intFillerFiller;
+	std::vector<std::vector<int>> intFillerFiller;
 	std::vector<double> raHold, decHold;
 	int decCounter, raCounter;
 	double decTemp, raTemp;
@@ -1226,17 +1206,17 @@ void Processor::classifyLSS(Survey &survey)
 			classificationsLSS[decCounter][raCounter].push_back(j);
 		}
 	}
-	//survey.setPartSetProcLSS(partSetProcLSS);
+	// survey.setPartSetProcLSS(partSetProcLSS);
 	survey.setClassificationsLSS(classificationsLSS);
 }
-void Processor::classifySSS(Composite & composite)
+void Processor::classifySSS(Composite &composite)
 {
 	std::vector<int> intFiller;
-	std::vector<std::vector<int> > intFillerFiller;
+	std::vector<std::vector<int>> intFillerFiller;
 	std::vector<double> raHold, decHold;
 	int decCounter, raCounter;
 	double decTemp, raTemp;
-	//std::vector<std::vector<std::vector<int> > > classificationsSSS;
+	// std::vector<std::vector<std::vector<int> > > classificationsSSS;
 
 	scans = composite.getScans();
 	partSetProcSSS = composite.getCompPartSetProcSSS();
@@ -1281,17 +1261,17 @@ void Processor::classifySSS(Composite & composite)
 			classificationsSSS[decCounter][raCounter].push_back(j);
 		}
 	}
-	//composite.setCompPartSetProcSSS(classificationsSSS);
+	// composite.setCompPartSetProcSSS(classificationsSSS);
 	composite.setClassificationsSSS(classificationsSSS);
 }
-void Processor::classifyLSS(Composite & composite)
+void Processor::classifyLSS(Composite &composite)
 {
 	scans = composite.getScans();
 	partSetProcLSS = composite.getCompPartSetProcLSS();
 	classificationsLSS = composite.getClassificationsLSS();
 
 	std::vector<int> intFiller;
-	std::vector<std::vector<int> > intFillerFiller;
+	std::vector<std::vector<int>> intFillerFiller;
 	std::vector<double> raHold, decHold;
 	int decCounter, raCounter;
 	double decTemp, raTemp;
@@ -1335,13 +1315,13 @@ void Processor::classifyLSS(Composite & composite)
 			classificationsLSS[decCounter][raCounter].push_back(j);
 		}
 	}
-	//composite.setCompPartSetProcLSS(partSetProcLSS);
+	// composite.setCompPartSetProcLSS(partSetProcLSS);
 	composite.setClassificationsLSS(classificationsLSS);
 }
 
 PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 {
-	//THIS FUNCTION DETERMINES SURVEY BOUNDARIES, BOTH PROCESSED AND RAW
+	// THIS FUNCTION DETERMINES SURVEY BOUNDARIES, BOTH PROCESSED AND RAW
 	PartitionSet partSetProc;
 	scans = survey.getScans();
 	if (LSS)
@@ -1352,7 +1332,7 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 	{
 		partSetProc = survey.getPartSetProcSSS();
 	}
-	
+
 	RCR rcr = RCR(LS_MODE_DL);
 
 	double decTemp, raTemp;
@@ -1360,7 +1340,7 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 	partSetProc.mapType = survey.getMapType();
 
 	int size;
-	//USED TO FIND RCR MIN AND MAX DEC AND RA
+	// USED TO FIND RCR MIN AND MAX DEC AND RA
 	for (int i = 0; i < scans.size(); i++)
 	{
 		if (LSS)
@@ -1384,7 +1364,6 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 				raTemp = scans[i].getRa(j);
 				decTemp = scans[i].getDec(j);
 			}
-
 
 			if (raTemp > partSetProc.maxRa)
 			{
@@ -1427,51 +1406,51 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 
 			for (int j = 0; j < size; j++)
 			{
-				//distance = Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa, partSetProc.centerDecDeg)*toDeg;//LAST TERM SHOULD PROBABLY BE 0
-				//ONCE DAISY PATHS ARE CORRECTED THIS SHOULD NO LONGER BE MOD
+				// distance = Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa, partSetProc.centerDecDeg)*toDeg;//LAST TERM SHOULD PROBABLY BE 0
+				// ONCE DAISY PATHS ARE CORRECTED THIS SHOULD NO LONGER BE MOD
 				if (LSS)
 				{
-					distance = Tools::getModGCDistance(scans[i].getLSSDec(j), scans[i].getLSSRa(j), partSetProc.medianDec, partSetProc.medianRa)*toDeg;
+					distance = Tools::getModGCDistance(scans[i].getLSSDec(j), scans[i].getLSSRa(j), partSetProc.medianDec, partSetProc.medianRa) * toDeg;
 				}
 				else
 				{
-					distance = Tools::getModGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa)*toDeg;
+					distance = Tools::getModGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa) * toDeg;
 				}
-				
+
 				radiiHold.push_back(distance);
 			}
 		}
 		rcr.performBulkRejection(radiiHold);
-		partSetProc.edgeRadius = rcr.result.mu; //DEGREES
+		partSetProc.edgeRadius = rcr.result.mu; // DEGREES
 		Debugger::print("Info", "Edge Radius in BW", partSetProc.edgeRadius / psfFWHM);
 	}
 
 	// If mapped in equatorial but want to process in galactic
 	if (survey.getMappingCoordinate() == "equatorial" && survey.getProcessingCoordinate() == GALACTIC)
 	{
-		globalCenterLatProc  = Tools::convertToB(globalCenterRa, globalCenterDec);
+		globalCenterLatProc = Tools::convertToB(globalCenterRa, globalCenterDec);
 		globalCenterLongProc = Tools::convertToL(globalCenterRa, globalCenterDec);
 	}
 	// If mapped in galactic but want to process in equatorial
 	else if (survey.getMappingCoordinate() == "galactic" && survey.getProcessingCoordinate() == EQUATORIAL)
 	{
-		globalCenterLatProc  = Tools::convertToDec(globalCenterRa, globalCenterDec);
+		globalCenterLatProc = Tools::convertToDec(globalCenterRa, globalCenterDec);
 		globalCenterLongProc = Tools::convertToRa(globalCenterRa, globalCenterDec);
 	}
 
-	partSetProc.centerLatProcDeg = globalCenterLatProc;   // never used if coordinate == MAPPED.
+	partSetProc.centerLatProcDeg = globalCenterLatProc; // never used if coordinate == MAPPED.
 	partSetProc.centerLongProcDeg = globalCenterLongProc;
 
 	partSetProc.centerDecDeg = globalCenterDec;
 	partSetProc.centerRaDeg = globalCenterRa;
 
-	partSetProc.subDecRes = Tools::max(1, (int)((partSetProc.maxDec - partSetProc.minDec) / Tools::max(psfFWHM*rfiScaleBW, psfFWHM)));
-	partSetProc.subRaRes = Tools::max(1, (int)(((partSetProc.maxRa - partSetProc.minRa) / Tools::max(psfFWHM*rfiScaleBW, psfFWHM))*Tools::min(cos(partSetProc.maxDec / toDeg), cos(partSetProc.minDec / toDeg))));
+	partSetProc.subDecRes = Tools::max(1, (int)((partSetProc.maxDec - partSetProc.minDec) / Tools::max(psfFWHM * rfiScaleBW, psfFWHM)));
+	partSetProc.subRaRes = Tools::max(1, (int)(((partSetProc.maxRa - partSetProc.minRa) / Tools::max(psfFWHM * rfiScaleBW, psfFWHM)) * Tools::min(cos(partSetProc.maxDec / toDeg), cos(partSetProc.minDec / toDeg))));
 
 	partSetProc.subDecInc = (partSetProc.maxDec - partSetProc.minDec) / partSetProc.subDecRes;
 	partSetProc.subRaInc = (partSetProc.maxRa - partSetProc.minRa) / partSetProc.subRaRes;
 
-	partSetProc.medianLatiMap = medianLatiMapped;  // never used if tracking == false.
+	partSetProc.medianLatiMap = medianLatiMapped; // never used if tracking == false.
 	partSetProc.medianLongMap = medianLongMapped;
 
 	return partSetProc;
@@ -1497,7 +1476,7 @@ PartitionSet Processor::determineProcCompositeDimensions(Composite &composite, b
 	std::vector<double> raHold, decHold;
 
 	int size;
-	//USED TO FIND RCR MIN AND MAX DEC AND RA
+	// USED TO FIND RCR MIN AND MAX DEC AND RA
 	for (int i = 0; i < scans.size(); i++)
 	{
 		if (LSS)
@@ -1522,7 +1501,6 @@ PartitionSet Processor::determineProcCompositeDimensions(Composite &composite, b
 				decTemp = scans[i].getDec(j);
 			}
 
-
 			if (raTemp > partSetProc.maxRa)
 			{
 				partSetProc.maxRa = raTemp;
@@ -1544,7 +1522,7 @@ PartitionSet Processor::determineProcCompositeDimensions(Composite &composite, b
 
 	if (composite.getMappingCoordinate() == "equatorial" && composite.getProcessingCoordinate() == GALACTIC)
 	{
-		globalCenterLatProc  = Tools::convertToB(globalCenterRa, globalCenterDec);
+		globalCenterLatProc = Tools::convertToB(globalCenterRa, globalCenterDec);
 		globalCenterLongProc = Tools::convertToL(globalCenterRa, globalCenterDec);
 	}
 	else if (composite.getMappingCoordinate() == "galactic" && composite.getProcessingCoordinate() == EQUATORIAL)
@@ -1553,7 +1531,7 @@ PartitionSet Processor::determineProcCompositeDimensions(Composite &composite, b
 		globalCenterLongProc = Tools::convertToRa(globalCenterRa, globalCenterDec);
 	}
 
-	partSetProc.centerLatProcDeg = globalCenterLatProc;    // never used if coordinate == MAPPED.
+	partSetProc.centerLatProcDeg = globalCenterLatProc; // never used if coordinate == MAPPED.
 	partSetProc.centerLongProcDeg = globalCenterLongProc;
 
 	partSetProc.centerDecDeg = globalCenterDec;
@@ -1561,24 +1539,24 @@ PartitionSet Processor::determineProcCompositeDimensions(Composite &composite, b
 
 	partSetProc.tracking = trackingForEdges;
 
-	partSetProc.subDecRes = Tools::max(1, (int)((partSetProc.maxDec - partSetProc.minDec) / Tools::max(psfFWHM*rfiScaleBW, psfFWHM)));
-	partSetProc.subRaRes = Tools::max(1, (int)(((partSetProc.maxRa - partSetProc.minRa) / Tools::max(psfFWHM*rfiScaleBW, psfFWHM))*Tools::min(cos(partSetProc.maxDec / toDeg), cos(partSetProc.minDec / toDeg))));
+	partSetProc.subDecRes = Tools::max(1, (int)((partSetProc.maxDec - partSetProc.minDec) / Tools::max(psfFWHM * rfiScaleBW, psfFWHM)));
+	partSetProc.subRaRes = Tools::max(1, (int)(((partSetProc.maxRa - partSetProc.minRa) / Tools::max(psfFWHM * rfiScaleBW, psfFWHM)) * Tools::min(cos(partSetProc.maxDec / toDeg), cos(partSetProc.minDec / toDeg))));
 
 	partSetProc.subDecInc = (partSetProc.maxDec - partSetProc.minDec) / partSetProc.subDecRes;
 	partSetProc.subRaInc = (partSetProc.maxRa - partSetProc.minRa) / partSetProc.subRaRes;
 
-	partSetProc.medianLatiMap = medianLatiMapped;   // never used if tracking == false.
+	partSetProc.medianLatiMap = medianLatiMapped; // never used if tracking == false.
 	partSetProc.medianLongMap = medianLongMapped;
 
-	//composite.setCompPartSetProcSSS(partSetProc);
-	//composite.setCompPartSetProcLSS(partSetProc);
+	// composite.setCompPartSetProcSSS(partSetProc);
+	// composite.setCompPartSetProcLSS(partSetProc);
 	return partSetProc;
 }
 
-void Processor::forceThetaGap(Composite & composite, double value)
+void Processor::forceThetaGap(Composite &composite, double value)
 {
 	scans = composite.getScans();
-	double forcedVal = value * 0.75*psfFWHM*toRad;
+	double forcedVal = value * 0.75 * psfFWHM * toRad;
 	for (int i = 0; i < scans.size(); i++)
 	{
 		for (int j = 0; j < scans[i].getSize(); j++)
@@ -1588,7 +1566,7 @@ void Processor::forceThetaGap(Composite & composite, double value)
 	}
 	composite.setScans(scans);
 }
-void Processor::repartitionScans(Composite & composite, std::vector<Survey> & surveys)
+void Processor::repartitionScans(Composite &composite, std::vector<Survey> &surveys)
 {
 	std::vector<Scan> scansHold;
 	PartitionSet partSet;
@@ -1602,7 +1580,7 @@ void Processor::repartitionScans(Composite & composite, std::vector<Survey> & su
 			}
 		}
 		surveys[i].setScans(scansHold);
-		
+
 		partSet = determineProcSurveyDimensions(surveys[i], false);
 		surveys[i].setPartSetProcSSS(partSet);
 		partSet = determineProcSurveyDimensions(surveys[i], true);
@@ -1617,10 +1595,9 @@ void Processor::repartitionScans(Composite & composite, std::vector<Survey> & su
 	}
 }
 
+// SMALL SCALE STRUCTURE PROCESSING
 
-//SMALL SCALE STRUCTURE PROCESSING
-
-//shift
+// shift
 std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 {
 	double minAngle1, maxAngle1, minAngle2, maxAngle2, angleHold, minAngle, maxAngle, angleStep, maxIFFT, hold;
@@ -1634,7 +1611,7 @@ std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 	flagsHold.resize(shifts.size(), 1);
 	N = shifts.size();
 
-	//FIND MINIMUM OF MAXIUMA AND MAXIMUM OF MINIMA FOR ALL SCANS TO CALCULATE R
+	// FIND MINIMUM OF MAXIUMA AND MAXIMUM OF MINIMA FOR ALL SCANS TO CALCULATE R
 	for (int i = 0; i < scans.size() - 1; i++)
 	{
 		minAngle1 = 999999;
@@ -1689,15 +1666,15 @@ std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 
 	R = maxAngle - minAngle;
 
-	//DETERMINE LIKELINESS OF THE ADJACENT SCANS TO HAVE SIMILAR SHIFTS
+	// DETERMINE LIKELINESS OF THE ADJACENT SCANS TO HAVE SIMILAR SHIFTS
 	for (int i = 0; i < shifts.size(); i++)
 	{
 
 		deltaI = shifts[i];
 
-		//IF ON EDGE SCAN, ONLY USE ONE ADJACENT SCAN'S SHIFT
+		// IF ON EDGE SCAN, ONLY USE ONE ADJACENT SCAN'S SHIFT
 
-		//IF BOTH ARE ACCESSIBLE USE BOTH
+		// IF BOTH ARE ACCESSIBLE USE BOTH
 
 		if (i == 0)
 		{
@@ -1714,13 +1691,13 @@ std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 			M = 2;
 		}
 
-		//CALCULATE LIKELINESS
+		// CALCULATE LIKELINESS
 
 		if (M == 1)
 		{
 			deltaJ = shifts[j];
 			probHold = (std::abs(deltaI - deltaJ) / R) * (2 - (std::abs(deltaI - deltaJ) / R));
-			prob = pow(2, (M - 1))*probHold;
+			prob = pow(2, (M - 1)) * probHold;
 		}
 		else
 		{
@@ -1732,10 +1709,10 @@ std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 			deltaJ = shifts[j];
 			probHold2 = (std::abs(deltaI - deltaJ) / R) * (2 - (std::abs(deltaI - deltaJ) / R));
 
-			prob = pow(2, (M - 1))*(probHold1*probHold2);
+			prob = pow(2, (M - 1)) * (probHold1 * probHold2);
 		}
 
-		//REJECT POINTS BASED ON LIKELINESS
+		// REJECT POINTS BASED ON LIKELINESS
 		if (prob > (1.0 / (2.0 * N)))
 		{
 			flagsHold[i] = 0;
@@ -1744,7 +1721,7 @@ std::vector<bool> Processor::shiftRejection(std::vector<double> shifts)
 
 	return flagsHold;
 }
-double Processor::calculateShift(std::vector<std::vector<double> > &maxIfftInfo)
+double Processor::calculateShift(std::vector<std::vector<double>> &maxIfftInfo)
 {
 	RCR rcr = RCR(LS_MODE_DL);
 	bool stop = false, first = true, alreadySorted = false;
@@ -1756,14 +1733,14 @@ double Processor::calculateShift(std::vector<std::vector<double> > &maxIfftInfo)
 	std::vector<double> swap, shiftsAbove, shiftsBelow, weightTemps, shifts, weights, tempArray, tempWeights, tempArray2, tempWeights2, weightsBelow, weightsAbove, ratioAbove, ratioBelow;
 	std::vector<double> shiftsFinal;
 
-	//CALCULATE THE CORRELATION BETWEEN SCANS
+	// CALCULATE THE CORRELATION BETWEEN SCANS
 	for (int j = 0; j < maxIfftInfo.size(); j++)
 	{
-		maxIfftInfo[j][0] = -1.0*pow(-1.0, j) * maxIfftInfo[j][0];
+		maxIfftInfo[j][0] = -1.0 * pow(-1.0, j) * maxIfftInfo[j][0];
 		shifts.push_back(maxIfftInfo[j][0]);
 	}
 
-	//REJECT NON-SENSIBLE CORRELATIONS DUE TO RFI
+	// REJECT NON-SENSIBLE CORRELATIONS DUE TO RFI
 	shiftRejectionFlags.resize(shifts.size(), 1);
 	shiftRejectionFlags = shiftRejection(shifts);
 
@@ -1775,8 +1752,7 @@ double Processor::calculateShift(std::vector<std::vector<double> > &maxIfftInfo)
 		}
 	}
 
-
-	//CALCULATE AVERAGE SHIFT
+	// CALCULATE AVERAGE SHIFT
 	if (shiftsFinal.size() == 0)
 	{
 		result = 0.0;
@@ -1810,7 +1786,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 	int requiredPower, maxIFFTBin, h, powerOffset;
 	double minAngle1, maxAngle1, minAngle2, maxAngle2, angleHold, minAngle, maxAngle, angleStep, maxIFFT, hold;
 	std::vector<double> dubFiller, angleVec1, angleVec2;
-	std::vector<std::vector<double> > interpolated, ifftResult, maxIfftInfo;
+	std::vector<std::vector<double>> interpolated, ifftResult, maxIfftInfo;
 	for (int i = 0; i < scans.size() - 1; i++)
 	{
 		minAngle1 = 999999;
@@ -1819,7 +1795,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 		maxAngle2 = -999999;
 		if (mapType == DAISY)
 		{
-			angleVec1 = Tools::daisyAngleBuilder(i, scans[i].getCenter(), partSetProcSSS.centerDecDeg,  scans[i].getRa(), scans[i].getDec());
+			angleVec1 = Tools::daisyAngleBuilder(i, scans[i].getCenter(), partSetProcSSS.centerDecDeg, scans[i].getRa(), scans[i].getDec());
 			angleVec2 = Tools::daisyAngleBuilder(i + 1, scans[i + 1].getCenter(), partSetProcSSS.centerDecDeg, scans[i + 1].getRa(), scans[i + 1].getDec());
 		}
 		else
@@ -1861,7 +1837,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 		}
 		minAngle = std::max(minAngle1, minAngle2);
 		maxAngle = std::min(maxAngle1, maxAngle2);
-		angleStep = std::min((maxAngle1 - minAngle1) / (double(scans[i].getSize())), (maxAngle2 - minAngle2) / (double(scans[i + 1].getSize())));//
+		angleStep = std::min((maxAngle1 - minAngle1) / (double(scans[i].getSize())), (maxAngle2 - minAngle2) / (double(scans[i + 1].getSize()))); //
 		requiredPower = 1;
 		while (pow(2, requiredPower) < (maxAngle - minAngle) / angleStep)
 		{
@@ -1888,7 +1864,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 				}
 				else
 				{
-					interpolated[1].push_back(scans[i].getFlux(h - 1) + (angleHold - angleVec1[h - 1])*(scans[i].getFlux(h) - scans[i].getFlux(h - 1)) / (angleVec1[h] - angleVec1[h - 1]));
+					interpolated[1].push_back(scans[i].getFlux(h - 1) + (angleHold - angleVec1[h - 1]) * (scans[i].getFlux(h) - scans[i].getFlux(h - 1)) / (angleVec1[h] - angleVec1[h - 1]));
 				}
 				angleHold += angleStep;
 			}
@@ -1906,7 +1882,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 				}
 				else
 				{
-					interpolated[2].push_back(scans[i + 1].getFlux(h + 1) + (angleHold - angleVec2[h + 1])*(scans[i + 1].getFlux(h) - scans[i + 1].getFlux(h + 1)) / (angleVec2[h] - angleVec2[h + 1]));
+					interpolated[2].push_back(scans[i + 1].getFlux(h + 1) + (angleHold - angleVec2[h + 1]) * (scans[i + 1].getFlux(h) - scans[i + 1].getFlux(h + 1)) / (angleVec2[h] - angleVec2[h + 1]));
 				}
 				angleHold += angleStep;
 			}
@@ -1928,7 +1904,7 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 				}
 				else
 				{
-					interpolated[1].push_back(scans[i].getFlux(h + 1) + (angleHold - angleVec1[h + 1])*(scans[i].getFlux(h) - scans[i].getFlux(h + 1)) / (angleVec1[h] - angleVec1[h + 1]));
+					interpolated[1].push_back(scans[i].getFlux(h + 1) + (angleHold - angleVec1[h + 1]) * (scans[i].getFlux(h) - scans[i].getFlux(h + 1)) / (angleVec1[h] - angleVec1[h + 1]));
 				}
 				angleHold += angleStep;
 			}
@@ -1946,12 +1922,11 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 				}
 				else
 				{
-					interpolated[2].push_back(scans[i + 1].getFlux(h - 1) + (angleHold - angleVec2[h - 1])*(scans[i + 1].getFlux(h) - scans[i + 1].getFlux(h - 1)) / (angleVec2[h] - angleVec2[h - 1]));
+					interpolated[2].push_back(scans[i + 1].getFlux(h - 1) + (angleHold - angleVec2[h - 1]) * (scans[i + 1].getFlux(h) - scans[i + 1].getFlux(h - 1)) / (angleVec2[h] - angleVec2[h - 1]));
 				}
 				angleHold += angleStep;
 			}
 		}
-
 
 		ifftResult = Tools::crossCorrelate(interpolated[1], interpolated[2]);
 		maxIFFT = -999999;
@@ -1982,13 +1957,11 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 	return maxIfftInfo;
 }
 
-
-
-//LARGE SCALE STRUCTURE PROCESSING
+// LARGE SCALE STRUCTURE PROCESSING
 void Processor::lssDropCorrection(Survey &survey)
 {
 
-	//stop pushing back the pre and post indices and instead just use them to call the continued iterations of 2D Scatter
+	// stop pushing back the pre and post indices and instead just use them to call the continued iterations of 2D Scatter
 	RCR rcr = RCR(SS_MEDIAN_DL);
 	scans = survey.getScans();
 
@@ -1997,7 +1970,7 @@ void Processor::lssDropCorrection(Survey &survey)
 
 	std::vector<int> preIndices, proIndices;
 	std::vector<double> delta, maxDetails;
-	
+
 	while (true)
 	{
 		delta.clear();
@@ -2009,7 +1982,7 @@ void Processor::lssDropCorrection(Survey &survey)
 		setDropFlags(delta);
 
 		std::vector<double> holdAng1, holdAng2, holdAng3;
-		//COLLECT THE PRE AND POST INDICES FOR EACH POINT TO BE TESTED
+		// COLLECT THE PRE AND POST INDICES FOR EACH POINT TO BE TESTED
 		for (int i = 0; i < scans.size(); i++)
 		{
 			for (int j = 0; j < scans[i].getSize(); j++)
@@ -2044,34 +2017,34 @@ void Processor::lssDropCorrection(Survey &survey)
 					if (i == 0)
 					{
 						preIndices.push_back(-1);
-						//proIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng3));
+						// proIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng3));
 
 						indexTemp = Tools::determineNearestIndex(j, holdAng1, holdAng3);
-						//indexTemp = correctIndex(j, indexTemp, i, i + 1);
-						indexTemp = correctIndex(i, j, i + 1, indexTemp);// j, indexTemp, i, i + 1);
+						// indexTemp = correctIndex(j, indexTemp, i, i + 1);
+						indexTemp = correctIndex(i, j, i + 1, indexTemp); // j, indexTemp, i, i + 1);
 						proIndices.push_back(indexTemp);
 					}
 					else if (i == scans.size() - 1)
 					{
 						indexTemp = Tools::determineNearestIndex(j, holdAng1, holdAng2);
-						indexTemp = correctIndex(i, j, i - 1, indexTemp);//correctIndex(j, indexTemp, i, i - 1);
+						indexTemp = correctIndex(i, j, i - 1, indexTemp); // correctIndex(j, indexTemp, i, i - 1);
 						preIndices.push_back(indexTemp);
 
-						//preIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng2)); 
+						// preIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng2));
 						proIndices.push_back(999999);
 					}
 					else
 					{
 						indexTemp = Tools::determineNearestIndex(j, holdAng1, holdAng2);
-						indexTemp = correctIndex(i, j, i - 1, indexTemp);//correctIndex(j, indexTemp, i, i - 1);
-						preIndices.push_back(indexTemp); // CHANGE TO BE DEC OR RA
+						indexTemp = correctIndex(i, j, i - 1, indexTemp); // correctIndex(j, indexTemp, i, i - 1);
+						preIndices.push_back(indexTemp);				  // CHANGE TO BE DEC OR RA
 
 						indexTemp = Tools::determineNearestIndex(j, holdAng1, holdAng3);
-						indexTemp = correctIndex(i, j, i + 1, indexTemp);// correctIndex(j, indexTemp, i, i + 1);
+						indexTemp = correctIndex(i, j, i + 1, indexTemp); // correctIndex(j, indexTemp, i, i + 1);
 						proIndices.push_back(indexTemp);
 
-						//preIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng2)); // CHANGE TO BE DEC OR RA
-						//proIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng3));
+						// preIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng2)); // CHANGE TO BE DEC OR RA
+						// proIndices.push_back(Tools::determineNearestIndex(j, holdAng1, holdAng3));
 					}
 				}
 			}
@@ -2234,7 +2207,7 @@ void Processor::lssSet2DScatter(Survey &survey)
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getDec(jAfter);
 					angleMid = scans[i].getDec(j);
@@ -2242,7 +2215,7 @@ void Processor::lssSet2DScatter(Survey &survey)
 				}
 				else
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getRa(jAfter);
 					angleMid = scans[i].getRa(j);
@@ -2257,7 +2230,6 @@ void Processor::lssSet2DScatter(Survey &survey)
 				weight += pow(((angleLow - xBar) * (angleHigh - angleLow)), 2.0) / weightHigh;
 				weight += pow(((angleMid - xBar) * (angleHigh - angleLow)), 2.0) * ((1.0 / weightHigh) + (1.0 / weightLow));
 				weights.push_back(1.0 / weight);
-
 			}
 			rcr.performBulkRejection(delta);
 			scatter2dTemp.push_back(std::sqrt(rcr.result.mu * rcr.result.mu + rcr.result.sigma * rcr.result.sigma));
@@ -2296,7 +2268,7 @@ void Processor::lssSet2DScatter(Survey &survey)
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getDec(jAfter);
 					angleMid = scans[i].getDec(j);
@@ -2304,7 +2276,7 @@ void Processor::lssSet2DScatter(Survey &survey)
 				}
 				else
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					angleHigh = scans[i + 1].getRa(jAfter);
 					angleMid = scans[i].getRa(j);
@@ -2319,7 +2291,6 @@ void Processor::lssSet2DScatter(Survey &survey)
 				weight += pow(((angleLow - xBar) * (angleHigh - angleLow)), 2.0) / weightHigh;
 				weight += pow(((angleMid - xBar) * (angleHigh - angleLow)), 2.0) * ((1.0 / weightHigh) + (1.0 / weightLow));
 				weights.push_back(1.0 / weight);
-
 			}
 			rcr.performBulkRejection(delta);
 			scatter2dTemp.push_back(std::sqrt(rcr.result.mu * rcr.result.mu + rcr.result.sigma * rcr.result.sigma));
@@ -2334,7 +2305,6 @@ void Processor::lssSet2DScatter(Survey &survey)
 	{
 		dumpSums.push_back(scans[i].getDumpSum());
 		indices.push_back(i);
-
 	}
 	for (int i = 0; i < scatter2dTemp.size(); i++)
 	{
@@ -2369,7 +2339,7 @@ void Processor::lssSet2DScatter(Survey &survey)
 		}
 		else
 		{
-			scatter2dTemp[i] = m*(i - xBar) + b;
+			scatter2dTemp[i] = m * (i - xBar) + b;
 		}
 		scatter2dTemp[i] = std::max(scans[i].getScatter(), scatter2dTemp[i]);
 	}
@@ -2388,17 +2358,17 @@ void Processor::lssPolynomialRFISubtraction(Survey &survey, double bgScale, doub
 {
 	bool multi = true;
 	std::vector<double> dubFiller;
-	std::vector<std::vector<double> > cleanedLSSGrid;
+	std::vector<std::vector<double>> cleanedLSSGrid;
 
 	for (int i = 0; i < scans.size(); i++)
 	{
 		dubFiller.resize(scans[i].getSize(), 0.0);
 		cleanedLSSGrid.push_back(dubFiller);
 	}
-	
-	//cleanedLSSGrid[58][9] = lssRecursivePolyFit(survey, 120, 40, bgScale, wScale);
-	//cleanedLSSGrid[58][9] = lssRecursivePolyFit(survey, 59, 10, bgScale, wScale);
-	
+
+	// cleanedLSSGrid[58][9] = lssRecursivePolyFit(survey, 120, 40, bgScale, wScale);
+	// cleanedLSSGrid[58][9] = lssRecursivePolyFit(survey, 59, 10, bgScale, wScale);
+
 	if (multi)
 	{
 		std::vector<std::future<double>> futureVec;
@@ -2426,7 +2396,6 @@ void Processor::lssPolynomialRFISubtraction(Survey &survey, double bgScale, doub
 		}
 	}
 
-
 	for (int i = 0; i < scans.size(); i++)
 	{
 		scans[i].setLSSData(cleanedLSSGrid[i]);
@@ -2444,13 +2413,13 @@ void Processor::lssElevationSubtraction(Survey &survey)
 	std::vector<std::future<std::vector<double>>> futureVec;
 	futureVec.resize(scans.size());
 	scans = survey.getScans();
-	calculateSurveyElevationScatter(); //LOOKS LIKE THIS IS 2D BACKGROUND AGAIN INSTEAD OF THIS CALCULATE SCATTER V2
+	calculateSurveyElevationScatter(); // LOOKS LIKE THIS IS 2D BACKGROUND AGAIN INSTEAD OF THIS CALCULATE SCATTER V2
 
 	for (int i = 0; i < scans.size(); i++)
 	{
 		Debugger::print("Info", i);
 		bgCuda = BackgroundCUDA(scans[i], true);
-		futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW*psfFWHM);
+		futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW * psfFWHM);
 		counter++;
 		liveThreads++;
 
@@ -2474,9 +2443,8 @@ void Processor::lssElevationSubtraction(Survey &survey)
 	survey.setScans(scans);
 }
 
-
-//lss drop
-std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndices, std::vector<int> & proIndices)
+// lss drop
+std::vector<double> Processor::determinePercentDrop(std::vector<int> &preIndices, std::vector<int> &proIndices)
 {
 	int indexCounter = 0, indexCounter2 = 0;
 	int rejectedPoints = 0, totalPoints = 0;
@@ -2516,7 +2484,7 @@ std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndice
 					proIndices[indexCounter2] = 0;
 				}
 
-				//BEFORE AND AFTER POINT IN SAME SCAN
+				// BEFORE AND AFTER POINT IN SAME SCAN
 				for (int k = 0; k < scans[i].getSize(); k++)
 				{
 					if (scans[i].getDropFlag(k) == 1)
@@ -2530,7 +2498,7 @@ std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndice
 					}
 				}
 
-				//PREVIOUS SCAN UP UNTIL PRE INDEX
+				// PREVIOUS SCAN UP UNTIL PRE INDEX
 				for (int k = 0; k < preIndices[indexCounter2]; k++)
 				{
 					if (scans[i - 1].getDropFlag(k) == 1)
@@ -2544,9 +2512,8 @@ std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndice
 					}
 				}
 
-
-				//PROCEEDING SCAN UP UNTIL PRO INDEX
-				for (int k = proIndices[indexCounter2]; k < maxProTemp; k++) //WE NEED A maxProTemp BECAUSE WE CAN'T CALL scans[i+1] SO WE JUST PROVIDE A FILLER
+				// PROCEEDING SCAN UP UNTIL PRO INDEX
+				for (int k = proIndices[indexCounter2]; k < maxProTemp; k++) // WE NEED A maxProTemp BECAUSE WE CAN'T CALL scans[i+1] SO WE JUST PROVIDE A FILLER
 				{
 
 					if (scans[i + 1].getDropFlag(k) == 1)
@@ -2559,9 +2526,6 @@ std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndice
 						totalPoints++;
 					}
 				}
-
-
-
 
 				/*
 				if (i == 0 || i == scans.size() - 1)
@@ -2579,10 +2543,10 @@ std::vector<double> Processor::determinePercentDrop(std::vector<int> & preIndice
 					percentRejected = (double)rejectedPoints / (double)totalPoints;
 				}
 
-				if (percentRejected > max)// && (i != 0 && i != scans.size()-1))// did not solve the problem
+				if (percentRejected > max) // && (i != 0 && i != scans.size()-1))// did not solve the problem
 				{
 					max = percentRejected;
-					//std::cout << "max\t" << max << "\n";
+					// std::cout << "max\t" << max << "\n";
 					maxScan = i;
 					maxData = j;
 					maxPre = preIndices[indexCounter2];
@@ -2723,14 +2687,13 @@ std::vector<double> Processor::setDropDeltas()
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					scans[i].setDrop2dValues(j, toPush);
-
 				}
 				else
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					scans[i].setDrop2dValues(j, toPush);
 				}
@@ -2761,7 +2724,6 @@ std::vector<double> Processor::setDropDeltas()
 				while (angleVec3[jAfter] < angleVec2[j])
 				{
 					jAfter++;
-
 				}
 				if (jAfter > 0 && std::abs(angleVec3[jAfter] - angleVec2[j]) > std::abs(angleVec3[jAfter - 1] - angleVec2[j]))
 				{
@@ -2769,13 +2731,13 @@ std::vector<double> Processor::setDropDeltas()
 				}
 				if (scansInRa)
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore))*(scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getDec(jAfter) - scans[i - 1].getDec(jBefore)) * (scans[i].getDec(j) - scans[i - 1].getDec(jBefore)));
 					delta.push_back(toPush);
 					scans[i].setDrop2dValues(j, toPush);
 				}
 				else
 				{
-					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore))*(scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
+					toPush = scans[i].getLSSData(j) - (scans[i - 1].getLSSData(jBefore) + (scans[i + 1].getLSSData(jAfter) - scans[i - 1].getLSSData(jBefore)) / (scans[i + 1].getRa(jAfter) - scans[i - 1].getRa(jBefore)) * (scans[i].getRa(j) - scans[i - 1].getRa(jBefore)));
 					delta.push_back(toPush);
 					scans[i].setDrop2dValues(j, toPush);
 				}
@@ -2784,16 +2746,16 @@ std::vector<double> Processor::setDropDeltas()
 	}
 	return delta;
 }
-void Processor::setDropFlags(std::vector<double> & delta)
+void Processor::setDropFlags(std::vector<double> &delta)
 {
 	std::vector<double> nonRejected;
-	//FIND THE AVERAGE DEVIATION FROM NOISE LEVEL AND THE LARGEST AND SMALLEST NON-REJECTED POINTS
+	// FIND THE AVERAGE DEVIATION FROM NOISE LEVEL AND THE LARGEST AND SMALLEST NON-REJECTED POINTS
 	RCR rcr = RCR(SS_MEDIAN_DL);
 	rcr.performBulkRejection(delta);
 	std::vector<bool> flags = rcr.result.flags;
 	nonRejected = rcr.result.cleanY;
-	double maxVal = -999999;// Tools::max(nonRejected);
-	double minVal = 999999;// Tools::min(nonRejected);
+	double maxVal = -999999; // Tools::max(nonRejected);
+	double minVal = 999999;	 // Tools::min(nonRejected);
 
 	for (int i = 0; i < nonRejected.size(); i++)
 	{
@@ -2807,7 +2769,7 @@ void Processor::setDropFlags(std::vector<double> & delta)
 		}
 	}
 
-	//IDENTIFY REJECTED POINTS (1), THOSE WITH DIFFERENCES BUT NOT REJECTED (0), AND THOSE THAT HAVE NO DIFFERENCES (-1)
+	// IDENTIFY REJECTED POINTS (1), THOSE WITH DIFFERENCES BUT NOT REJECTED (0), AND THOSE THAT HAVE NO DIFFERENCES (-1)
 	for (int i = 0; i < scans.size(); i++)
 	{
 		for (int j = 0; j < scans[i].getSize(); j++)
@@ -2915,7 +2877,7 @@ void Processor::correctDrop(std::vector<double> maxDetails)
 	std::ofstream outFile;
 	outFile.open("Rejections.txt");
 	outFile << "Indices:\t" << maxScan << "\t" << maxData << "\t" << scans[maxScan].getSize() << "\n";
-	//outFile << "Boost Value:\t" << boostValue << "\n";
+	// outFile << "Boost Value:\t" << boostValue << "\n";
 	flagHolder = rcr2.result.flags;
 	for (int q = 0; q < data.size(); q++)
 	{
@@ -2923,10 +2885,9 @@ void Processor::correctDrop(std::vector<double> maxDetails)
 	}
 	outFile.close();
 
-
 	boostValue = 2 * rcr2.result.mu;
 
-	//std::cout << "Indices:\t" << maxScan << "\t" << maxData << "\t" << scans[maxScan].getSize() << "\n";
+	// std::cout << "Indices:\t" << maxScan << "\t" << maxData << "\t" << scans[maxScan].getSize() << "\n";
 	Debugger::print("Info", "Boost Value", boostValue);
 
 	for (int i = maxScan; i < scans.size(); i++)
@@ -2946,9 +2907,8 @@ void Processor::correctDrop(std::vector<double> maxDetails)
 			}
 		}
 	}
-
 }
-int Processor::correctIndex(int i1, int j1, int i2, int j2)//int j1, int j2, int i1, int i2)
+int Processor::correctIndex(int i1, int j1, int i2, int j2) // int j1, int j2, int i1, int i2)
 {
 	bool incWithIndex;
 	bool proceeding = false;
@@ -2967,7 +2927,7 @@ int Processor::correctIndex(int i1, int j1, int i2, int j2)//int j1, int j2, int
 		vec2 = scans[i2].getDec();
 	}
 
-	//ENSURE STANDARD CASE
+	// ENSURE STANDARD CASE
 	if (j2 == -1)
 	{
 		return -1;
@@ -2978,7 +2938,7 @@ int Processor::correctIndex(int i1, int j1, int i2, int j2)//int j1, int j2, int
 		return vec2.size();
 	}
 
-	//SCAN BEFORE OR AFTER
+	// SCAN BEFORE OR AFTER
 	if (i2 > i1)
 	{
 		proceeding = true;
@@ -2996,7 +2956,6 @@ int Processor::correctIndex(int i1, int j1, int i2, int j2)//int j1, int j2, int
 	{
 		incWithIndex = false;
 	}
-
 
 	while (true)
 	{
@@ -3092,7 +3051,7 @@ int Processor::correctIndex(int i1, int j1, int i2, int j2)//int j1, int j2, int
 	return j2;
 }
 
-//elevation
+// elevation
 void Processor::calculateSurveyElevationScatter()
 {
 	double m, b, xBar;
@@ -3133,7 +3092,7 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 	std::vector<int> intFiller;
 	std::vector<double> dubFiller, data, weights, bg, elevation, LSSData, dumps;
 	std::vector<double> ra, dec;
-	std::vector<std::vector<double> > bgData, bgWeights;
+	std::vector<std::vector<double>> bgData, bgWeights;
 
 	elevation = scans[scanIndex].getElevation();
 	LSSData = scans[scanIndex].getLSSData();
@@ -3150,7 +3109,7 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 
 	RCR rcr = RCR(LS_MODE_DL);
 
-	//FIND THE MINIMUM AND MAXIMUM INDEX VALUES FOR A BASELINE LENGTH STARTING AT INDEX start
+	// FIND THE MINIMUM AND MAXIMUM INDEX VALUES FOR A BASELINE LENGTH STARTING AT INDEX start
 	for (; start < size - 2; start++)
 	{
 		while (end < size - 1 && elevation[end] - elevation[start] < baseline)
@@ -3162,12 +3121,11 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 		{
 			end++;
 		}
-		//CALCULATE THE LOCAL MODEL VALUES
+		// CALCULATE THE LOCAL MODEL VALUES
 		if (end != start)
 		{
-			//calculateBaselines(true, start, end, size, elevationScatter, elevation, LSSData, dumps, bgData, bgWeights, ra, dec);
+			// calculateBaselines(true, start, end, size, elevationScatter, elevation, LSSData, dumps, bgData, bgWeights, ra, dec);
 		}
-
 	}
 	end = size - 1;
 	start = size - 1;
@@ -3184,7 +3142,7 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 		}
 		if (start != end)
 		{
-			//calculateBaselines(false, start, end, size, elevationScatter, elevation, LSSData, dumps, bgData, bgWeights, ra, dec);
+			// calculateBaselines(false, start, end, size, elevationScatter, elevation, LSSData, dumps, bgData, bgWeights, ra, dec);
 		}
 	}
 
@@ -3251,7 +3209,7 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 			}
 			if (bg[low] != 999999 && bg[high] != 999999)
 			{
-				bg[k] = bg[low] + (bg[high] - bg[low]) / (high - low)*(k - low);
+				bg[k] = bg[low] + (bg[high] - bg[low]) / (high - low) * (k - low);
 			}
 			else if (bg[low] == 999999)
 			{
@@ -3266,7 +3224,7 @@ void Processor::calculateElevationBG(int scanIndex, double baseline)
 	scans[scanIndex].removeElevation(bg);
 }
 
-//lss rfi
+// lss rfi
 bool Processor::verifyOutlierState(SurfaceType modelType, int i_0, int j_0, double thetaFWHM, std::vector<double> &coef, std::vector<double> &inRange)
 {
 
@@ -3309,7 +3267,6 @@ bool Processor::verifyOutlierState(SurfaceType modelType, int i_0, int j_0, doub
 	{
 		return false;
 	}
-
 }
 bool Processor::planeApplication(int minScanCount, int minPointsInScan, int minPointsInAp, std::vector<std::vector<int>> scanNumbers, int counter, MapTypes mapType)
 {
@@ -3359,7 +3316,6 @@ bool Processor::planeApplication(int minScanCount, int minPointsInScan, int minP
 	}
 	return false;
 
-
 	if (minApCheck && minScanCheck)
 	{
 		return true;
@@ -3368,7 +3324,6 @@ bool Processor::planeApplication(int minScanCount, int minPointsInScan, int minP
 	{
 		return false;
 	}
-
 }
 void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double thetaFWHM, double avgScatter, std::vector<double> &inRange, std::vector<bool> &checks)
 {
@@ -3380,20 +3335,20 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 	int count, iTemp, jTemp, maxI;
 	std::vector<double> coef, deltas;
 	std::vector<int> deltasIndex;
-	std::vector<std::vector<int> > scanNumbers;
+	std::vector<std::vector<int>> scanNumbers;
 	std::ofstream SurPoints;
 	SurfaceType modelType;
 
 	deltas.reserve(inRange.size() / 6);
 	deltasIndex.reserve(inRange.size() / 6);
 
-	largestGap = scans[i_0].getLSSThetaGap(j_0); //circleThetaGap(i_0, j_0, true);
+	largestGap = scans[i_0].getLSSThetaGap(j_0); // circleThetaGap(i_0, j_0, true);
 
 	while (sigma > avgScatter)
 	{
-		//largestGap = lssCircleThetaGap(i_0, j_0, inRange, checks);// in radians
-		thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0)*largestGap*toDeg / psfFWHM), thetaFWHM));
-		alpha = -1.0*std::log(2) / (std::log(std::cos(M_PI*thetaWPrime / (4.0*thetaFWHM))));
+		// largestGap = lssCircleThetaGap(i_0, j_0, inRange, checks);// in radians
+		thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0) * largestGap * toDeg / psfFWHM), thetaFWHM));
+		alpha = -1.0 * std::log(2) / (std::log(std::cos(M_PI * thetaWPrime / (4.0 * thetaFWHM))));
 
 		count = 0;
 		sigma = 0;
@@ -3403,7 +3358,7 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 		modelType = determineSurfaceType(scanNumbers, mapType);
 		coef = determineModelCoef(modelType, count, inRange, checks, alpha, scans[i_0].getDec(j_0), scans[i_0].getRa(j_0));
 
-		//CALCULATE DELTAS OFF OF MODEL
+		// CALCULATE DELTAS OFF OF MODEL
 		for (int i = 0; i < inRange.size() / 6; i++)
 		{
 			if (checks[i] == false)
@@ -3428,13 +3383,12 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 			delta = std::abs(inRange[6 * i] - zPrime);
 
 			thetaPerp = calculateThetaPerp(iTemp, jTemp);
-			secondDeriv = calculateSecondDerivitive(modelType, iTemp, jTemp, thetaPerp, coef); //possibly not being calculated for m6
+			secondDeriv = calculateSecondDerivitive(modelType, iTemp, jTemp, thetaPerp, coef); // possibly not being calculated for m6
 
 			w += wPrime;
 			ww += wPrime * wPrime;
-			wzz += wPrime * delta*delta;
+			wzz += wPrime * delta * delta;
 			wVarience = wPrime * delta * delta;
-
 
 			if (wVarience > max)
 			{
@@ -3442,35 +3396,36 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 				maxI = i;
 			}
 
-			//if ((signedDelta > 0 && secondDeriv < 0) || (signedDelta < 0 && secondDeriv > 0))
+			// if ((signedDelta > 0 && secondDeriv < 0) || (signedDelta < 0 && secondDeriv > 0))
 			//{
 			//	if (wVarience > max)
 			//	{
 			//		max = wVarience;
 			//		maxI = i;
 			//	}
-			//}
+			// }
 		}
 
 		double deltaTemp;
-		switch (modelType) {
-		case(M10):
+		switch (modelType)
+		{
+		case (M10):
 			deltaTemp = 10;
 			break;
-		case(M6):
+		case (M6):
 			deltaTemp = 6;
 			break;
-		case(M3):
+		case (M3):
 			deltaTemp = 3;
 			break;
-		case(M0):
+		case (M0):
 			deltaTemp = 0;
 			break;
 		}
 
-		sigma = std::sqrt(wzz / (w - (deltaTemp)*(ww / w)));
+		sigma = std::sqrt(wzz / (w - (deltaTemp) * (ww / w)));
 
-		//std::cout << sigma << "\t" << sigma/count << "\t" << avgScatter << "\n";
+		// std::cout << sigma << "\t" << sigma/count << "\t" << avgScatter << "\n";
 
 		if ((sigma) < avgScatter)
 		{
@@ -3482,7 +3437,8 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 			if (i_0 == 59 && j_0 == 10)
 			{
 				SurPoints.open("SurPoints.txt");
-				SurPoints << sigma << "\t" << avgScatter << "\t" << inRange[6 * maxI + 4] << "\t" << inRange[6 * maxI + 5] << "\t" << "rejected\n";
+				SurPoints << sigma << "\t" << avgScatter << "\t" << inRange[6 * maxI + 4] << "\t" << inRange[6 * maxI + 5] << "\t"
+						  << "rejected\n";
 				SurPoints.close();
 			}
 
@@ -3493,7 +3449,6 @@ void Processor::rejectModelPoints(int i_0, int j_0, double thetaMinPrime, double
 		{
 			sigma = -999999;
 		}
-
 	}
 }
 double Processor::lssRecursivePolyFit(Survey &survey, int i_0, int j_0, double bgScale, double wScale)
@@ -3506,39 +3461,39 @@ double Processor::lssRecursivePolyFit(Survey &survey, int i_0, int j_0, double b
 	std::vector<int> possibles;
 	std::vector<bool> checks;
 	std::vector<double> inRange, coef;
-	std::vector<std::vector<int> > scanNumbers;
+	std::vector<std::vector<int>> scanNumbers;
 
-	double preScanDist = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[i_0].getDec(0), scans[i_0].getRa(0), partSetProcSSS.centerDecDeg)*toDeg;
-	double proScanDist = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[i_0].getDec(scans[i_0].getSize() - 1), scans[i_0].getRa(scans[i_0].getSize() - 1), partSetProcSSS.centerDecDeg)*toDeg;
-	double thetaBG = bgScale;// UNITS OF BEAMS
-	double thetaEnd = std::max(proScanDist, preScanDist) / psfFWHM;// UNITS OF BEAMS
-	double thetaFWHM = std::max(std::min(thetaBG / 3.0, 2.0*thetaEnd / 3.0), 1.0);// UNITS OF BEAMS
+	double preScanDist = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[i_0].getDec(0), scans[i_0].getRa(0), partSetProcSSS.centerDecDeg) * toDeg;
+	double proScanDist = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[i_0].getDec(scans[i_0].getSize() - 1), scans[i_0].getRa(scans[i_0].getSize() - 1), partSetProcSSS.centerDecDeg) * toDeg;
+	double thetaBG = bgScale;														 // UNITS OF BEAMS
+	double thetaEnd = std::max(proScanDist, preScanDist) / psfFWHM;					 // UNITS OF BEAMS
+	double thetaFWHM = std::max(std::min(thetaBG / 3.0, 2.0 * thetaEnd / 3.0), 1.0); // UNITS OF BEAMS
 
 	double largestGap = scans[i_0].getLSSThetaGap(j_0);
-	double thetaMinPrime = wScale * thetaFWHM;// 2 * thetaFWHM / 3.0;
-	double thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0)*largestGap*toDeg / psfFWHM), thetaFWHM));
-	double alpha = -1.0*std::log(2) / (std::log(std::cos(M_PI*thetaWPrime / (4.0*thetaFWHM))));
+	double thetaMinPrime = wScale * thetaFWHM; // 2 * thetaFWHM / 3.0;
+	double thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0) * largestGap * toDeg / psfFWHM), thetaFWHM));
+	double alpha = -1.0 * std::log(2) / (std::log(std::cos(M_PI * thetaWPrime / (4.0 * thetaFWHM))));
 
 	std::vector<double> LSS2DScatter = survey.getLSS2DScatter();
-	
-	pointCandidates = findPossLSS(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), thetaFWHM*psfFWHM, possibles);
-	inRange.reserve(pointCandidates * 6); //THIS MAY BE CHANGED TO RESERVE INSTEAD OF RESIZE
+
+	pointCandidates = findPossLSS(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), thetaFWHM * psfFWHM, possibles);
+	inRange.reserve(pointCandidates * 6); // THIS MAY BE CHANGED TO RESERVE INSTEAD OF RESIZE
 	checks.resize(pointCandidates, true);
 
-	//CALCULATE EXPECTED SCATTER OVER GIVEN RADIUS
+	// CALCULATE EXPECTED SCATTER OVER GIVEN RADIUS
 	for (int k = 0; k < pointCandidates; k++)
 	{
 		holdI = possibles[k * 2];
 		holdJ = possibles[k * 2 + 1];
 
-		distance = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[holdI].getDec(holdJ), scans[holdI].getRa(holdJ), partSetProcSSS.centerDecDeg)*toDeg;
+		distance = Tools::getGCDistance(scans[i_0].getDec(j_0), scans[i_0].getRa(j_0), scans[holdI].getDec(holdJ), scans[holdI].getRa(holdJ), partSetProcSSS.centerDecDeg) * toDeg;
 
-		if (distance < thetaFWHM*psfFWHM)
+		if (distance < thetaFWHM * psfFWHM)
 		{
-			//STORES ALL THE INFORMATION OF THE ACCEPTED DATA POINT
+			// STORES ALL THE INFORMATION OF THE ACCEPTED DATA POINT
 
 			inRange.push_back(scans[holdI].getLSSData(holdJ));
-			inRange.push_back(cos((M_PI*distance) / (thetaFWHM*psfFWHM*2.0)));
+			inRange.push_back(cos((M_PI * distance) / (thetaFWHM * psfFWHM * 2.0)));
 			inRange.push_back(scans[holdI].getDataDumps(holdJ));
 			inRange.push_back(LSS2DScatter[scans[holdI].getScanNumberInSurvey()]);
 			inRange.push_back(holdI);
@@ -3548,14 +3503,14 @@ double Processor::lssRecursivePolyFit(Survey &survey, int i_0, int j_0, double b
 			avgScatter += LSS2DScatter[scans[holdI].getScanNumberInSurvey()];
 		}
 	}
-	avgScatter = avgScatter / count;//; // (double)count;
+	avgScatter = avgScatter / count; //; // (double)count;
 	inRange.erase(inRange.begin() + 6 * count, inRange.begin() + inRange.size());
 	checks.erase(checks.begin() + 1 * count, checks.begin() + checks.size());
 
-	//BEGIN REJECTING POINTS UNTIL NOISE WITHIN SCATTER
+	// BEGIN REJECTING POINTS UNTIL NOISE WITHIN SCATTER
 	rejectModelPoints(i_0, j_0, thetaMinPrime, thetaFWHM, avgScatter, inRange, checks);
 
-	//FINAL FIT
+	// FINAL FIT
 	count = 0;
 	for (int i = 0; i < scanNumbers.size(); i++)
 	{
@@ -3565,9 +3520,9 @@ double Processor::lssRecursivePolyFit(Survey &survey, int i_0, int j_0, double b
 	scanNumbers = calculateScanNumbers(count, inRange, checks);
 	modelType = determineSurfaceType(scanNumbers, mapType);
 
-	//largestGap = lssCircleThetaGap(i_0, j_0, inRange, checks);
-	thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0)*largestGap*toDeg / psfFWHM), thetaFWHM));
-	alpha = -1.0*std::log(2) / (std::log(std::cos(M_PI*thetaWPrime / (4.0*thetaFWHM))));
+	// largestGap = lssCircleThetaGap(i_0, j_0, inRange, checks);
+	thetaWPrime = Tools::max(thetaMinPrime, Tools::min(((4.0 / 3.0) * largestGap * toDeg / psfFWHM), thetaFWHM));
+	alpha = -1.0 * std::log(2) / (std::log(std::cos(M_PI * thetaWPrime / (4.0 * thetaFWHM))));
 
 	coef = determineModelCoef(modelType, count, inRange, checks, alpha, scans[i_0].getDec(j_0), scans[i_0].getRa(j_0));
 
@@ -3576,10 +3531,10 @@ double Processor::lssRecursivePolyFit(Survey &survey, int i_0, int j_0, double b
 	zPrime = applySurfaceModel(xPrime, yPrime, scans[i_0].getLSSData(j_0), coef);
 
 	std::vector<double> results = LSSCollectResults(i_0, j_0, thetaFWHM, LSS2DScatter, coef, checks, inRange);
-	//LSSRFICollectResults
-	//scans[i_0].setLSSThetaWPrime(j_0, thetaWPrime);
-	//scans[i_0].setLSSCorrelation(thetaWPrime); //in beams
-	//scans[i_0].setLSSSummedWeights(wDumpSum/count);
+	// LSSRFICollectResults
+	// scans[i_0].setLSSThetaWPrime(j_0, thetaWPrime);
+	// scans[i_0].setLSSCorrelation(thetaWPrime); //in beams
+	// scans[i_0].setLSSSummedWeights(wDumpSum/count);
 	return zPrime;
 }
 double Processor::applySurfaceModel(double xPrime, double yPrime, double zOrig, std::vector<double> &coef)
@@ -3588,10 +3543,10 @@ double Processor::applySurfaceModel(double xPrime, double yPrime, double zOrig, 
 	switch (coef.size())
 	{
 	case 10:
-		zPrime = coef[0] + coef[1] * xPrime + coef[2] * yPrime + coef[3] * xPrime*xPrime + coef[4] * yPrime*yPrime + coef[5] * xPrime*yPrime + coef[6] * xPrime*xPrime*xPrime + coef[7] * yPrime*yPrime*yPrime + coef[8] * xPrime*xPrime*yPrime + coef[9] * xPrime*yPrime*yPrime;
+		zPrime = coef[0] + coef[1] * xPrime + coef[2] * yPrime + coef[3] * xPrime * xPrime + coef[4] * yPrime * yPrime + coef[5] * xPrime * yPrime + coef[6] * xPrime * xPrime * xPrime + coef[7] * yPrime * yPrime * yPrime + coef[8] * xPrime * xPrime * yPrime + coef[9] * xPrime * yPrime * yPrime;
 		break;
 	case 6:
-		zPrime = coef[0] + coef[1] * xPrime + coef[2] * yPrime + coef[3] * xPrime*xPrime + coef[4] * yPrime*yPrime + coef[5] * xPrime*yPrime;
+		zPrime = coef[0] + coef[1] * xPrime + coef[2] * yPrime + coef[3] * xPrime * xPrime + coef[4] * yPrime * yPrime + coef[5] * xPrime * yPrime;
 		break;
 	case 3:
 		zPrime = coef[0] + coef[1] * xPrime + coef[2] * yPrime;
@@ -3635,7 +3590,7 @@ double Processor::calculateSecondDerivitive(SurfaceType modelType, int i_0, int 
 	{
 		for (int j = 0; j <= i; j++)
 		{
-			secondDerivative += coef[count] * ((i*(i - 1))*pow(x, (i - 2))*pow(y, j)*(1 / pow(std::cos(theta), 2)) + 2 * i*j*pow(x, i - 1)*pow(y, j - 1)*(1 / std::cos(theta))*(1 / std::sin(theta)) + j * (j - 1)*pow(x, i)*pow(y, j - 2)*(1 / pow(std::sin(theta), 2)))*(pow(std::cos(theta), 2)*pow(std::sin(theta), 2));
+			secondDerivative += coef[count] * ((i * (i - 1)) * pow(x, (i - 2)) * pow(y, j) * (1 / pow(std::cos(theta), 2)) + 2 * i * j * pow(x, i - 1) * pow(y, j - 1) * (1 / std::cos(theta)) * (1 / std::sin(theta)) + j * (j - 1) * pow(x, i) * pow(y, j - 2) * (1 / pow(std::sin(theta), 2))) * (pow(std::cos(theta), 2) * pow(std::sin(theta), 2));
 			count++;
 		}
 	}
@@ -3668,13 +3623,13 @@ double Processor::calculateThetaPerp(int iTemp, int jTemp)
 	thetaPerp = -1 / Tools::signedArcTan(coef[1] + 2 * coef[0] * x, 1);
 	return thetaPerp;
 }
-std::vector<std::vector<int>> Processor::calculateScanNumbers(int & count, std::vector<double> & inRange, std::vector<bool> &checks)
+std::vector<std::vector<int>> Processor::calculateScanNumbers(int &count, std::vector<double> &inRange, std::vector<bool> &checks)
 {
 	int holdI, holdJ;
 	bool contained;
 	std::vector<int> intFiller;
-	std::vector<std::vector<int> > scanNumbers;
-	//DETERMINE WHICH MODELING SCHEME CAN BE USED
+	std::vector<std::vector<int>> scanNumbers;
+	// DETERMINE WHICH MODELING SCHEME CAN BE USED
 	for (int i = 0; i < scanNumbers.size(); i++)
 	{
 		scanNumbers[i].clear();
@@ -3708,7 +3663,7 @@ std::vector<std::vector<int>> Processor::calculateScanNumbers(int & count, std::
 	}
 	return scanNumbers;
 }
-std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaFWHM, std::vector<double> & LSS2DScatter, std::vector<double> &coef, std::vector<bool> & checks, std::vector<double> &inRange)
+std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaFWHM, std::vector<double> &LSS2DScatter, std::vector<double> &coef, std::vector<bool> &checks, std::vector<double> &inRange)
 {
 	double x0 = scans[i_0].getDec(j_0);
 	double y0 = scans[i_0].getRa(j_0);
@@ -3718,12 +3673,12 @@ std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaF
 	bool countAbove, countBelow, rejectPoints, fluxAbove;
 	double dd;
 	double distSq, wDistSq, pointCount, wPointCount;
-	double LMWeight, LMValue;//local model value
-	//double centerLSSFlux = applySurfaceModel(0, 0, z0, coef);
+	double LMWeight, LMValue; // local model value
+	// double centerLSSFlux = applySurfaceModel(0, 0, z0, coef);
 	double jLSSFlux;
 
-	double pw; //proximity weight -- cos(M_PI*dist/2*rfiScale)^2
-	double dw; //dump weight -- dataDump
+	double pw; // proximity weight -- cos(M_PI*dist/2*rfiScale)^2
+	double dw; // dump weight -- dataDump
 	double pwSum = 0, dwSum = 0;
 	double pwAvg = 0, dwAvg = 0;
 	double pwTemp, dwTemp;
@@ -3789,21 +3744,22 @@ std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaF
 
 				jLSSFlux = applySurfaceModel(jDec, jRa, jFlux, coef);
 
-				if (wCorrMap)//We determine the first correction factor and the correlation scale for photometry here.
+				if (wCorrMap) // We determine the first correction factor and the correlation scale for photometry here.
 				{
 					rfiCountHold = 0.0;
-					countAbove = (centerLSSFlux > sqrt(2.0)*correlatedScatter) ? true : false;
-					fluxAbove = (jLSSFlux > sqrt(2.0)*correlatedScatter) ? true : false;
+					countAbove = (centerLSSFlux > sqrt(2.0) * correlatedScatter) ? true : false;
+					fluxAbove = (jLSSFlux > sqrt(2.0) * correlatedScatter) ? true : false;
 
 					dd = scans[jHoldI].getDataDumps(jHoldJ);
-					pointDistance = Tools::getGCDistance(iDec, iRa, jDec, jRa, partSetProcSSS.centerDecDeg)*toDeg;//CHECK THAT fwhmRfi*toDeg is right units
+					pointDistance = Tools::getGCDistance(iDec, iRa, jDec, jRa, partSetProcSSS.centerDecDeg) * toDeg; // CHECK THAT fwhmRfi*toDeg is right units
 
-					if (checks[j] && (pointDistance < thetaFWHM*psfFWHM) && ((countAbove && fluxAbove) || (!countAbove && !fluxAbove))) {//Includes all points that are within a rfi-beam of LMV && within a rfi-beam of GMV && are (Case 1: above OR Case 2: below) the 2d-scatter. 
+					if (checks[j] && (pointDistance < thetaFWHM * psfFWHM) && ((countAbove && fluxAbove) || (!countAbove && !fluxAbove)))
+					{ // Includes all points that are within a rfi-beam of LMV && within a rfi-beam of GMV && are (Case 1: above OR Case 2: below) the 2d-scatter.
 						rfiCountHold += 1;
 						if ((pointDistance != 0))
 						{
-							wPointCount += 1.0*dd;
-							wDistSq += pow(pointDistance, 2)*dd;
+							wPointCount += 1.0 * dd;
+							wDistSq += pow(pointDistance, 2) * dd;
 						}
 					}
 				}
@@ -3829,10 +3785,10 @@ std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaF
 
 			results.push_back(iHoldI);
 			results.push_back(iHoldJ);
-			results.push_back(LMWeight);//w of local model (Apendix C)
-			results.push_back(LMValue);//local model value
+			results.push_back(LMWeight); // w of local model (Apendix C)
+			results.push_back(LMValue);	 // local model value
 
-			results.push_back(rfiCountHold);//number of points that satisfy conditions (1), (2), and (3) in appendix D. (Used to divide local model weights that go into the global model weight)
+			results.push_back(rfiCountHold); // number of points that satisfy conditions (1), (2), and (3) in appendix D. (Used to divide local model weights that go into the global model weight)
 			results.push_back(wDistSq);
 			results.push_back(wPointCount);
 		}
@@ -3840,7 +3796,7 @@ std::vector<double> Processor::LSSCollectResults(int i_0, int j_0, double thetaF
 	return results;
 }
 
-SurfaceType Processor::determineSurfaceType(std::vector<std::vector<int>> & scanNumbers, MapTypes mapType)
+SurfaceType Processor::determineSurfaceType(std::vector<std::vector<int>> &scanNumbers, MapTypes mapType)
 {
 	SurfaceType modelType;
 	if (planeApplication(5, 5, 10, scanNumbers, 1, mapType))
@@ -3861,7 +3817,7 @@ SurfaceType Processor::determineSurfaceType(std::vector<std::vector<int>> & scan
 	}
 	return modelType;
 }
-std::vector<double> Processor::determineModelCoef(SurfaceType modelType, int pointCount, std::vector<double>& inRange, std::vector<bool> &checks, double alpha, double dec, double ra)
+std::vector<double> Processor::determineModelCoef(SurfaceType modelType, int pointCount, std::vector<double> &inRange, std::vector<bool> &checks, double alpha, double dec, double ra)
 {
 	std::vector<double> coef;
 	switch (modelType)
@@ -3881,23 +3837,22 @@ std::vector<double> Processor::determineModelCoef(SurfaceType modelType, int poi
 	}
 	return coef;
 }
-std::vector<double> Processor::surfaceFit3(std::vector<double>& inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
+std::vector<double> Processor::surfaceFit3(std::vector<double> &inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
 {
 	int columnCount = 3, pivotIndex, intersect;
 	int scanIndex, dataIndex, iPointCandidates;
 
 	double pivot, swap, multiplier, toRad = M_PI / 180.0;
 	double w = 0,
-		xw = 0, yw = 0,
-		xxw = 0, yyw = 0, xyw = 0,
-		xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
-		xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
-		zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0,
-		xHold, yHold, zHold, wHold, wLocalW = 0, wLocalW1 = 0, wLocalWInv = 0, finalAnswer;
+		   xw = 0, yw = 0,
+		   xxw = 0, yyw = 0, xyw = 0,
+		   xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
+		   xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
+		   zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0,
+		   xHold, yHold, zHold, wHold, wLocalW = 0, wLocalW1 = 0, wLocalWInv = 0, finalAnswer;
 	double ww = 0, sumWSquared = 0;
 	double weightingFunction;
 
-	
 	double withinRfiDec, withinBeamDec, withinRfiRa, withinBeamRa;
 	double rfiDistance;
 	int iTemp, jTemp;
@@ -3906,7 +3861,7 @@ std::vector<double> Processor::surfaceFit3(std::vector<double>& inRange, std::ve
 	std::vector<double> b;
 	std::vector<double> coef;
 	std::vector<int> possibles;
-	std::vector<std::vector<double> > finalHold;
+	std::vector<std::vector<double>> finalHold;
 	A.resize(columnCount * columnCount, 0.0);
 	b.resize(columnCount, 0.0);
 
@@ -3928,26 +3883,34 @@ std::vector<double> Processor::surfaceFit3(std::vector<double>& inRange, std::ve
 
 		wHold = pow(inRange[1 + i * 6], alpha);
 		w += wHold;
-		xw += xHold*wHold;
-		yw += yHold*wHold;
-		xxw += xHold*xHold*wHold;
-		yyw += yHold*yHold*wHold;
-		xyw += xHold*yHold*wHold;
-		zw += zHold*wHold;
-		xzw += xHold*zHold*wHold;
-		yzw += yHold*zHold*wHold;
+		xw += xHold * wHold;
+		yw += yHold * wHold;
+		xxw += xHold * xHold * wHold;
+		yyw += yHold * yHold * wHold;
+		xyw += xHold * yHold * wHold;
+		zw += zHold * wHold;
+		xzw += xHold * zHold * wHold;
+		yzw += yHold * zHold * wHold;
 	}
 
-	A[0] = w; A[1] = xw; A[2] = yw;
-	A[3] = xw; A[4] = xxw; A[5] = xyw;
-	A[6] = yw; A[7] = xyw; A[8] = yyw;
-	b[0] = zw; b[1] = xzw; b[2] = yzw;
+	A[0] = w;
+	A[1] = xw;
+	A[2] = yw;
+	A[3] = xw;
+	A[4] = xxw;
+	A[5] = xyw;
+	A[6] = yw;
+	A[7] = xyw;
+	A[8] = yyw;
+	b[0] = zw;
+	b[1] = xzw;
+	b[2] = yzw;
 
 	coef = Tools::matrixSolver(columnCount, A, b);
 
 	return coef;
 }
-std::vector<double> Processor::surfaceFit6(std::vector<double>& inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
+std::vector<double> Processor::surfaceFit6(std::vector<double> &inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
 {
 	int columnCount = 6, pivotIndex, intersect;
 	int scanIndex, dataIndex, iPointCandidates;
@@ -3955,17 +3918,17 @@ std::vector<double> Processor::surfaceFit6(std::vector<double>& inRange, std::ve
 	double pivot, swap, multiplier, toRad = M_PI / 180.0;
 
 	double w = 0, xw = 0, yw = 0, xxw = 0, yyw = 0, xyw = 0,
-		xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
-		xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
-		zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0,
-		xHold, yHold, zHold, wHold, finalAnswer;
+		   xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
+		   xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
+		   zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0,
+		   xHold, yHold, zHold, wHold, finalAnswer;
 	double ww = 0, sumWSquared = 0, wLocalW = 0, wLocalW1 = 0, wLocalWInv = 0;
 	double weightingFunction;
 
-	//weightingFunction = processingWeightingFunction;
-	//weightingFunction = 0.33;
+	// weightingFunction = processingWeightingFunction;
+	// weightingFunction = 0.33;
 
-	//double alpha = (log(0.5)) / (log(cos(M_PI*thetaWPrime / (4.0 *thetaFWHM))));
+	// double alpha = (log(0.5)) / (log(cos(M_PI*thetaWPrime / (4.0 *thetaFWHM))));
 	double withinRfiDec, withinBeamDec, withinRfiRa, withinBeamRa;
 	int iTemp, jTemp;
 
@@ -3973,7 +3936,7 @@ std::vector<double> Processor::surfaceFit6(std::vector<double>& inRange, std::ve
 	std::vector<double> b;
 	std::vector<double> coef;
 	std::vector<int> possibles;
-	std::vector<std::vector<double> > finalHold;
+	std::vector<std::vector<double>> finalHold;
 	A.resize(columnCount * columnCount, 0.0);
 	b.resize(columnCount, 0.0);
 	for (int i = 0; i < inRange.size() / 6; i++)
@@ -3993,44 +3956,78 @@ std::vector<double> Processor::surfaceFit6(std::vector<double>& inRange, std::ve
 
 		wHold = pow(inRange[1 + i * 6], alpha);
 		w += wHold;
-		xw += xHold*wHold;
-		yw += yHold*wHold;
-		xxw += xHold*xHold*wHold;
-		yyw += yHold*yHold*wHold;
-		xyw += xHold*yHold*wHold;
-		xxxw += xHold*xHold*xHold*wHold;
-		xyyw += xHold*yHold*yHold*wHold;
-		xxyw += xHold*xHold*yHold*wHold;
-		yyyw += yHold*yHold*yHold*wHold;
-		xxxxw += xHold*xHold*xHold*xHold*wHold;
-		xxyyw += xHold*xHold*yHold*yHold*wHold;
-		xxxyw += xHold*yHold*xHold*xHold*wHold;
-		yyyyw += yHold*yHold*yHold*yHold*wHold;
-		xyyyw += xHold*yHold*yHold*yHold*wHold;
-		zw += zHold*wHold;
-		xzw += xHold*zHold*wHold;
-		yzw += yHold*zHold*wHold;
-		xxzw += xHold*xHold*zHold*wHold;
-		yyzw += yHold*yHold*zHold*wHold;
-		xyzw += xHold*yHold*zHold*wHold;
+		xw += xHold * wHold;
+		yw += yHold * wHold;
+		xxw += xHold * xHold * wHold;
+		yyw += yHold * yHold * wHold;
+		xyw += xHold * yHold * wHold;
+		xxxw += xHold * xHold * xHold * wHold;
+		xyyw += xHold * yHold * yHold * wHold;
+		xxyw += xHold * xHold * yHold * wHold;
+		yyyw += yHold * yHold * yHold * wHold;
+		xxxxw += xHold * xHold * xHold * xHold * wHold;
+		xxyyw += xHold * xHold * yHold * yHold * wHold;
+		xxxyw += xHold * yHold * xHold * xHold * wHold;
+		yyyyw += yHold * yHold * yHold * yHold * wHold;
+		xyyyw += xHold * yHold * yHold * yHold * wHold;
+		zw += zHold * wHold;
+		xzw += xHold * zHold * wHold;
+		yzw += yHold * zHold * wHold;
+		xxzw += xHold * xHold * zHold * wHold;
+		yyzw += yHold * yHold * zHold * wHold;
+		xyzw += xHold * yHold * zHold * wHold;
 	}
 
 	sumWSquared = std::abs(pow(w, 2));
 
-	A[0] = w; A[1] = xw; A[2] = yw; A[3] = xxw; A[4] = yyw; A[5] = xyw;
-	A[6] = xw;  A[7] = xxw; A[8] = xyw; A[9] = xxxw; A[10] = xyyw; A[11] = xxyw;
-	A[12] = yw; A[13] = xyw; A[14] = yyw; A[15] = xxyw; A[16] = yyyw; A[17] = xyyw;
-	A[18] = xxw; A[19] = xxxw; A[20] = xxyw; A[21] = xxxxw; A[22] = xxyyw; A[23] = xxxyw;
-	A[24] = yyw; A[25] = xyyw; A[26] = yyyw; A[27] = xxyyw; A[28] = yyyyw; A[29] = xyyyw;
-	A[30] = xyw; A[31] = xxyw; A[32] = xyyw; A[33] = xxxyw; A[34] = xyyyw; A[35] = xxyyw;
-	b[0] = zw; b[1] = xzw; b[2] = yzw; b[3] = xxzw; b[4] = yyzw; b[5] = xyzw;
+	A[0] = w;
+	A[1] = xw;
+	A[2] = yw;
+	A[3] = xxw;
+	A[4] = yyw;
+	A[5] = xyw;
+	A[6] = xw;
+	A[7] = xxw;
+	A[8] = xyw;
+	A[9] = xxxw;
+	A[10] = xyyw;
+	A[11] = xxyw;
+	A[12] = yw;
+	A[13] = xyw;
+	A[14] = yyw;
+	A[15] = xxyw;
+	A[16] = yyyw;
+	A[17] = xyyw;
+	A[18] = xxw;
+	A[19] = xxxw;
+	A[20] = xxyw;
+	A[21] = xxxxw;
+	A[22] = xxyyw;
+	A[23] = xxxyw;
+	A[24] = yyw;
+	A[25] = xyyw;
+	A[26] = yyyw;
+	A[27] = xxyyw;
+	A[28] = yyyyw;
+	A[29] = xyyyw;
+	A[30] = xyw;
+	A[31] = xxyw;
+	A[32] = xyyw;
+	A[33] = xxxyw;
+	A[34] = xyyyw;
+	A[35] = xxyyw;
+	b[0] = zw;
+	b[1] = xzw;
+	b[2] = yzw;
+	b[3] = xxzw;
+	b[4] = yyzw;
+	b[5] = xyzw;
 
 	coef = Tools::matrixSolver(columnCount, A, b);
 
 	return coef;
-
 }
-std::vector<double> Processor::surfaceFit10(std::vector<double>& inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
+std::vector<double> Processor::surfaceFit10(std::vector<double> &inRange, std::vector<bool> &checks, double alpha, double i_0, double j_0)
 {
 	int columnCount = 10, pivotIndex, intersect;
 	int scanIndex, dataIndex, iPointCandidates;
@@ -4039,17 +4036,17 @@ std::vector<double> Processor::surfaceFit10(std::vector<double>& inRange, std::v
 	double weightingFunctionTemp, weightPower;
 	double ww = 0, sumWSquared = 0, wLocalW = 0, wLocalW1 = 0, wLocalWInv = 0;
 	double w = 0, xw = 0, yw = 0, xxw = 0, yyw = 0, xyw = 0,
-		xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
-		xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
-		xxxxxw = 0, xxyyyw = 0, xxxxyw = 0, xxxyyw = 0, yyyyyw = 0, xyyyyw = 0,
-		xxxxxxw = 0, xxxxxyw = 0, xxxxyyw = 0, xxxyyyw = 0, xxyyyyw = 0, xyyyyyw = 0, yyyyyyw = 0,
-		zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0, xxxzw = 0, yyyzw = 0, xxyzw = 0, xyyzw = 0,
-		xHold, yHold, zHold, wHold, finalAnswer;
+		   xxxw = 0, xyyw = 0, xxyw = 0, yyyw = 0,
+		   xxxxw = 0, xxyyw = 0, xxxyw = 0, yyyyw = 0, xyyyw = 0,
+		   xxxxxw = 0, xxyyyw = 0, xxxxyw = 0, xxxyyw = 0, yyyyyw = 0, xyyyyw = 0,
+		   xxxxxxw = 0, xxxxxyw = 0, xxxxyyw = 0, xxxyyyw = 0, xxyyyyw = 0, xyyyyyw = 0, yyyyyyw = 0,
+		   zw = 0, xzw = 0, yzw = 0, xxzw = 0, yyzw = 0, xyzw = 0, xxxzw = 0, yyyzw = 0, xxyzw = 0, xyyzw = 0,
+		   xHold, yHold, zHold, wHold, finalAnswer;
 	std::vector<double> A;
 	std::vector<double> b;
 	std::vector<double> coef;
 	std::vector<int> possibles;
-	std::vector<std::vector<double> > finalHold;
+	std::vector<std::vector<double>> finalHold;
 	A.resize(columnCount * columnCount, 0.0);
 	b.resize(columnCount, 0.0);
 	double weightingFunction;
@@ -4057,7 +4054,7 @@ std::vector<double> Processor::surfaceFit10(std::vector<double>& inRange, std::v
 	double withinRfiDec, withinBeamDec, withinRfiRa, withinBeamRa;
 	int iTemp, jTemp;
 
-	for (int i = 0; i < inRange.size() / 6; i++) //Was i < pointCount
+	for (int i = 0; i < inRange.size() / 6; i++) // Was i < pointCount
 	{
 		if (checks[i] == false)
 		{
@@ -4075,58 +4072,157 @@ std::vector<double> Processor::surfaceFit10(std::vector<double>& inRange, std::v
 
 		wHold = pow(inRange[1 + i * 6], alpha);
 		w += wHold;
-		xw += xHold*wHold;
-		yw += yHold*wHold;
-		xxw += xHold*xHold*wHold;
-		yyw += yHold*yHold*wHold;
-		xyw += xHold*yHold*wHold;
-		xxxw += xHold*xHold*xHold*wHold;
-		xyyw += xHold*yHold*yHold*wHold;
-		xxyw += xHold*xHold*yHold*wHold;
-		yyyw += yHold*yHold*yHold*wHold;
-		xxxxw += xHold*xHold*xHold*xHold*wHold;
-		xxyyw += xHold*xHold*yHold*yHold*wHold;
-		xxxyw += xHold*yHold*xHold*xHold*wHold;
-		yyyyw += yHold*yHold*yHold*yHold*wHold;
-		xyyyw += xHold*yHold*yHold*yHold*wHold;
-		xxxxxw += xHold*xHold*xHold*xHold*xHold*wHold;
-		xxyyyw += xHold*xHold*yHold*yHold*yHold*wHold;
-		xxxxyw += xHold*xHold*xHold*xHold*yHold*wHold;
-		xxxyyw += xHold*xHold*xHold*yHold*yHold*wHold;
-		yyyyyw += yHold*yHold*yHold*yHold*yHold*wHold;
-		xyyyyw += xHold*yHold*yHold*yHold*yHold*wHold;
-		xxxxxxw += xHold*xHold*xHold*xHold*xHold*xHold*wHold;
-		xxxxxyw += xHold*xHold*xHold*xHold*xHold*yHold*wHold;
-		xxxxyyw += xHold*xHold*xHold*xHold*yHold*yHold*wHold;
-		xxxyyyw += xHold*xHold*xHold*yHold*yHold*yHold*wHold;
-		xxyyyyw += xHold*xHold*yHold*yHold*yHold*yHold*wHold;
-		xyyyyyw += xHold*yHold*yHold*yHold*yHold*yHold*wHold;
-		yyyyyyw += yHold*yHold*yHold*yHold*yHold*yHold*wHold;
-		zw += zHold*wHold;
-		xzw += xHold*zHold*wHold;
-		yzw += yHold*zHold*wHold;
-		xxzw += xHold*xHold*zHold*wHold;
-		yyzw += yHold*yHold*zHold*wHold;
-		xyzw += xHold*yHold*zHold*wHold;
-		xxxzw += xHold*xHold*xHold*zHold*wHold;
-		yyyzw += yHold*yHold*yHold*zHold*wHold;
-		xxyzw += xHold*xHold*yHold*zHold*wHold;
-		xyyzw += xHold*yHold*yHold*zHold*wHold;
+		xw += xHold * wHold;
+		yw += yHold * wHold;
+		xxw += xHold * xHold * wHold;
+		yyw += yHold * yHold * wHold;
+		xyw += xHold * yHold * wHold;
+		xxxw += xHold * xHold * xHold * wHold;
+		xyyw += xHold * yHold * yHold * wHold;
+		xxyw += xHold * xHold * yHold * wHold;
+		yyyw += yHold * yHold * yHold * wHold;
+		xxxxw += xHold * xHold * xHold * xHold * wHold;
+		xxyyw += xHold * xHold * yHold * yHold * wHold;
+		xxxyw += xHold * yHold * xHold * xHold * wHold;
+		yyyyw += yHold * yHold * yHold * yHold * wHold;
+		xyyyw += xHold * yHold * yHold * yHold * wHold;
+		xxxxxw += xHold * xHold * xHold * xHold * xHold * wHold;
+		xxyyyw += xHold * xHold * yHold * yHold * yHold * wHold;
+		xxxxyw += xHold * xHold * xHold * xHold * yHold * wHold;
+		xxxyyw += xHold * xHold * xHold * yHold * yHold * wHold;
+		yyyyyw += yHold * yHold * yHold * yHold * yHold * wHold;
+		xyyyyw += xHold * yHold * yHold * yHold * yHold * wHold;
+		xxxxxxw += xHold * xHold * xHold * xHold * xHold * xHold * wHold;
+		xxxxxyw += xHold * xHold * xHold * xHold * xHold * yHold * wHold;
+		xxxxyyw += xHold * xHold * xHold * xHold * yHold * yHold * wHold;
+		xxxyyyw += xHold * xHold * xHold * yHold * yHold * yHold * wHold;
+		xxyyyyw += xHold * xHold * yHold * yHold * yHold * yHold * wHold;
+		xyyyyyw += xHold * yHold * yHold * yHold * yHold * yHold * wHold;
+		yyyyyyw += yHold * yHold * yHold * yHold * yHold * yHold * wHold;
+		zw += zHold * wHold;
+		xzw += xHold * zHold * wHold;
+		yzw += yHold * zHold * wHold;
+		xxzw += xHold * xHold * zHold * wHold;
+		yyzw += yHold * yHold * zHold * wHold;
+		xyzw += xHold * yHold * zHold * wHold;
+		xxxzw += xHold * xHold * xHold * zHold * wHold;
+		yyyzw += yHold * yHold * yHold * zHold * wHold;
+		xxyzw += xHold * xHold * yHold * zHold * wHold;
+		xyyzw += xHold * yHold * yHold * zHold * wHold;
 	}
 
 	sumWSquared = std::abs(pow(w, 2));
 
-	A[0] = w; A[1] = xw; A[2] = yw; A[3] = xxw; A[4] = yyw; A[5] = xyw; A[6] = xxxw; A[7] = yyyw; A[8] = xxyw; A[9] = xyyw;
-	A[10] = xw; A[11] = xxw; A[12] = xyw; A[13] = xxxw; A[14] = xyyw; A[15] = xxyw; A[16] = xxxxw; A[17] = xyyyw; A[18] = xxxyw; A[19] = xxyyw;
-	A[20] = yw; A[21] = xyw; A[22] = yyw; A[23] = xxyw; A[24] = yyyw; A[25] = xyyw; A[26] = xxxyw; A[27] = yyyyw; A[28] = xxyyw; A[29] = xyyyw;
-	A[30] = xxw; A[31] = xxxw; A[32] = xxyw; A[33] = xxxxw; A[34] = xxyyw; A[35] = xxxyw; A[36] = xxxxxw; A[37] = xxyyyw; A[38] = xxxxyw; A[39] = xxxyyw;
-	A[40] = yyw; A[41] = xyyw; A[42] = yyyw; A[43] = xxyyw; A[44] = yyyyw; A[45] = xyyyw; A[46] = xxxyyw; A[47] = yyyyyw; A[48] = xxyyyw; A[49] = xyyyyw;
-	A[50] = xyw; A[51] = xxyw; A[52] = xyyw; A[53] = xxxyw; A[54] = xyyyw; A[55] = xxyyw; A[56] = xxxxyw; A[57] = xyyyyw; A[58] = xxxyyw; A[59] = xxyyyw;
-	A[60] = xxxw; A[61] = xxxxw; A[62] = xxxyw; A[63] = xxxxxw; A[64] = xxxyyw; A[65] = xxxxyw; A[66] = xxxxxxw; A[67] = xxxyyyw; A[68] = xxxxxyw; A[69] = xxxxyyw;
-	A[70] = yyyw; A[71] = xyyyw; A[72] = yyyyw; A[73] = xxyyyw; A[74] = yyyyyw; A[75] = xyyyyw; A[76] = xxxyyyw; A[77] = yyyyyyw; A[78] = xxyyyyw; A[79] = xyyyyyw;
-	A[80] = xxyw; A[81] = xxxyw; A[82] = xxyyw; A[83] = xxxxyw; A[84] = xxyyyw; A[85] = xxxyyw; A[86] = xxxxxyw; A[87] = xxyyyyw; A[88] = xxxxyyw; A[89] = xxxyyyw;
-	A[90] = xyyw; A[91] = xxyyw; A[92] = xyyyw; A[93] = xxxyyw; A[94] = xyyyyw; A[95] = xxyyyw; A[96] = xxxxyyw; A[97] = xyyyyyw; A[98] = xxxyyyw; A[99] = xxyyyyw;
-	b[0] = zw; b[1] = xzw; b[2] = yzw; b[3] = xxzw; b[4] = yyzw; b[5] = xyzw; b[6] = xxxzw; b[7] = yyyzw; b[8] = xxyzw; b[9] = xyyzw;
+	A[0] = w;
+	A[1] = xw;
+	A[2] = yw;
+	A[3] = xxw;
+	A[4] = yyw;
+	A[5] = xyw;
+	A[6] = xxxw;
+	A[7] = yyyw;
+	A[8] = xxyw;
+	A[9] = xyyw;
+	A[10] = xw;
+	A[11] = xxw;
+	A[12] = xyw;
+	A[13] = xxxw;
+	A[14] = xyyw;
+	A[15] = xxyw;
+	A[16] = xxxxw;
+	A[17] = xyyyw;
+	A[18] = xxxyw;
+	A[19] = xxyyw;
+	A[20] = yw;
+	A[21] = xyw;
+	A[22] = yyw;
+	A[23] = xxyw;
+	A[24] = yyyw;
+	A[25] = xyyw;
+	A[26] = xxxyw;
+	A[27] = yyyyw;
+	A[28] = xxyyw;
+	A[29] = xyyyw;
+	A[30] = xxw;
+	A[31] = xxxw;
+	A[32] = xxyw;
+	A[33] = xxxxw;
+	A[34] = xxyyw;
+	A[35] = xxxyw;
+	A[36] = xxxxxw;
+	A[37] = xxyyyw;
+	A[38] = xxxxyw;
+	A[39] = xxxyyw;
+	A[40] = yyw;
+	A[41] = xyyw;
+	A[42] = yyyw;
+	A[43] = xxyyw;
+	A[44] = yyyyw;
+	A[45] = xyyyw;
+	A[46] = xxxyyw;
+	A[47] = yyyyyw;
+	A[48] = xxyyyw;
+	A[49] = xyyyyw;
+	A[50] = xyw;
+	A[51] = xxyw;
+	A[52] = xyyw;
+	A[53] = xxxyw;
+	A[54] = xyyyw;
+	A[55] = xxyyw;
+	A[56] = xxxxyw;
+	A[57] = xyyyyw;
+	A[58] = xxxyyw;
+	A[59] = xxyyyw;
+	A[60] = xxxw;
+	A[61] = xxxxw;
+	A[62] = xxxyw;
+	A[63] = xxxxxw;
+	A[64] = xxxyyw;
+	A[65] = xxxxyw;
+	A[66] = xxxxxxw;
+	A[67] = xxxyyyw;
+	A[68] = xxxxxyw;
+	A[69] = xxxxyyw;
+	A[70] = yyyw;
+	A[71] = xyyyw;
+	A[72] = yyyyw;
+	A[73] = xxyyyw;
+	A[74] = yyyyyw;
+	A[75] = xyyyyw;
+	A[76] = xxxyyyw;
+	A[77] = yyyyyyw;
+	A[78] = xxyyyyw;
+	A[79] = xyyyyyw;
+	A[80] = xxyw;
+	A[81] = xxxyw;
+	A[82] = xxyyw;
+	A[83] = xxxxyw;
+	A[84] = xxyyyw;
+	A[85] = xxxyyw;
+	A[86] = xxxxxyw;
+	A[87] = xxyyyyw;
+	A[88] = xxxxyyw;
+	A[89] = xxxyyyw;
+	A[90] = xyyw;
+	A[91] = xxyyw;
+	A[92] = xyyyw;
+	A[93] = xxxyyw;
+	A[94] = xyyyyw;
+	A[95] = xxyyyw;
+	A[96] = xxxxyyw;
+	A[97] = xyyyyyw;
+	A[98] = xxxyyyw;
+	A[99] = xxyyyyw;
+	b[0] = zw;
+	b[1] = xzw;
+	b[2] = yzw;
+	b[3] = xxzw;
+	b[4] = yyzw;
+	b[5] = xyzw;
+	b[6] = xxxzw;
+	b[7] = yyyzw;
+	b[8] = xxyzw;
+	b[9] = xyyzw;
 
 	coef = Tools::matrixSolver(columnCount, A, b);
 
@@ -4138,8 +4234,8 @@ std::vector<double> Processor::surfaceFit10(std::vector<double>& inRange, std::v
 	return coef;
 }
 
-//lss leveling
-void Processor::levelLSSData(std::vector<Survey> & surveys)
+// lss leveling
+void Processor::levelLSSData(std::vector<Survey> &surveys)
 {
 	PartitionSet partSetI, partSetJ;
 	std::vector<Scan> scansI, scansJ;
@@ -4172,7 +4268,6 @@ void Processor::levelLSSData(std::vector<Survey> & surveys)
 			}
 			scansJ = surveys[j].getScans();
 			partSetJ = surveys[j].getPartSetProcSSS();
-
 
 			for (int k = 0; k < scansI.size(); k++)
 			{
@@ -4207,11 +4302,11 @@ void Processor::levelLSSData(std::vector<Survey> & surveys)
 	double devNew, devOld, devDiff;
 	std::vector<double> deviations;
 	deviations.resize(surveys.size(), 0.0);
-	//iterate through deviations until the most a single one changes is 0.01
+	// iterate through deviations until the most a single one changes is 0.01
 	while (maxDiff > 0.01)
 	{
 		devDiff = 0;
-		for (int i = 1; i < surveys.size(); i++)//always let one of the deviations be zero
+		for (int i = 1; i < surveys.size(); i++) // always let one of the deviations be zero
 		{
 			devOld = deviations[i];
 			num = 0;
@@ -4231,15 +4326,13 @@ void Processor::levelLSSData(std::vector<Survey> & surveys)
 			}
 		}
 	}
-	
 
-	//WE THEN NEED TO SUBTRACT THESE VALUES OFF OF THE GRID AND EXCISE BAD POINTS
+	// WE THEN NEED TO SUBTRACT THESE VALUES OFF OF THE GRID AND EXCISE BAD POINTS
 	subtractDeviations(surveys, deviations);
 
-
-	//scansI.removeLSSPoints(checks);
+	// scansI.removeLSSPoints(checks);
 }
-void Processor::subtractDeviations(std::vector<Survey> & surveys, std::vector<double> & deviations)
+void Processor::subtractDeviations(std::vector<Survey> &surveys, std::vector<double> &deviations)
 {
 	std::vector<Scan> scansI;
 	std::vector<double> fluxVec;
@@ -4277,25 +4370,25 @@ double Processor::surfaceModel(std::vector<Scan> scansJ, PartitionSet partSetJ, 
 	std::vector<double> inRange, coef;
 	std::vector<bool> checks;
 
-	std::vector<std::vector<int> > scanNumbers;
+	std::vector<std::vector<int>> scanNumbers;
 	pointCandidates = findPossLSS(dec, ra, psfFWHM, possibles);
-	inRange.resize(pointCandidates * 6); //THIS MAY BE CHANGED TO RESERVE INSTEAD OF RESIZE
+	inRange.resize(pointCandidates * 6); // THIS MAY BE CHANGED TO RESERVE INSTEAD OF RESIZE
 	checks.resize(pointCandidates, true);
 
-	//CALCULATE EXPECTED SCATTER OVER GIVEN RADIUS
+	// CALCULATE EXPECTED SCATTER OVER GIVEN RADIUS
 	for (int k = 0; k < pointCandidates; k++)
 	{
 		holdI = possibles[k * 2];
 		holdJ = possibles[k * 2 + 1];
 
-		distance = Tools::getGCDistance(dec, ra, scansJ[holdI].getDec(holdJ), scansJ[holdI].getRa(holdJ), partSetProcSSS.centerDecDeg)*toDeg;
+		distance = Tools::getGCDistance(dec, ra, scansJ[holdI].getDec(holdJ), scansJ[holdI].getRa(holdJ), partSetProcSSS.centerDecDeg) * toDeg;
 
 		if (distance < psfFWHM)
 		{
-			//STORES ALL THE INFORMATION OF THE ACCEPTED DATA POINT
+			// STORES ALL THE INFORMATION OF THE ACCEPTED DATA POINT
 			inRange[count * 6] = scans[holdI].getLSSData(holdJ);
-			inRange[count * 6 + 1] = cos((M_PI*distance) / (psfFWHM*2.0));
-			inRange[count * 6 + 2] = 999999;// THESE ARE SET SO THAT THE INDEXING OF THE SURFACE FIT FUNCTION STILL WORKS;
+			inRange[count * 6 + 1] = cos((M_PI * distance) / (psfFWHM * 2.0));
+			inRange[count * 6 + 2] = 999999; // THESE ARE SET SO THAT THE INDEXING OF THE SURFACE FIT FUNCTION STILL WORKS;
 			inRange[count * 6 + 3] = 999999;
 			inRange[count * 6 + 4] = holdI;
 			inRange[count * 6 + 5] = holdJ;
@@ -4311,14 +4404,14 @@ double Processor::surfaceModel(std::vector<Scan> scansJ, PartitionSet partSetJ, 
 	scanNumbers = calculateScanNumbers(count, inRange, checks);
 	modelType = determineSurfaceType(scanNumbers, mapType);
 
-	scale = Tools::max(wScale, Tools::min((4.0 / 3.0)*largestGap / (psfFWHM*toRad), 1.0));
+	scale = Tools::max(wScale, Tools::min((4.0 / 3.0) * largestGap / (psfFWHM * toRad), 1.0));
 
-	alpha = -1.0*std::log(2) / (std::log(std::cos(M_PI*scale / (4.0*psfFWHM))));
+	alpha = -1.0 * std::log(2) / (std::log(std::cos(M_PI * scale / (4.0 * psfFWHM))));
 
 	coef = determineModelCoef(modelType, count, inRange, checks, alpha, dec, ra);
 
-	xPrime = 0.0;// (scans[iTemp].getDec(jTemp) - scans[i_0].getDec(j_0));
-	yPrime = 0.0;// (scans[iTemp].getRa(jTemp) - scans[i_0].getRa(j_0));
+	xPrime = 0.0; // (scans[iTemp].getDec(jTemp) - scans[i_0].getDec(j_0));
+	yPrime = 0.0; // (scans[iTemp].getRa(jTemp) - scans[i_0].getRa(j_0));
 	zPrime = applySurfaceModel(xPrime, yPrime, NAN, coef);
 
 	return zPrime;
@@ -4374,7 +4467,7 @@ bool Processor::checkEdgeCriteria(Coordinates coordinate, PartitionSet partSetPr
 		decBoundTop = (mTwo * (ra - xbarTwo) + bTwo);
 		decBoundBottom = (mFour * (ra - xbarFour) + bFour);
 
-		if (raBoundRight < ra  && ra < raBoundLeft)
+		if (raBoundRight < ra && ra < raBoundLeft)
 		{
 			withinBoundsRa = true;
 		}
@@ -4401,7 +4494,7 @@ bool Processor::checkEdgeCriteria(Coordinates coordinate, PartitionSet partSetPr
 		medianRa = partSetProcSSS.medianRa;
 		trimSize = partSetProcSSS.trimSize;
 
-		distance = Tools::getModGCDistance(dec, ra, medianDec, medianRa)*toDeg;
+		distance = Tools::getModGCDistance(dec, ra, medianDec, medianRa) * toDeg;
 
 		if ((distance / psfFWHM) < ((edgeRadius - trimSize * psfFWHM) / psfFWHM))
 		{
@@ -4423,7 +4516,7 @@ std::vector<double> Processor::determineMappedEdges(double LONG, double LATI, bo
 	if (!(mCoordinate == "galactic" && pCoordinate == GALACTIC) && !(mCoordinate == "equatorial" && pCoordinate == EQUATORIAL)) // if mapping coords != processing coords.
 	{
 		if (pCoordinate == GALACTIC)
-		{	// This is in limbo because Skynet is wrong.
+		{ // This is in limbo because Skynet is wrong.
 			if (tracking)
 			{
 				centerProcLati = Tools::convertToB(compPartSetProc.medianLongMap, compPartSetProc.medianLatiMap);
@@ -4453,8 +4546,8 @@ std::vector<double> Processor::determineMappedEdges(double LONG, double LATI, bo
 			}
 		}
 
-		unTransLati = LATI + centerProcLati;	// these two lines do the un-transform in the processing coords.
-		unTransLong = (LONG / cos(undoAngDeg*toRad)) + centerProcLong;
+		unTransLati = LATI + centerProcLati; // these two lines do the un-transform in the processing coords.
+		unTransLong = (LONG / cos(undoAngDeg * toRad)) + centerProcLong;
 
 		if (pCoordinate == GALACTIC)
 		{
@@ -4473,8 +4566,8 @@ std::vector<double> Processor::determineMappedEdges(double LONG, double LATI, bo
 		}
 		else
 		{
-			LATI = unTransLatiVert - centerMapLati;	// these two lines re-transform in the mapping coords.
-			LONG = (unTransLongVert - centerMapLong)*cos(doAngDeg*toRad);
+			LATI = unTransLatiVert - centerMapLati; // these two lines re-transform in the mapping coords.
+			LONG = (unTransLongVert - centerMapLong) * cos(doAngDeg * toRad);
 		}
 	}
 	else // if mapping coords == processing coords.
@@ -4482,7 +4575,7 @@ std::vector<double> Processor::determineMappedEdges(double LONG, double LATI, bo
 		if (mapType == NODDING) // edges for NODDINGs are now checked in un-transformed coordinates.
 		{
 			LATI = LATI + centerMapLati;
-			LONG = (LONG / cos(centerMapLati*toRad)) + centerMapLong;
+			LONG = (LONG / cos(centerMapLati * toRad)) + centerMapLong;
 		}
 	}
 
@@ -4494,10 +4587,7 @@ std::vector<double> Processor::determineMappedEdges(double LONG, double LATI, bo
 	return coordinatesToCheck;
 }
 
-
-
-
-//background
+// background
 /*
 bool Processor::findDuplicate(double value, std::vector<double> vectorHold)
 {
@@ -5318,8 +5408,8 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 }
 */
 
-//OLD FUNCTIONS
-//std::vector<double> rfiFit(int pointsInRange, double avgSigma, std::vector<double> &sigmaValues, std::vector<int> &checks, std::vector<double> &inRange)
+// OLD FUNCTIONS
+// std::vector<double> rfiFit(int pointsInRange, double avgSigma, std::vector<double> &sigmaValues, std::vector<int> &checks, std::vector<double> &inRange)
 //{
 //	double sigmaTerm = 0, fluxShapeTerm = 0, shapeSquaredTerm = 0, shapeTerm = 0, fluxTerm = 0;
 //	double f, g, sigma, sigmaSquare, flux, shape, dump;
@@ -5346,8 +5436,8 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //	solution[0] = f;
 //	solution[1] = g;
 //	return solution;
-//}
-//void Processor::rfiRemovePoints(int pointsInRange, double avgSigma, std::vector<int> & holdIVec2, std::vector<int> & holdJVec2, std::vector<double> &sigmaValues, std::vector<int> &checks, std::vector<double> &inRange)
+// }
+// void Processor::rfiRemovePoints(int pointsInRange, double avgSigma, std::vector<int> & holdIVec2, std::vector<int> & holdJVec2, std::vector<double> &sigmaValues, std::vector<int> &checks, std::vector<double> &inRange)
 //{
 //	double largestDiff, largest, splusSigmaDiff, splus = 0;
 //	double f, g;
@@ -5435,8 +5525,8 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //			splus = 0;
 //		}
 //	}
-//}
-//std::vector<double> Processor::rfiRemovalMulti(int i_0, int j_0)
+// }
+// std::vector<double> Processor::rfiRemovalMulti(int i_0, int j_0)
 //{
 //	//std::cout << scatter2d.size() << "\n";
 //	std::vector<int> possibles;
@@ -5490,7 +5580,7 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //
 //	//FIT A LOCAL MODEL AND REJECT MOST DEVIANT POINT UNTIL WITHIN TOLERATED SCATTER
 //
-//	
+//
 //	/*while (splus > avgSigma)
 //	{
 //		largestDiff = 0;
@@ -5667,7 +5757,7 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //							rfiCountHold += 1;	//Includes all points that are within a rfi-beam of LMV && within a rfi-beam of GMV && are above the 2d-scatter.
 //						}
 //						if (countBelow && scans[jHoldI].getFlux(jHoldJ) < sqrt(2.0)*correlatedScatter) {
-//							rfiCountHold += 1; //Includes all points that are within a rfi-beam of LMV && within a rfi-beam of GMV && are below the 2d-scatter. 
+//							rfiCountHold += 1; //Includes all points that are within a rfi-beam of LMV && within a rfi-beam of GMV && are below the 2d-scatter.
 //						}
 //					}
 //					if (checks[j]) //Correlation scale here.
@@ -5724,9 +5814,9 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //			}
 //			else {
 //				wResult = (localModelDumpSum / (1.0 + 2.0 * pow((shapeParam - localModelShapeSum), 2) / (normalLocalWeight / normalLocalWeightCounter)));
-//				
+//
 //			}
-//			
+//
 //			results.push_back(holdI);
 //			results.push_back(holdJ);
 //			results.push_back(wResult);
@@ -5738,8 +5828,8 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //		}
 //	}
 //	return results;
-//}
-//void Processor::extraLocalModels(double decPoint, double raPoint, std::vector<std::vector<std::vector<double> > > &rfiValues, std::vector<std::vector<std::vector<double> > > &rfiWeights, std::vector<std::vector<std::vector<double> > >&rfiCounts, std::vector<std::vector<std::vector<double> > > & rfiDists, std::vector<std::vector<std::vector<double> > > & rfiNs, double rfiScale, std::vector<MapTypes> mapHolder)
+// }
+// void Processor::extraLocalModels(double decPoint, double raPoint, std::vector<std::vector<std::vector<double> > > &rfiValues, std::vector<std::vector<std::vector<double> > > &rfiWeights, std::vector<std::vector<std::vector<double> > >&rfiCounts, std::vector<std::vector<std::vector<double> > > & rfiDists, std::vector<std::vector<std::vector<double> > > & rfiNs, double rfiScale, std::vector<MapTypes> mapHolder)
 //{
 //	int rfiCountHold = 0;
 //	double comDec, comRa;
@@ -6049,8 +6139,8 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //			}
 //		}
 //	}
-//}
-//void Processor::extraLocalModels(double decPoint, double raPoint, std::vector<std::vector<std::vector<double> > > &rfiValues, std::vector<std::vector<std::vector<double> > > &rfiWeights, std::vector<std::vector<std::vector<double> > >&rfiCounts, std::vector<std::vector<std::vector<double> > > & rfiDists, std::vector<std::vector<std::vector<double> > > & rfiNs, double rfiScale, std::vector<MapTypes> mapHolder)
+// }
+// void Processor::extraLocalModels(double decPoint, double raPoint, std::vector<std::vector<std::vector<double> > > &rfiValues, std::vector<std::vector<std::vector<double> > > &rfiWeights, std::vector<std::vector<std::vector<double> > >&rfiCounts, std::vector<std::vector<std::vector<double> > > & rfiDists, std::vector<std::vector<std::vector<double> > > & rfiNs, double rfiScale, std::vector<MapTypes> mapHolder)
 //{
 //	int rfiCountHold = 0;
 //	double comDec, comRa;
@@ -6138,9 +6228,9 @@ void Processor::performBGSubtraction(Survey &survey, double bgScale)
 //			}
 //		}
 //	}
-//}
+// }
 
-//CLEANNED RFI FUNCTIONS
+// CLEANNED RFI FUNCTIONS
 /*
 void Processor::autoCentroid(std::vector<std::vector<std::vector<double> > > rfiValues)
 {
@@ -6819,18 +6909,17 @@ return rfiSubtracted;
 }
 */
 
-
-//theta gap
+// theta gap
 /*
 std::vector<int> Processor::quadrantSort(double dec, double ra, std::vector<int> &inRange, Quadrant quadrant)
 {
-	//NOMENCLATURE: 
+	//NOMENCLATURE:
 	//RA AND DEC = "x1,y1"
 	//RACHECK AND DECCHECK = "x2,y2"
 
 	//THIS FUNCTION WHICH POINTS OF A GIVEN SET SIT WITHIN A CERTAIN QUADRANT.
 
-	//IT USES RA AND DEC FOR "CARDINAL QUADRANTS" TOP, BOTTOM, LEFT, AND RIGHT, AND SLOPE FOR "DIAGONAL QUADRANTS" 
+	//IT USES RA AND DEC FOR "CARDINAL QUADRANTS" TOP, BOTTOM, LEFT, AND RIGHT, AND SLOPE FOR "DIAGONAL QUADRANTS"
 
 
 	double raCheck, decCheck, slope;
@@ -7010,7 +7099,7 @@ void Processor::determineCircleParams(double dec, double ra, Quadrant quadrant, 
 
 	kDiag1 = -1.0*1.0;
 	kDiag2 = -1.0*-1.0;
-	//THE FIRST -1.0 HERE HIGHLIGHTS THAT RA INCREASES RIGHT TO LEFT.  THEREFORE WHAT IS NORMALLY SEEN AS A NEGATIVE SLOPE, IS ACTUALLY A "POSITIVE" SLOPE IN THIS REFLECTION. 
+	//THE FIRST -1.0 HERE HIGHLIGHTS THAT RA INCREASES RIGHT TO LEFT.  THEREFORE WHAT IS NORMALLY SEEN AS A NEGATIVE SLOPE, IS ACTUALLY A "POSITIVE" SLOPE IN THIS REFLECTION.
 
 	circleParams.resize(6 * inRange.size() / 2, 0.0);
 
@@ -7303,7 +7392,7 @@ double Processor::circleThetaGap(int i_0, int j_0, bool LSSOn)
 
 	thetaGap = maxAll * toRad;
 
-	//THE 4.0/3.0 CHECK IS APPLIED NOW IN THE THETA GAP SETTER 
+	//THE 4.0/3.0 CHECK IS APPLIED NOW IN THE THETA GAP SETTER
 
 	return thetaGap; //IN RADIANS
 }
@@ -7311,5 +7400,4 @@ double Processor::circleThetaGap(int i_0, int j_0, bool LSSOn)
 
 Processor::~Processor()
 {
-
 }

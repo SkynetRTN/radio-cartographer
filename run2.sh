@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Working directory
-DIR=pwd
+DIR=$(pwd)
 # "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo pwd
 # Files to be processed in the directory
-FILES=testing/good-test-file.cyb.fits        # arg 1  =  Filename                    The file(s) to be processed
+# FILES=testing/good-test-file.cyb.fits        # arg 1  =  Filename                    The file(s) to be processed
 # *_2.txt this was good when we tested it using .txt
 
 # The following are the processing parameters
@@ -33,7 +33,7 @@ Log="${DIR%/}/run_sh.log"
 set_output_directory () {
     filename="${1##*/}"         # Remove the path from the beginning
     filename="${filename%.*}"   # Remove the extension from the end
-
+    echo outdir
     echo -n "${DIR%/}/${filename}_phot"
 }
 
@@ -67,13 +67,15 @@ info "\tM10\t\t= $M10"
 #   of multiple items (instead of a string with spaces in it)
 # for file in "${DIR%/}/"${FILES}
 shopt -s nullglob
-files_array=(*.fits)
+files_array=(testing/good-test-file.cyb.fits)
+
 for ((i=0; i<${#files_array[@]}; i++)); do
   files_array[$i]="${DIR}/${files_array[$i]}"
 done
 # echo ${files_array[@]}
 
     file=${files_array[0]}
+    echo $file
     info "Processing $file"
 
     ./RDP.out $file $Coord $Channel $Cali $Bg $RFI $Wgt $TS $Raw $LSS $Phot $Apt $Ann $Fd $Loc $Trm $M10 ${files_array[@]}

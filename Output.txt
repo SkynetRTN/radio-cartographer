@@ -7,127 +7,21 @@ left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy)
 left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
 right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
 right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	46978.71	28.07
-1	1	47977.57	35.34
-0	1	46976.82	0.00
-0	1	47977.45	0.04
+1	1	25469.53	0.43
+1	1	25740.27	0.08
+0	1	25469.71	20.62
+0	1	25739.98	19.82
 polarization channel and gain calibration:
 left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
 left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
 right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
 right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	46978.71	28.07
-1	1	47977.57	35.34
-0	1	46976.82	0.00
-0	1	47977.45	0.04
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	48804.13	30.15
-1	1	49765.57	35.40
-0	1	48807.20	0.02
-0	1	49765.89	0.03
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	52654.82	61.40
-1	1	53654.27	35.20
-0	1	52655.30	0.06
-0	1	53654.31	0.03
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	56262.94	64.56
-1	1	57213.63	39.78
-0	1	56262.41	0.03
-0	1	57213.63	0.04
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	59478.68	17.95
-1	1	60494.23	36.95
-0	1	59479.34	0.08
-0	1	60493.98	0.04
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	63075.93	59.09
-1	1	64073.98	28.48
-0	1	63074.80	0.05
-0	1	64074.07	0.04
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	66702.58	56.54
-1	1	67708.07	42.99
-0	1	66701.02	0.03
-0	1	67707.89	0.02
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	70281.56	27.74
-1	1	71232.39	42.00
-0	1	70284.14	0.04
-0	1	71231.91	0.06
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	73883.97	7.24
-1	1	74890.19	33.42
-0	1	73887.24	0.07
-0	1	74889.86	0.03
-polarization channel and gain calibration:
-left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
-right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
-1	1	77496.20	26.97
-1	1	78450.04	26.72
-0	1	77497.53	0.02
-0	1	78448.70	0.02
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
-BGSCALE,6,Background subtraction scale (beams)
-TIMESHIF,0,Time delay correction (s) (Used=false)
+1	1	25469.53	0.43
+1	1	25740.27	0.08
+0	1	25469.71	20.62
+0	1	25739.98	19.82
 BGSCALE,6,Background subtraction scale (beams)
 TIMESHIF,0,Time delay correction (s) (Used=false)
 BGSCALE,6,Background subtraction scale (beams)
 TIMESHIF,0,Time delay correction (s) (Used=false)
 RFISCALE,0.05,RFI removal scale (beams)
-CENTERRA,133.698,Center ra (deg)
-CENTERDE,20.1042,Center dec (deg)
-CENTERX,74,Center pixel along the x-axis
-CENTERY,74,Center pixel along the y-axis
-PIXLSIZE,0.05,Size of single pixel (beams)
-(Photometry=off)
-(Photometry=off)
