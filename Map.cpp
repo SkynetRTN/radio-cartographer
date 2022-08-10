@@ -4,15 +4,16 @@
 #include <math.h>
 #include <float.h>
 #include <cmath>
-#include "Debugger.h"
+
 
 Map::Map()
 {
+
 }
 
-// i COORDINATE CORESPONDS TO DEC
+//i COORDINATE CORESPONDS TO DEC
 
-// MAP PREPROCESSING
+//MAP PREPROCESSING
 void Map::reserveGrid(double maxDec, double minDec, double maxRa, double minRa, double res, double centerDec, double centerRa)
 {
 	this->maxDec = maxDec;
@@ -26,7 +27,7 @@ void Map::reserveGrid(double maxDec, double minDec, double maxRa, double minRa, 
 	int numberOfPixels = (int)(maxDec - minDec) / res;
 	std::vector<Pixel> pixelFiller;
 	Pixel pixelTemp;
-
+	
 	grid.reserve(numberOfPixels);
 
 	for (double i = 0; i <= maxDec - minDec; i += res)
@@ -36,12 +37,13 @@ void Map::reserveGrid(double maxDec, double minDec, double maxRa, double minRa, 
 		{
 			pixelTemp.setDec(i);
 			pixelTemp.setRa(j);
-			grid[round((1.0 / res) * i)].push_back(pixelTemp);
+			grid[round((1.0 / res)*i)].push_back(pixelTemp);
 		}
 	}
 }
 
-// MAP PRINTING
+
+//MAP PRINTING
 void Map::printSSSWeightMap()
 {
 	double hold;
@@ -178,7 +180,7 @@ void Map::printSSSProcFluxMap()
 {
 	double hold;
 	std::ofstream file;
-	Debugger::print("Info", "Starting SSS");
+
 	file.open("SSS_main.txt");
 	for (int i = 0; i < grid.size(); i++)
 	{
@@ -499,7 +501,7 @@ void Map::printIndexNumberMap()
 }
 
 void Map::printFits(const std::string fitsName, FitsFile fitsType)
-{
+{  
 	/*
 	long naxis = 2;
 	long naxes[2] = {  grid[0].size(), grid.size() };
@@ -508,7 +510,7 @@ void Map::printFits(const std::string fitsName, FitsFile fitsType)
 	long& numberOfRows = naxes[1];
 	long nelements(1);
 	long  fpixel(1);
-	nelements = naxes[0] * naxes[1];// Find the total size of the array. calculating naxes[0]*naxes[1])
+	nelements = naxes[0] * naxes[1];// Find the total size of the array. calculating naxes[0]*naxes[1]) 
 
 	std::valarray<double> row(vectorLength);
 	std::valarray<double> array(nelements);
@@ -557,7 +559,8 @@ void Map::printFits(const std::string fitsName, FitsFile fitsType)
 	*/
 }
 
-// MAP GETTERS
+
+//MAP GETTERS
 double Map::getMaxDec()
 {
 	return maxDec;
@@ -587,7 +590,8 @@ double Map::getResolution()
 	return resolution;
 }
 
-// GRID GETTERS
+
+//GRID GETTERS
 int Map::getSize(int i)
 {
 	if (i == 0)
@@ -602,7 +606,7 @@ int Map::getSize(int i)
 	{
 		std::cout << "ERROR: GRID INDEX OUT OF BOUNDS!\n";
 		std::cout << "PRESS ENTER TO ABORT\n";
-		// throw error here
+		//throw error here
 	}
 }
 bool Map::getCentroidFlag(int i, int j)
@@ -673,7 +677,7 @@ int Map::getIndexNumber(int i, int j)
 	return grid[i][j].getIndexNumber();
 }
 
-// GRID SETTERS
+//GRID SETTERS
 void Map::setCentroidFlag(int i, int j, bool value)
 {
 	grid[i][j].setCentroidFlag(value);
@@ -736,6 +740,8 @@ void Map::setLSSWeight2(int i, int j, double value)
 {
 	grid[i][j].setLSSWeight2(value);
 }
+
+
 
 void Map::setScanNumber(int i, int j, int value)
 {

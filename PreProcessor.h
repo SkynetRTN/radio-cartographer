@@ -12,6 +12,9 @@ struct SpectralParameters
 	double modSubScale;
 	double velocity;
 
+	std::vector<double> inclusionBand;
+	std::vector<double> exclusionBand;
+
 	std::vector<std::string> files;
 	std::vector<double> modSubZones;
 	Receiver receiver;
@@ -40,6 +43,7 @@ public:
 
 	std::vector<std::vector<double>> getFreqDists();
 	std::vector<std::vector<double>> getWeights();
+	std::vector<std::vector<double>> getFrequencies();
 	std::vector<std::vector<double>> baselines; // Should live in SpectralParameters
 	
 	std::vector<int> excisedIndices;
@@ -128,7 +132,7 @@ private:
 	void sortLowResData();
 	void sortHiResData(Receiver);
 	void appendColumnData();
-	int averageSpectra();
+	int averageSpectra(std::vector<std::vector<double>>, std::vector<double>, std::vector<double>);
 
 	// Misc Variables
 	double centerOffset;

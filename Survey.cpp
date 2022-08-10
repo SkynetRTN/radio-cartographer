@@ -170,8 +170,10 @@ Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::strin
 		std::vector<std::vector<double>> sdfitsData;
 		PreProcessor sdfits = PreProcessor();
 		sdfitsData = sdfits.sdfitsReader(cParams);
+		std::cout << "Out of PreProcessor\n";
 		setSdfitsParams(sParams, sdfits);
 		initializeData(sdfitsData);
+		std::cout << "Out of Initialize\n";
 	}
 	else
 	{
@@ -317,6 +319,11 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 			this->mapType = RASTER;
 			this->scansInRa = true;
 		}
+		else if (mapPattern == "DecLatMap")
+		{
+			this->mapType = RASTER;
+			this->scansInRa = true;
+		}
 		else
 		{
 			this->mapType = DAISY;
@@ -428,19 +435,11 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	janskyCalibration(1.0, LEFT);
 	janskyCalibration(1.0, RIGHT);
 	janskyCalibration(1.0, COMPOSITE);
-
+	std::cout << times.size() << std::endl;
 	for (int i = offset; i < times.size() - offset; i++)
 	{
+		std::cout << decs[i].size() << std::endl;
 		this->scans.push_back(Scan(times[i], decs[i], ras[i], elevations[i], dataDumps[i], fluxL[i], fluxR[i], fluxComp[i]));
-		
-		for (int j = 0; j < fluxR[i].size(); j++)
-		{
-			if (fluxL[i][j] == 999 || fluxR[i][j] == 999)
-			{
-				std::cout << scans.size() << "\t" << i << "\t" << j << "\n";
-				exit(1);
-			}
-		}
 	}
 
 	Debugger::print("Info", "scans loaded");
@@ -739,6 +738,7 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		//CALIBRATION DATA DURING TRANSITION
 
 		while (i < data[0].size())
+		//while (i < 1223)
 		{
 			//STORE ALL INITIAL CALIBRATION DATA AND ZERO SCAN DATA
 			if ((data[9][i] == 0 && data[10][i] == 0))
@@ -806,6 +806,7 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		scanCount = 2;
 
 		while (i < data[0].size())
+		//while (i < 1223)
 		{
 			//STORE NON-TRANSITION DATA FOR REMAINING SCANS
 			if (data[9][i] != scanCount - 1 && data[9][i] != 0)
@@ -855,6 +856,7 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 
 		//POST CALIBRATION 
 		while (i < data[0].size())
+		//while (i < 1223)
 		{
 			times[scanCount].push_back(data[0][i]);
 			ras[scanCount].push_back(15.0*data[1][i]);
@@ -953,6 +955,38 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 			i++;
 		}
 	}
+	std::ofstream times1;
+	std::ofstream ras1;
+	std::ofstream decs1;
+	std::ofstream fluxL1;
+	std::ofstream fluxR1;
+	std::ofstream dataDumps1;
+
+	times1.open("times.txt", std::ios_base::app);
+	ras1.open("ras.txt", std::ios_base::app);
+	decs1.open("decs.txt", std::ios_base::app);
+	fluxL1.open("fluxR.txt", std::ios_base::app);
+	fluxR1.open("fluxL.txt", std::ios_base::app);
+	dataDumps1.open("dataDumps.txt", std::ios_base::app);
+	
+	for (int i = 0; i < times.size(); i++)
+	{
+		for (int j = 0; j < times[i].size(); j++)
+		{
+			times1 << times[i][j] << std::endl;
+			ras1 << ras[i][j] << std::endl;
+			decs1 << decs[i][j] << std::endl;
+			fluxL1 << fluxL[i][j] << std::endl;
+			fluxR1 << fluxR[i][j] << std::endl;
+			dataDumps1 << dataDumps[i][j] << std::endl;
+		}
+	}
+	times1.close();
+	ras1.close();
+	decs1.close();
+	fluxL1.close();
+    fluxR1.close();
+	dataDumps1.close();
 }
 
 //calibration
@@ -970,6 +1004,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 	switch (chan)
 	{
 	case LEFT:
+
 		flux = fluxL;
 		break;
 	case RIGHT:
@@ -1030,20 +1065,20 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		}
 	}
 
-	if (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3)
+	if (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2)
 	{
 		calMethod = POST;
 		Debugger::print("Warn", "No reliable pre-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to post-calibration!");
 	}
-	else if (lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3)
+	else if (lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2)
 	{
 		calMethod = PRE;
 		Debugger::print("Warn", "No reliable post-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to pre-calibration!");
 	}
 
-	if ((lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3) && (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3))
+	if ((lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2) && (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2))
 	{
 		Debugger::print("Error", "No reliable calibration data found!");
 		//throw error for no reliable calibration data;
@@ -1073,6 +1108,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		}
 
 		model = LinearModel(lowDumpStart, lowTimeStart, lowFluxArrayStart);
+
 		rcr.setParametricModel(model);
 		rcr.performBulkRejection(lowDumpStart, lowFluxArrayStart);
 		mOffStart = model.m;
@@ -1093,6 +1129,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		deltaStart = std::abs((mOnStart*(averageTimeStart - xBarOnStart) + bOnStart) - (mOffStart*(averageTimeStart - xBarOffStart) + bOffStart));
 
 		model = LinearModel(highDumpEnd, highTimeEnd, highFluxArrayEnd);
+
 		rcr.setParametricModel(model);
 		rcr.performBulkRejection(highDumpEnd, highFluxArrayEnd);
 		mOnEnd = model.m;
@@ -1110,6 +1147,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		}
 
 		model = LinearModel(lowDumpEnd, lowTimeEnd, lowFluxArrayEnd);
+
 		rcr.setParametricModel(model);
 		rcr.performBulkRejection(lowDumpEnd, lowFluxArrayEnd);
 		mOffEnd = model.m;
