@@ -30,7 +30,13 @@ public:
 
 };
 
+/* 
+	Hello. I recommend rewriting PrePrcoessor. It would
+	be nice if there were (at least) 3 classes. These
+	are: Input, PreProcessor, and Output.
 
+	It would greatly increase followability of the code.
+*/
 std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters cParams)
 {
 	CCfits::FITS::setVerboseMode(true);
@@ -39,7 +45,7 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 	setFilename(cParams);
 	determineTelescope();
 	accessFITS();
-
+	std::cout << "telescope" << telescope << std::endl;
 	if (telescope == "NRAO20") 
 	{
 		if (cParams.subScale != 0.0) 
@@ -48,7 +54,14 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 			performCleaningMulti(spectra, cParams.subScale);
 			//appendColumnData();
 		}
-		averageSpectra();
+
+		// temp
+		const double freqStep = inputData[9][0];
+		spectra.setFlux(spectra20);
+		spectra.determineFrequency(freqStep, frequency, centerOffset);
+		// temp
+
+		averageSpectra(spectra.getFrequencies(), cParams.inclusionBand, cParams.exclusionBand);
 	}
 
 	if (telescope == "NRAO20" && hiRes) 
@@ -59,6 +72,18 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 	{
 		sortLowResData();
 	}
+	/*std::cout << "out size 2 " << outputData[0].size() << std::endl;
+	for (int i = 0; i < outputData.size(); i++)
+	{
+		for (int j = 0; j < outputData[i].size(); j++)
+		{
+			if (j%2)
+			{
+				outputData[i].erase(outputData[i].begin() + j);
+			}
+		}
+	}
+	std::cout << "out size 2 " << outputData[0].size() << std::endl;*/
 
 	return outputData;
 }
@@ -165,7 +190,7 @@ int PreProcessor::accessExtTableGBT(int file)
 	std::vector<std::string> obsDateVec, odvTemp, obsMode, columns;
 	std::vector<std::vector<double>> inputTemp;
 
-	//// Open the binary table
+	// Open the binary table
 	std::string hdu = "SINGLE DISH";
 	Debugger::print("Info", "Accessing extension table", file);
 
@@ -178,12 +203,13 @@ int PreProcessor::accessExtTableGBT(int file)
 
 	for (int i = 1; i < 8; i++)
 	{
-		if (i != 5 || i != 6)
+		if (i != 5 && i != 6)
 		{
-			table.column(columns[i]).read(inputTemp[i], 1, 999999);
+			table.column(columns[i]).read(inputTemp[i], 1, 99999);
 		}
 	}
-	table.column("DATA").read(gbdTemp, 1, 999999);
+
+	table.column("DATA").read(gbdTemp, 1, 9999999);
 	table.column("DATE-OBS").read(odvTemp, 1, inputTemp[1].size());
 
 	if (file == 1)
@@ -206,10 +232,11 @@ int PreProcessor::accessExtTableGBT(int file)
 		// Other
 		table.column("OBSMODE").read(obsMode, 1, 1);
 		table.column("OBSFREQ").read(freqGBT, 1, 1);
-		table.column("MJD").read(MJDateHold, 1, 1);
+		//table.column("MJD").read(MJDateHold, 1, 1);
 
 		// Define MJD and Frequency
-		MJDate = (int)MJDateHold[0];
+		//MJDate = (int)MJDateHold[0];
+		MJDate = 58708;
 		frequency = freqGBT[0];
 
 		// Format sweeps, pattern, and utc
@@ -406,14 +433,65 @@ void PreProcessor::setBG(std::vector<double> bg, int index)
 }
 void PreProcessor::removeBG()
 {
+	std::ofstream cc1;// , cc2, cc3, cc4, cc5, cc6, cc7, cc8;
+	cc1.open("12344.txt", std::ios_base::app);
+	//cc2.open("12346.txt", std::ios_base::app);
+	//cc3.open("68432.txt", std::ios_base::app);
+	//cc4.open("74126.txt", std::ios_base::app);
+	//cc5.open("74128.txt", std::ios_base::app);
+	//cc6.open("74130.txt", std::ios_base::app);
+	//cc7.open("112558.txt", std::ios_base::app);
+	//cc8.open("112560.txt", std::ios_base::app);
+
 	for (int i = 0; i < spectra20.size(); i++)
 	{
 		for (int j = 0; j < spectra20[i].size(); j++)
 		{
 			spectra20[i][j] = spectra20[i][j] - bgOutput[i][j];
 
+			if (i == 1)
+			{
+				cc1 << bgOutput[i][j] << "\n";
+			}
+			/*if (i == 12346)
+			{
+				cc2 << bgOutput[i][j] << "\n";
+			}
+			if (i == 68432)
+			{
+				cc3 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74126)
+			{
+				cc4 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74128)
+			{
+				cc5 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74130)
+			{
+				cc6 << bgOutput[i][j] << "\n";
+			}
+			if (i == 112558)
+			{
+				cc7 << bgOutput[i][j] << "\n";
+			}
+			if (i == 112560)
+			{
+				cc8 << bgOutput[i][j] << "\n";
+			}*/
 		}
 	}
+
+	cc1.close();
+	//cc2.close();
+	//cc3.close();
+	//cc4.close();
+	//cc5.close();
+	//cc6.close();
+	//cc7.close();
+	//cc8.close();
 }
 
 // Scatter
@@ -481,19 +559,95 @@ void PreProcessor::formatCoordinateSystem()
 void PreProcessor::formatSpectra20(std::vector<valarray<double>> vaSpec)
 {
 
-	intRanges[0] = 770;
-	intRanges[1] = 800;
+	//intRanges[0] = 770;
+	//intRanges[1] = 800;
 
 	std::vector<double> vSpecHold;
 	vSpecHold.resize(intRanges[1] - intRanges[0] + 1);
+
+	/*std::ofstream cc1, cc2, cc3, cc4, cc5, cc6, cc7, cc8;
+	cc1.open("12344_raw.txt", std::ios_base::app);
+	cc2.open("12346_raw.txt", std::ios_base::app);
+	cc3.open("68432_raw.txt", std::ios_base::app);
+	cc4.open("74126_raw.txt", std::ios_base::app);
+	cc5.open("74128_raw.txt", std::ios_base::app);
+	cc6.open("74130_raw.txt", std::ios_base::app);
+	cc7.open("112558_raw.txt", std::ios_base::app);
+	cc8.open("112560_raw.txt", std::ios_base::app);*/
 
 	for (int i = 0; i < vaSpec.size(); i++)
 	{   // Convert from valarray to vector -- revese to match frequencies
 		std::copy(std::begin(vaSpec[i]) + intRanges[0] - 1, std::begin(vaSpec[i]) + intRanges[1], vSpecHold.begin());
 		std::reverse(vSpecHold.begin(), vSpecHold.end());
 
+		//if (i == 12344)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc1 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 12346)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc2 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 68432)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc3 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 74126)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc4 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 74128)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc5 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 74130)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc6 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 112558)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc7 << vSpecHold[j] << "\n";
+		//	}
+		//}
+		//if (i == 112560)
+		//{
+		//	for (int j = 0; j < vSpecHold.size(); j++)
+		//	{
+		//		cc8 << vSpecHold[j] << "\n";
+		//	}
+		//}
+
 		spectra20.push_back(vSpecHold);
 	}
+
+	/*cc1.close();
+	cc2.close();
+	cc3.close();
+	cc4.close();
+	cc5.close();
+	cc6.close();
+	cc7.close();
+	cc8.close();*/
 
 	// Center offset from new zero-th spot
 	if (intRanges[1] > 512)
@@ -517,6 +671,7 @@ void PreProcessor::formatGBTInput(std::string mode, std::vector<string> dates, s
 	int modeEnd = 0;
 	double hdbl, mdbl, sdbl;
 	std::string hours, minutes, seconds;
+	utc.resize(dates.size());
 
 	for (int i = 0; i < dates.size(); i++)
 	{
@@ -597,19 +752,55 @@ void PreProcessor::formatObservationYear(std::string date)
 }
 
 // Misc
-int PreProcessor::averageSpectra()
+int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, std::vector<double> inclusionBand, std::vector<double> exclusionBand)
 {
+	int stopIndex;
 	double spectraSum, inRangeSum;
 	continuum.resize(spectra20.size());
+
+	bool outOfNotches;
+	double notchStart, notchStop;
+	double bandStart = inclusionBand[0] * pow(10, 6);
+	double bandStop  = inclusionBand[1] * pow(10, 6);
 
 	for (int i = 0; i < spectra20.size(); i++)
 	{
 		spectraSum = 0.0;
 		inRangeSum = 0.0;
+		
+		stopIndex = 0;
+		notchStart = exclusionBand[0] * pow(10, 6);
+		notchStop  = exclusionBand[1] * pow(10, 6);	
+		outOfNotches = false;
+
 		for (int j = 0; j < spectra20[i].size(); j++)
 		{
-			spectraSum += spectra20[i][j];
-			inRangeSum++;
+			// Check for next notch, if not last
+			if (frequencies[i][j] > notchStop && !outOfNotches)
+			{
+				for (int k = 0; k < exclusionBand.size(); k++)
+				{
+					if (frequencies[i][j] > exclusionBand[k] * pow(10, 6)) {
+						stopIndex = k + 1;
+					}
+				}
+				try {
+					notchStop = exclusionBand.at(stopIndex + 1) * pow(10, 6);
+					notchStart = exclusionBand.at(stopIndex) * pow(10, 6);
+				}
+				catch (const std::out_of_range& e) {
+					outOfNotches = true; //this is fine
+				}
+			}
+
+			// Contribute to sum if in selected band and not in a notch
+			if ((frequencies[i][j] > bandStart  && frequencies[i][j] < bandStop) &&
+				(frequencies[i][j] < notchStart || frequencies[i][j] > notchStop)) 
+			{
+				//if (i == 0) {std::cout << "freqs: " << frequencies[i][j] << std::endl;}
+				spectraSum += spectra20[i][j];
+				inRangeSum++;
+			}
 		}
 		continuum[i] = spectraSum / inRangeSum;
 	}
@@ -705,7 +896,18 @@ void PreProcessor::sortLowResData()
 		}
 	}
 
-	int place = 0;
+	/*std::ofstream cc;
+	cc.open("outputData.txt", std::ios_base::app);
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < continuum.size() / 2; j++)
+		{
+			cc << outputData[i][j] << "\n";
+		}
+	}
+	cc.close();*/
+
+	/*int place = 0;
 	int place245 = 0, place39 = 0, place357 = 0, place217 = 0;
 
 	for (int i = 0; i < outputData[0].size(); i++)
@@ -718,7 +920,7 @@ void PreProcessor::sortLowResData()
 				std::cout << "place245\t" << 2 * place << "\n";
 			}
 			place245++;
-		}
+		}*/
 		//if (outputData[9][i] == 39 - 1)
 		//{
 		//	if (place39 == 77 || place39 == 78)
@@ -746,8 +948,8 @@ void PreProcessor::sortLowResData()
 		//	}
 		//	place217++;
 		//}
-		place++;
-	}
+		//place++;
+	//}
 	
 	// Not sure why I ever did this?
 	// Convert hours to degrees below
@@ -969,6 +1171,14 @@ void Spectra::determineBaselines(SpectralParameters sp)
 	}
 
 	velocityToFrequency(sp);
+
+	//std::ofstream cc;
+	/*cc.open("baselines.txt", std::ios_base::app);
+	for (int z = 0; z < baselines[1000].size(); z++)
+	{
+		cc << baselines[1000][z] << "\n";
+	}
+	cc.close();*/
 }
 void Spectra::determineFrequency(double fStep, double obsFreq, double centerOffset)
 {
@@ -995,6 +1205,8 @@ void Spectra::determineFrequency(double fStep, double obsFreq, double centerOffs
 		freqDists[i] = fdTemp;
 		frequencies[i] = fTemp;
 	}
+
+	std::cout << "Frequency size: " << frequencies[0].size() << "\n";
 
 	// Needed if first or last point is excised later
 	freqStart = frequencies[0][0];
@@ -1114,6 +1326,16 @@ void Spectra::keepBackground(std::vector<std::vector<double>> &bgOutput, double 
 
 	freqStep = std::abs(freqStep);
 
+	std::ofstream cc1;//, cc2, cc3, cc4, cc5, cc6, cc7, cc8;
+	cc1.open("12344.txt", std::ios_base::app);
+	//cc2.open("12346.txt", std::ios_base::app);
+	//cc3.open("68432.txt", std::ios_base::app);
+	//cc4.open("74126.txt", std::ios_base::app);
+	//cc5.open("74128.txt", std::ios_base::app);
+	//cc6.open("74130.txt", std::ios_base::app);
+	//cc7.open("112558.txt", std::ios_base::app);
+	//cc8.open("112560.txt", std::ios_base::app);
+
 	if (excisedIndices.size() != 0)
 	{
 		for (auto i : excisedIndices)
@@ -1156,8 +1378,57 @@ void Spectra::keepBackground(std::vector<std::vector<double>> &bgOutput, double 
 			{				
 				flux[i][j] = flux[i][j] - bgOutput[i][j];
 			}
+			if (i == 1)
+			{
+				cc1 << flux[i][j] << "\t";
+				cc1 << bgOutput[i][j] << "\n";
+			}
+			if (i == 12346)
+			{
+				//cc2 << flux[i][j] << "\n";
+				//cc2 << bgOutput[i][j] << "\n";
+			}
+			if (i == 68432)
+			{
+				//cc3 << flux[i][j] << "\n";
+				//cc3 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74126)
+			{
+				//cc4 << flux[i][j] << "\n";
+				//cc4 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74128)
+			{
+			//	cc5 << flux[i][j] << "\n";
+				//cc5 << bgOutput[i][j] << "\n";
+			}
+			if (i == 74130)
+			{
+				//cc6 << flux[i][j] << "\n";
+				//cc6 << bgOutput[i][j] << "\n";
+			}
+			if (i == 112558)
+			{
+				//cc7 << flux[i][j] << "\n";
+				//cc7 << bgOutput[i][j] << "\n";
+			}
+			if (i == 112560)
+			{
+				//cc8 << flux[i][j] << "\n";
+				//cc8 << bgOutput[i][j] << "\n";
+			}
 		}
 	}
+
+	cc1.close();
+	//cc2.close();
+	//cc3.close();
+	//cc4.close();
+	//cc5.close();
+	//cc6.close();
+	//cc7.close();
+	//cc8.close();
 }
 void Spectra::insertPoints(std::vector<std::vector<double>> &bgOutput, double freqStep, int i, int j, std::string position)
 {
@@ -1219,6 +1490,10 @@ std::vector<std::vector<double>> Spectra::getFreqDists()
 std::vector<std::vector<double>> Spectra::getWeights()
 {
 	return this->weights;
+}
+std::vector<std::vector<double>> Spectra::getFrequencies()
+{
+	return this->frequencies;
 }
 
 // Setters

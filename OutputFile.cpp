@@ -21,10 +21,15 @@ void Output::printTelescopeInfo(SurveyParameters sParams)
 		telescopeName = "40 foot";
 		psfFWHM = 1.22*299792458.0*180.0 / (sParams.frequency* pow(10, 9) * 12.192 * M_PI);
 	}
-	else
+	else if (sParams.tele == 1)
 	{
 		telescopeName = "20 meter";
 		psfFWHM = 1.22*299792458.0*180.0 / (sParams.frequency* pow(10, 9) * 20.0 * M_PI);
+	}
+	else
+	{
+		telescopeName = "105 meter";
+		psfFWHM = 1.22*299792458.0*180.0 / (sParams.frequency* pow(10, 9) * 105.0 * M_PI);
 	}
 
 	outputFile << "TELESCOP," << telescopeName << ",Telescope name\n";
