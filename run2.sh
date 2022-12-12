@@ -26,6 +26,14 @@ Loc=0               # arg 15 =  Coordinates                 Location of sources
 Trm=0               # arg 16 =  Trim Size                   Trims the turning edges
 M10=0               # arg 17 =  M10+ Criteria               1 or 0 corresponds to true/on or false/off
 
+# PreProcessing parameters are currently hard-coded, but can easily be made to take inputs
+# ppSubScale = 0.0                                          Subtraction scale for spectra before integration
+# ppModifiedSubScale = 0.0                                  Subtraction scale for user-defined frequency ranges (dynamic subtraction scale)
+# ppModifiedSubBands = (start, stop)                        Bands for modified subtraction scale as defined above. Multiple start/stops can be appended to list, e.g., (start, stop, start, stop, ..)
+# ppInclusionBand = (start, stop)                           Bands for frequency integration. Only sum spectra inside of these bands.
+# ppExclusionBand = (start, stop)                           Bands to exclude frequency integration. Do not sum sprectra inside of these bands. Can overlap with inclusion band (essentially notch filter)
+# ppVelocity = 0.0                                          Do not subtract for regions of specified velocity (I think this is only half-implemented)
+
 # The location and filename for the log file
 Log="${DIR%/}/run_sh.log"
 
