@@ -12,57 +12,87 @@ std::string skynet_filename;
 
 double setRFIMaxVal(SurveyParameters sParams, int MJD)
 {
-	//WE NEED EXCEPTION HANDLING FOR FREQUENCIES/CONFIGURATIONS THAT DON'T ALIGN WITH THESE FREQUENCIES
-	//RFI Max can't be used for multiple surveys with different dates yet.
-	//RFIMax() needs exception handling for different configurations.
+	// WE NEED EXCEPTION HANDLING FOR FREQUENCIES/CONFIGURATIONS THAT DON'T ALIGN WITH THESE FREQUENCIES
+	// RFI Max can't be used for multiple surveys with different dates yet.
+	// RFIMax() needs exception handling for different configurations.
 
 	double maxRFI;
 	if (sParams.tele == FOURTY_FOOT)
 	{
 		if (sParams.frequency == 1.405)
 		{
-			if (sParams.channel == COMPOSITE) { maxRFI = 0.7; }
-			else { maxRFI = 0.7; }
+			if (sParams.channel == COMPOSITE)
+			{
+				maxRFI = 0.7;
+			}
+			else
+			{
+				maxRFI = 0.7;
+			}
 		}
 	}
 	else
 	{
 		if (sParams.frequency == 9.000)
 		{
-			if (sParams.channel == COMPOSITE) { maxRFI = 0.8; }
-			else { maxRFI = 0.8; }
+			if (sParams.channel == COMPOSITE)
+			{
+				maxRFI = 0.8;
+			}
+			else
+			{
+				maxRFI = 0.8;
+			}
 		}
 		else if (sParams.frequency == 1.395 && MJD < 56870)
 		{
-			if (sParams.channel == COMPOSITE) { maxRFI = 0.8; }
-			else { maxRFI = 0.7; }
+			if (sParams.channel == COMPOSITE)
+			{
+				maxRFI = 0.8;
+			}
+			else
+			{
+				maxRFI = 0.7;
+			}
 		}
 		else if (sParams.frequency == 1.550)
 		{
-			if (sParams.channel == COMPOSITE) { maxRFI = 0.9; }
-			else { maxRFI = 0.8; }
+			if (sParams.channel == COMPOSITE)
+			{
+				maxRFI = 0.9;
+			}
+			else
+			{
+				maxRFI = 0.8;
+			}
 		}
 		else if ((sParams.frequency == 1.680 || sParams.frequency == 1.700) && MJD < 56870)
 		{
-			if (sParams.channel == COMPOSITE) { maxRFI = 1.1; }
-			else { maxRFI = 0.9; }
+			if (sParams.channel == COMPOSITE)
+			{
+				maxRFI = 1.1;
+			}
+			else
+			{
+				maxRFI = 0.9;
+			}
 		}
 	}
 
-	//if (sParams.simulation == true)
+	// if (sParams.simulation == true)
 	//{
 	//	maxRFI = 0.95;
-	//}
-	//else
+	// }
+	// else
 	//{
 	//	maxRFI = 0.8;
-	//}
+	// }
 	maxRFI = 0.8;
 
 	return maxRFI;
 }
 
-void setInputMapParams(char* argv[], MapParameters &mParams)
+void setInputMapParams(char *argv[], MapParameters &mParams)
 {
 	// TEMPORARY
 	double photometryOn = atof(argv[11]);
@@ -74,28 +104,34 @@ void setInputMapParams(char* argv[], MapParameters &mParams)
 	mParams.pixelSize = 0.05;
 	mParams.rfiScale = atof(argv[6]);
 
-	if (m10PlusCriteria == 1) {
+	if (m10PlusCriteria == 1)
+	{
 		mParams.m10PlusProcessing = true;
 	}
-	else {
+	else
+	{
 		mParams.m10PlusProcessing = false;
 	}
 
-	if (largeScaleStruct == 1) {
+	if (largeScaleStruct == 1)
+	{
 		mParams.LSSMapping = true;
 	}
-	else {
+	else
+	{
 		mParams.LSSMapping = false;
 	}
 
-	if (photometryOn) {
+	if (photometryOn)
+	{
 		mParams.correlatedWeightMap = true;
 	}
-	else {
+	else
+	{
 		mParams.correlatedWeightMap = false;
 	}
 }
-void setInputSurveyParams(char* argv[], SurveyParameters &sParams)
+void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 {
 	// TEMPORARY
 	std::string inputChannel = argv[3];
@@ -150,7 +186,7 @@ void setInputSurveyParams(char* argv[], SurveyParameters &sParams)
 		sParams.pCoordinate = EQUATORIAL;
 	}
 }
-void setInputPhotoParams(char* argv[], PhotoParams &pParams)
+void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
 	double perform = atof(argv[11]);
 	pParams.innerRadius = atof(argv[12]);
@@ -178,22 +214,21 @@ void setInputPhotoParams(char* argv[], PhotoParams &pParams)
 		pParams.centroidType = COORDINATES;
 	}
 
-	//pParams.numberOfSources = atof(argv[12]);
-	//pParams.coordinatesDeg = { 0, 0 };
-	//pParams.coordinatesPixels = { 103, 21, 231, 61, 153, 161, 134, 182, 385, 196, 331, 214, 245, 258, 201, 267, 285, 360, 299, 409 };
-
+	// pParams.numberOfSources = atof(argv[12]);
+	// pParams.coordinatesDeg = { 0, 0 };
+	// pParams.coordinatesPixels = { 103, 21, 231, 61, 153, 161, 134, 182, 385, 196, 331, 214, 245, 258, 201, 267, 285, 360, 299, 409 };
 }
-void setInputSpectralParams(char* argv[], SpectralParameters &cParams)
+void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 {
 	// IN-PROGRESS
 	cParams.subScale = 0.0;
 	cParams.modSubScale = 0.0;
-	cParams.modSubZones = {};//{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
+	cParams.modSubZones = {}; //{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
 	cParams.receiver = YY;
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
-	cParams.inclusionBand = {1408., 1435.}; // MHz
+	cParams.inclusionBand = {1408., 1435.};				  // MHz
 	cParams.exclusionBand = {1412., 1415., 1420., 1424.}; // MHz
 
 	// FILENAME(S)
@@ -203,7 +238,7 @@ void setInputSpectralParams(char* argv[], SpectralParameters &cParams)
 	cParams.files.push_back("Skynet_58397_fig16_2_36380_37171.02.cyb.fits");
 	cParams.files.push_back("Skynet_58397_fig16_2_36380_37171.03.cyb.fits");*/
 }
-void setInputProcessingParams(char* argv[], ProcessorParameters &procParams)
+void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 {
 	double photometryOn = atof(argv[11]);
 	double rawMap = atof(argv[9]);
@@ -232,10 +267,9 @@ void setInputProcessingParams(char* argv[], ProcessorParameters &procParams)
 
 	// HARD-CODED FOR NOW
 	procParams.lssProc = false;
-
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	/*
 	The inputs are as follows:
@@ -247,7 +281,7 @@ int main(int argc, char* argv[])
 	-> Processing channel
 	arg 4 = Calibration Method
 	-> Which calibration data to be used
-	arg 5 = Background Scale
+	arg 5 = Background Scalecoo
 	-> In beamwidths
 	arg 6 = RFI Scale
 	-> In beamwidths
@@ -275,7 +309,7 @@ int main(int argc, char* argv[])
 	-> 1 or 0 corresponds to true/on or false/off
 	*/
 
-	//WELCOME TO RDP_2.0! INSTRUCTIONS IN COMMENTS BELOW
+	// WELCOME TO RDP_2.0! INSTRUCTIONS IN COMMENTS BELOW
 	std::vector<Survey> surveyHold;
 	std::vector<Survey> surveys;
 	std::ofstream outputFile;
@@ -304,11 +338,11 @@ int main(int argc, char* argv[])
 	setInputProcessingParams(argv, procParams);
 
 	// SURVEY
-	//Survey survey(sParams, cParams, skynet_filename);
+	// Survey survey(sParams, cParams, skynet_filename);
 	Survey survey(sParams, cParams, skynet_filename);
 	surveyHold.push_back(survey);
-	//Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
-	//surveyHold.push_back(survey2);
+	// Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
+	// surveyHold.push_back(survey2);
 
 	// OUTPUT
 	Output output;
@@ -356,20 +390,21 @@ int main(int argc, char* argv[])
 		Analysis analysis(composite, mParams);
 		analysis.photometryMulti(procMap, pParams);
 
-		procMap.printSSSCorrelationMap();
+		// procMap.printSSSCorrelationMap();
 	}
 	if (!(pParams.perform) || procParams.raw)
 	{
 		output.printPhotometryHolder();
 	}
-	if (!(procParams.raw))
-	{
-		procMap.printSSSScaleMap();
-		procMap.printSSSWeightMap();
-	}
+	// if (!(procParams.raw))
+	// {
+	procMap.printSSSScaleMap();
+	procMap.printSSSWeightMap();
+	procMap.printSSSCorrelationMap();
+	// }
 
 	// EXIT
 	std::cout << "The code has exited successfully with return code 0" << std::endl;
-	
+
 	return 0;
 }

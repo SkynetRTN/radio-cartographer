@@ -962,31 +962,31 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 	std::ofstream fluxR1;
 	std::ofstream dataDumps1;
 
-	times1.open("times.txt", std::ios_base::app);
-	ras1.open("ras.txt", std::ios_base::app);
-	decs1.open("decs.txt", std::ios_base::app);
-	fluxL1.open("fluxR.txt", std::ios_base::app);
-	fluxR1.open("fluxL.txt", std::ios_base::app);
-	dataDumps1.open("dataDumps.txt", std::ios_base::app);
+	// times1.open("times.txt", std::ios_base::app);
+	// ras1.open("ras.txt", std::ios_base::app);
+	// decs1.open("decs.txt", std::ios_base::app);
+	// fluxL1.open("fluxR.txt", std::ios_base::app);
+	// fluxR1.open("fluxL.txt", std::ios_base::app);
+	// dataDumps1.open("dataDumps.txt", std::ios_base::app);
 	
-	for (int i = 0; i < times.size(); i++)
-	{
-		for (int j = 0; j < times[i].size(); j++)
-		{
-			times1 << times[i][j] << std::endl;
-			ras1 << ras[i][j] << std::endl;
-			decs1 << decs[i][j] << std::endl;
-			fluxL1 << fluxL[i][j] << std::endl;
-			fluxR1 << fluxR[i][j] << std::endl;
-			dataDumps1 << dataDumps[i][j] << std::endl;
-		}
-	}
-	times1.close();
-	ras1.close();
-	decs1.close();
-	fluxL1.close();
-    fluxR1.close();
-	dataDumps1.close();
+	// for (int i = 0; i < times.size(); i++)
+	// {
+	// 	for (int j = 0; j < times[i].size(); j++)
+	// 	{
+	// 		times1 << times[i][j] << std::endl;
+	// 		ras1 << ras[i][j] << std::endl;
+	// 		decs1 << decs[i][j] << std::endl;
+	// 		fluxL1 << fluxL[i][j] << std::endl;
+	// 		fluxR1 << fluxR[i][j] << std::endl;
+	// 		dataDumps1 << dataDumps[i][j] << std::endl;
+	// 	}
+	// }
+	// times1.close();
+	// ras1.close();
+	// decs1.close();
+	// fluxL1.close();
+    // fluxR1.close();
+	// dataDumps1.close();
 }
 
 //calibration
