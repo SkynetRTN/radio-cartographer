@@ -5,7 +5,7 @@
 #include "Analysis.h"
 #include <stdexcept>
 #include <iostream>
-#include "Debugger.h"
+
 double rfiMax;
 bool LSSProcessing;
 std::string skynet_filename;
@@ -228,9 +228,22 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
-	cParams.inclusionBand = {atof(argv[7]), atof(argv[8])}; // MHz
-	cParams.exclusionBand = {1412., 1415., 1420., 1424.};	// MHz
-	Debugger::print("Info", "skip Freqs", atof(argv[9]));
+	double minFreq = atof(argv[7]);
+	double maxFreq = atof(argv[8]);
+	cParams.inclusionBand = {minFreq, maxFreq}; // MHz
+	double skipMinFreq = atof(argv[9]);
+	double skipMaxFreq = atof(argv[10]);
+	if (skipMinFreq > 0 && skipMaxFreq > 0 &&
+		skipMinFreq < skipMaxFreq &&
+		minFreq <= skipMinFreq && maxFreq >= skipMaxFreq)
+	{
+		cParams.exclusionBand = {skipMinFreq, skipMaxFreq}; // MHz
+	}
+	else
+	{
+		cParams.exclusionBand = {}
+		// cParams.exclusionBand = {1412., 1415., 1420., 1424.};	// MHz
+	}
 
 	// FILENAME(S)
 	cParams.files.push_back(skynet_filename);
