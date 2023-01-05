@@ -95,14 +95,14 @@ double setRFIMaxVal(SurveyParameters sParams, int MJD)
 void setInputMapParams(char *argv[], MapParameters &mParams)
 {
 	// TEMPORARY
-	double photometryOn = atof(argv[11]);
-	double m10PlusCriteria = atof(argv[17]);
-	double largeScaleStruct = atof(argv[10]);
+	double photometryOn = atof(argv[15]);
+	double m10PlusCriteria = atof(argv[13]);
+	double largeScaleStruct = atof(argv[21]);
 
 	// PERMANENT
 	mParams.SSSMapping = true;
 	mParams.pixelSize = 0.05;
-	mParams.rfiScale = atof(argv[6]);
+	mParams.rfiScale = atof(argv[12]);
 
 	if (m10PlusCriteria == 1)
 	{
@@ -134,14 +134,14 @@ void setInputMapParams(char *argv[], MapParameters &mParams)
 void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 {
 	// TEMPORARY
-	std::string inputChannel = argv[3];
-	std::string inputCalibrationMethod = argv[4];
-	std::string inputProcessingCoordinates = argv[2];
+	std::string inputChannel = argv[2];
+	std::string inputCalibrationMethod = argv[3];
+	std::string inputProcessingCoordinates = argv[4];
 
 	// DEBUGGING
 	sParams.forcedTS = 0.0;
 	sParams.tele = TWENTY_METER;
-	sParams.trimSize = atof(argv[16]);
+	sParams.trimSize = atof(argv[20]);
 
 	// MISC
 	sParams.tracking = false;
@@ -188,10 +188,10 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 }
 void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
-	double perform = atof(argv[11]);
-	pParams.innerRadius = atof(argv[12]);
-	pParams.outerRadius = atof(argv[13]);
-	std::string centroidType = argv[14];
+	double perform = atof(argv[15]);
+	pParams.innerRadius = atof(argv[16]);
+	pParams.outerRadius = atof(argv[17]);
+	std::string centroidType = argv[18];
 
 	if (perform)
 	{
@@ -240,13 +240,13 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 }
 void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 {
-	double photometryOn = atof(argv[11]);
-	double rawMap = atof(argv[9]);
+	double photometryOn = atof(argv[15]);
+	double rawMap = atof(argv[6]);
 
-	procParams.bgScaleBW = atof(argv[5]);
-	procParams.rfiScaleBW = atof(argv[6]);
-	procParams.timeShift = atof(argv[8]);
-	procParams.wScaleBW = atof(argv[7]);
+	procParams.bgScaleBW = atof(argv[11]);
+	procParams.rfiScaleBW = atof(argv[12]);
+	procParams.timeShift = atof(argv[5]);
+	procParams.wScaleBW = atof(argv[14]);
 
 	if (photometryOn)
 	{
