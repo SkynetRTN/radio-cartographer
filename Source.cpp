@@ -228,8 +228,9 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
-	cParams.inclusionBand = {1408., 1435.};				  // MHz
-	cParams.exclusionBand = {1412., 1415., 1420., 1424.}; // MHz
+	cParams.inclusionBand = {atof(argv[7]), atof(argv[8])}; // MHz
+	cParams.exclusionBand = {1412., 1415., 1420., 1424.};	// MHz
+	Debugger::print("Info", "skip Freqs", atof(argv[9]));
 
 	// FILENAME(S)
 	cParams.files.push_back(skynet_filename);
