@@ -145,11 +145,11 @@ Map Cartographer::generateProcMapsMulti()
 
 			if (i % 2 == 0)
 			{
-				procMap.setProcPath(a, b, i);
+				procMap.setProcPath(a, b, 1);
 			}
 			else
 			{
-				procMap.setProcPath(a, b, j);
+				procMap.setProcPath(a, b, -1);
 			}
 		}
 	}
