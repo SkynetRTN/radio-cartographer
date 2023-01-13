@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -763,6 +764,11 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 	double bandStart = inclusionBand[0] * pow(10, 6);
 	double bandStop  = inclusionBand[1] * pow(10, 6);
 
+	if (exclusionBand.size() == 0) {
+        exclusionBand.push_back(999999.0);
+		exclusionBand.push_back(0.0);
+	}
+
 	for (int i = 0; i < spectra20.size(); i++)
 	{
 		spectraSum = 0.0;
@@ -789,7 +795,7 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 					notchStart = exclusionBand.at(stopIndex) * pow(10, 6);
 				}
 				catch (const std::out_of_range& e) {
-					outOfNotches = true; //this is fine
+					outOfNotches = true;
 				}
 			}
 
@@ -797,7 +803,6 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 			if ((frequencies[i][j] > bandStart  && frequencies[i][j] < bandStop) &&
 				(frequencies[i][j] < notchStart || frequencies[i][j] > notchStop)) 
 			{
-				//if (i == 0) {std::cout << "freqs: " << frequencies[i][j] << std::endl;}
 				spectraSum += spectra20[i][j];
 				inRangeSum++;
 			}
