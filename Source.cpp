@@ -260,6 +260,7 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 	procParams.bgScaleBW = atof(argv[11]);
 	procParams.rfiScaleBW = atof(argv[12]);
 	procParams.timeShift = atof(argv[5]);
+	procParams.timeShiftValue = atof(argv[22]);
 	procParams.wScaleBW = atof(argv[14]);
 
 	if (photometryOn)

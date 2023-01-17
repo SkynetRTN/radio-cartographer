@@ -83,6 +83,7 @@ Processor::Processor(ProcessorParameters & procParams)
 	rfiScaleBW = procParams.rfiScaleBW;
 	wScaleBW = procParams.wScaleBW;
 	timeShift = procParams.timeShift;
+	timeShiftValue = procParams.timeShiftValue;
 	wCorrMap = procParams.wCorrMap;
 	lssProc = procParams.lssProc;
 
@@ -137,83 +138,20 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 }
 void Processor::performTimeShifting(Survey &survey)
 {
-	double t_int = 0;
-
 	characterizeSurvey(survey);
 
+	double t_int = 0;
 	if (timeShift == true)
 	{
-		/*
-		RCR rcr = RCR(LS_MODE_DL);
-		int centerIndex;
-		bool stop = false;
-		double negation = -1.0;
-		double shift, median = 0, sampling;
-		std::vector<int> checks;
-		std::vector<double> angleHold, angDists, speeds, tempArray, tempWeights, angDistHold, timeHold;
-		std::vector<double> centers, speedTemp;
-		std::vector<std::vector<double> > maxIfftInfo;
-		if (mapType == DAISY)
-		{
-			for (int i = 0; i < scans.size(); i++)
-			{
-				centerIndex = scans[i].getCenter();
-				speeds.push_back((scans[i].getAngDist(centerIndex + 1) - scans[i].getAngDist(centerIndex - 1)) / (scans[i].getTime(centerIndex + 1) - scans[i].getTime(centerIndex - 1)));
-				angDists.push_back((scans[i].getAngDist(centerIndex + 1) - scans[i].getAngDist(centerIndex - 1)) / 2.0);
-			}
-			rcr.performBulkRejection(angDists);
-			sampling = rcr.result.mu;
+		if (timeShiftValue == 0.0) {
+			ProcessorTS procTS = ProcessorTS(scans, mapType, psfFWHM, medianDiffAlongSweeps, scansInRa);
+			t_int = procTS.find_tInt();
 		}
-		else
-		{
-			for (int i = 0; i < scans.size(); i++)
-			{
-				if (scansInRa)
-				{
-					angDistHold = scans[i].getRa();// getAngDist();// STOP CHECK
-				}
-				else
-				{
-					angDistHold = scans[i].getDec();
-				}
-
-				timeHold = scans[i].getTime();
-				for (int j = 1; j < scans[i].getSize(); j++)
-				{
-					speedTemp.push_back((angDistHold[j] - angDistHold[j - 1]) / (timeHold[j] - timeHold[j - 1]));
-				}
-				rcr.performBulkRejection(speedTemp);
-				speeds.push_back(rcr.result.mu);
-				speedTemp.clear();
-			}
-			sampling = medianDiffAlongSweeps;
+		else {
+			t_int = timeShiftValue // user has specified their own time shift value
 		}
-
-		maxIfftInfo = getScanToScanShifts(sampling);
-		shift = calculateShift(maxIfftInfo) / 2.0;
-
-		if (mapType == DAISY)
-		{
-			rcr.performRejection(speeds);
-		}
-		else
-		{
-			rcr.performBulkRejection(speeds);
-		}
-
-
-		t_int = shift / rcr.result.mu;
-
-
-		std::ofstream outputFileAux;
-		outputFileAux.open("TS.txt", std::ios_base::app);
-		outputFileAux << t_int << "\n";
-		outputFileAux.close();
-		*/
-		ProcessorTS procTS = ProcessorTS(scans, mapType, psfFWHM, medianDiffAlongSweeps, scansInRa);
-		t_int = procTS.find_tInt();
+		survey.setTimeShift(t_int);
 	}
-
 
 	Output output;
 	output.printTimeShiftInfo(timeShift, t_int);
