@@ -149,7 +149,7 @@ Map Cartographer::generateProcMapsMulti()
 			}
 			else
 			{
-				procMap.setProcPath(a, b, -1);
+				procMap.setProcPath(a, b, 0.5);
 			}
 		}
 	}
