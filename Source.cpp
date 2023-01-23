@@ -241,8 +241,8 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 	}
 	else
 	{
-		// cParams.exclusionBand = {};
-		cParams.exclusionBand = {1412., 1415., 1420., 1424.}; // MHz
+		cParams.exclusionBand = {};
+		// cParams.exclusionBand = {1412., 1415., 1420., 1424.}; // MHz
 	}
 
 	// FILENAME(S)
