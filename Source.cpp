@@ -95,14 +95,14 @@ double setRFIMaxVal(SurveyParameters sParams, int MJD)
 void setInputMapParams(char *argv[], MapParameters &mParams)
 {
 	// TEMPORARY
-	double photometryOn = atof(argv[15]);
-	double m10PlusCriteria = atof(argv[13]);
-	double largeScaleStruct = atof(argv[21]);
+	double photometryOn = atof(argv[13]);
+	double m10PlusCriteria = atof(argv[11]);
+	double largeScaleStruct = atof(argv[19]);
 
 	// PERMANENT
 	mParams.SSSMapping = true;
 	mParams.pixelSize = 0.05;
-	mParams.rfiScale = atof(argv[12]);
+	mParams.rfiScale = atof(argv[10]);
 
 	if (m10PlusCriteria == 1)
 	{
@@ -141,7 +141,7 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 	// DEBUGGING
 	sParams.forcedTS = 0.0;
 	sParams.tele = TWENTY_METER;
-	sParams.trimSize = atof(argv[20]);
+	sParams.trimSize = atof(argv[18]);
 
 	// MISC
 	sParams.tracking = false;
@@ -189,9 +189,9 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
 	double perform = atof(argv[15]);
-	pParams.innerRadius = atof(argv[16]);
-	pParams.outerRadius = atof(argv[17]);
-	std::string centroidType = argv[18];
+	pParams.innerRadius = atof(argv[14]);
+	pParams.outerRadius = atof(argv[15]);
+	std::string centroidType = argv[16];
 
 	if (perform)
 	{
@@ -218,7 +218,7 @@ void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 	// pParams.coordinatesDeg = { 0, 0 };
 	// pParams.coordinatesPixels = { 103, 21, 231, 61, 153, 161, 134, 182, 385, 196, 331, 214, 245, 258, 201, 267, 285, 360, 299, 409 };
 }
-void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
+void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 {
 	// IN-PROGRESS
 	cParams.subScale = 0.0;
@@ -231,18 +231,10 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 	double minFreq = atof(argv[7]);
 	double maxFreq = atof(argv[8]);
 	cParams.inclusionBand = {minFreq, maxFreq}; // MHz
-	double skipMinFreq = atof(argv[9]);
-	double skipMaxFreq = atof(argv[10]);
-	if (skipMinFreq > 0 && skipMaxFreq > 0 &&
-		skipMinFreq < skipMaxFreq &&
-		minFreq <= skipMinFreq && maxFreq >= skipMaxFreq)
+	cParams.exclusionBand = {};
+	for (int i = 20; i < argc; i++)
 	{
-		cParams.exclusionBand = {skipMinFreq, skipMaxFreq}; // MHz
-	}
-	else
-	{
-		cParams.exclusionBand = {};
-		// cParams.exclusionBand = {1412., 1415., 1420., 1424.}; // MHz
+		cParams.exclusionBand.push_back(argv[i]);
 	}
 
 	// FILENAME(S)
@@ -254,14 +246,14 @@ void setInputSpectralParams(char *argv[], SpectralParameters &cParams)
 }
 void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 {
-	double photometryOn = atof(argv[15]);
+	double photometryOn = atof(argv[13]);
 	double rawMap = atof(argv[6]);
 
-	procParams.bgScaleBW = atof(argv[11]);
-	procParams.rfiScaleBW = atof(argv[12]);
+	procParams.bgScaleBW = atof(argv[9]);
+	procParams.rfiScaleBW = atof(argv[10]);
 	procParams.timeShift = atof(argv[5]);
 	procParams.timeShiftValue = atof(argv[22]);
-	procParams.wScaleBW = atof(argv[14]);
+	procParams.wScaleBW = atof(argv[12]);
 
 	if (photometryOn)
 	{
@@ -342,7 +334,7 @@ int main(int argc, char *argv[])
 
 	// SPECTRAL
 	SpectralParameters cParams;
-	setInputSpectralParams(argv, cParams);
+	setInputSpectralParams(argc, argv, cParams);
 
 	// PHOTOMETRY
 	PhotoParams pParams;
