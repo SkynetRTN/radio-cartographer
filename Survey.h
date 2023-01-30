@@ -51,6 +51,7 @@ public:
 	void setScansInRa(bool);
 	void setStandardThetaGap();
 	void setSurveyNumber(int);
+	void setTimeShift(double);
 
 	//getters
 	bool getScanDirection();

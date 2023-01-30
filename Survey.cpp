@@ -2380,9 +2380,15 @@ void Survey::setClassificationsSSS(std::vector<std::vector<std::vector<int> > > 
 {
 	this->classificationsSSS = classVec;
 }
+
 void Survey::setClassificationsLSS(std::vector<std::vector<std::vector<int> > > & classVec)
 {
 	this->classificationsLSS = classVec;
+}
+
+void Survey::setTimeShift(double ts)
+{
+	this->t_int = ts;
 }
 
 //getters

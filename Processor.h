@@ -54,19 +54,20 @@ private:
 	bool wCorrMap;
 	bool lssProc;
 
+	double timeShiftValue;
 	double globalMaxDec;
 	double globalMinDec;
 	double globalMaxRa;
 	double globalMinRa;
 	double globalCenterDec;
 	double globalCenterRa;
-	double globalCenterLatProc;   //DYLAN
-	double globalCenterLongProc; //DYLAN
-	double medianLatiMapped;    //DYLAN
-	double medianLongMapped;   //DYLAN
-	bool trackingForEdges;    //DYLAN
+	double globalCenterLatProc;
+	double globalCenterLongProc;
+	double medianLatiMapped;
+	double medianLongMapped;
+	bool trackingForEdges;
 
-	std::string mCoordinate; //DYLAN
+	std::string mCoordinate;
 	std::vector<double> centroidLocations;
 	std::vector<double> standardGaps;
 	std::vector<std::vector<double> > scatter2dLSS;
