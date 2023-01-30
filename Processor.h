@@ -50,7 +50,7 @@ private:
 	double bgScaleBW;
 	double rfiScaleBW;
 	double wScaleBW;
-	bool timeShift;
+	string timeShift;
 	bool wCorrMap;
 	bool lssProc;
 

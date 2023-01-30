@@ -95,14 +95,14 @@ double setRFIMaxVal(SurveyParameters sParams, int MJD)
 void setInputMapParams(char *argv[], MapParameters &mParams)
 {
 	// TEMPORARY
-	double photometryOn = atof(argv[13]);
-	double m10PlusCriteria = atof(argv[11]);
-	double largeScaleStruct = atof(argv[19]);
+	double photometryOn = atof(argv[14]);
+	double m10PlusCriteria = atof(argv[12]);
+	double largeScaleStruct = atof(argv[20]);
 
 	// PERMANENT
 	mParams.SSSMapping = true;
 	mParams.pixelSize = 0.05;
-	mParams.rfiScale = atof(argv[10]);
+	mParams.rfiScale = atof(argv[11]);
 
 	if (m10PlusCriteria == 1)
 	{
@@ -141,7 +141,7 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 	// DEBUGGING
 	sParams.forcedTS = 0.0;
 	sParams.tele = TWENTY_METER;
-	sParams.trimSize = atof(argv[18]);
+	sParams.trimSize = atof(argv[19]);
 
 	// MISC
 	sParams.tracking = false;
@@ -188,10 +188,10 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 }
 void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
-	double perform = atof(argv[15]);
-	pParams.innerRadius = atof(argv[14]);
-	pParams.outerRadius = atof(argv[15]);
-	std::string centroidType = argv[16];
+	double perform = atof(argv[16]);
+	pParams.innerRadius = atof(argv[15]);
+	pParams.outerRadius = atof(argv[16]);
+	std::string centroidType = argv[17];
 
 	if (perform)
 	{
@@ -228,11 +228,11 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
-	double minFreq = atof(argv[7]);
-	double maxFreq = atof(argv[8]);
+	double minFreq = atof(argv[8]);
+	double maxFreq = atof(argv[9]);
 	cParams.inclusionBand = {minFreq, maxFreq}; // MHz
 	cParams.exclusionBand = {};
-	for (int i = 20; i < argc; i++)
+	for (int i = 21; i < argc; i++)
 	{
 		cParams.exclusionBand.push_back(argv[i]);
 	}
@@ -246,14 +246,14 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 }
 void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 {
-	double photometryOn = atof(argv[13]);
+	double photometryOn = atof(argv[14]);
 	double rawMap = atof(argv[6]);
 
-	procParams.bgScaleBW = atof(argv[9]);
-	procParams.rfiScaleBW = atof(argv[10]);
-	procParams.timeShift = atof(argv[5]);
-	procParams.timeShiftValue = atof(argv[22]);
-	procParams.wScaleBW = atof(argv[12]);
+	procParams.bgScaleBW = atof(argv[10]);
+	procParams.rfiScaleBW = atof(argv[11]);
+	procParams.timeShift = argv[5];
+	procParams.timeShiftValue = atof(argv[6]);
+	procParams.wScaleBW = atof(argv[13]);
 
 	if (photometryOn)
 	{
