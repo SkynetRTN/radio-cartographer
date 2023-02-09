@@ -234,7 +234,7 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.exclusionBand = {};
 	for (int i = 21; i < argc; i++)
 	{
-		cParams.exclusionBand.push_back(argv[i]);
+		cParams.exclusionBand.push_back(stod(argv[i]));
 	}
 
 	// FILENAME(S)

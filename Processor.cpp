@@ -143,13 +143,13 @@ void Processor::performTimeShifting(Survey &survey)
 		}
 		else
 		{
-			t_int = timeShiftValue // user has specified their own time shift value
+			t_int = timeShiftValue; // user has specified their own time shift value
 		}
 		survey.setTimeShift(t_int);
 	}
 
 	Output output;
-	output.printTimeShiftInfo(timeShift, t_int);
+	output.printTimeShiftInfo(atoi(timeShift), t_int);
 
 	std::vector<double> holdDec, holdRa;
 	for (int i = 0; i < scans.size(); i++)
