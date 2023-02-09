@@ -134,8 +134,10 @@ void Processor::performTimeShifting(Survey &survey)
 	characterizeSurvey(survey);
 
 	double t_int = 0;
+	int isTs = 0;
 	if (timeShift == "auto" || timeShift == "custom")
 	{
+		isTs = 1;
 		if (timeShift == "auto" || !timeShiftValue)
 		{
 			ProcessorTS procTS = ProcessorTS(scans, mapType, psfFWHM, medianDiffAlongSweeps, scansInRa);
@@ -149,7 +151,7 @@ void Processor::performTimeShifting(Survey &survey)
 	}
 
 	Output output;
-	output.printTimeShiftInfo(atoi(timeShift), t_int);
+	output.printTimeShiftInfo(isTs, t_int);
 
 	std::vector<double> holdDec, holdRa;
 	for (int i = 0; i < scans.size(); i++)

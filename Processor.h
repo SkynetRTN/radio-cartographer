@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include <future>
 #include "Survey.h"
 #include "Composite.h"
