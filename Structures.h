@@ -120,7 +120,7 @@ struct ProcessorParameters
 	double rfiScaleBW;
 	double bgScaleBW;
 	double wScaleBW;
-	string timeShift;
+	std::string timeShift;
 	double timeShiftValue;
 	bool wCorrMap;
 	bool lssProc;
