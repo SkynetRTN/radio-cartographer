@@ -20,7 +20,7 @@ fail, it is recommended to go to the following links for additional details and 
 ## Windows
 
 ### 1. Install CMake
-CMake can be freely downloaded from http://www.cmake.org. It is recommended that you choose the 
+CMake can be freely downloaded from http://www.cmake.org. It is recommended that you choose the
 "Add CMake to the system PATH for current user" option during the installation setup process for 
 convenience when running CMake later on.
 
