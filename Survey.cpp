@@ -273,7 +273,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 	std::string mapPattern = sdfits.getMapPattern();
 	std::string telescopeName = sdfits.getTelescope();
 
-	if (telescopeName == "NRAO20")
+	if (telescopeName == "GreenBank-20")
 	{
 		// Used for RFIMax
 		params.tele = TWENTY_METER;
@@ -435,11 +435,15 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	janskyCalibration(1.0, LEFT);
 	janskyCalibration(1.0, RIGHT);
 	janskyCalibration(1.0, COMPOSITE);
-	std::cout << times.size() << std::endl;
+
 	for (int i = offset; i < times.size() - offset; i++)
 	{
-		std::cout << decs[i].size() << std::endl;
-		this->scans.push_back(Scan(times[i], decs[i], ras[i], elevations[i], dataDumps[i], fluxL[i], fluxR[i], fluxComp[i]));
+		if (times[i].size() != 0) {
+			this->scans.push_back(Scan(times[i], decs[i], ras[i], elevations[i], dataDumps[i], fluxL[i], fluxR[i], fluxComp[i]));
+		}
+		else {
+			std::cout << "[ WARN ] No valid data found for scan " + i << std::endl;
+		}
 	}
 
 	Debugger::print("Info", "scans loaded");
