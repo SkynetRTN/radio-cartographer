@@ -2087,6 +2087,10 @@ void Survey::convertToGalacticInitial()
 			b = Tools::convertToB(ras[i][j], decs[i][j]);
 			l = Tools::convertToL(ras[i][j], decs[i][j]);
 
+			if (l >= 360.0) {
+				l -= 360.0;
+			}
+
 			bVec.push_back(b);
 			lVec.push_back(l);
 		}
