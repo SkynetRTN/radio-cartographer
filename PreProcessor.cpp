@@ -47,7 +47,7 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 	determineTelescope();
 	accessFITS();
 	std::cout << "telescope" << telescope << std::endl;
-	if (telescope == "GreenBank-20") 
+	if (telescope == "GreenBank-20" || telescope == "NRAO20") 
 	{
 		if (cParams.subScale != 0.0) 
 		{
@@ -65,7 +65,7 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 		averageSpectra(spectra.getFrequencies(), cParams.inclusionBand, cParams.exclusionBand);
 	}
 
-	if (telescope == "GreenBank-20" && hiRes) 
+	if ((telescope == "GreenBank-20" || telescope == "NRAO20") && hiRes)
 	{
 		sortHiResData(cParams.receiver);
 	}
@@ -273,7 +273,7 @@ int PreProcessor::primaryHeader()
 
 	formatObservationYear(obsDate);
 
-	if (telescope == "GreenBank-20" || telescope == "GBT")
+	if (telescope == "GreenBank-20" || telescope == "GBT" || telescope == "NRAO20")
 	{
 		if (year >= 2017) {
 			image.readKey("COORDREF", system);
@@ -308,7 +308,7 @@ void PreProcessor::accessFITS()
 		{
 			accessExtTable40f(file);
 		}
-		else if (telescope == "GreenBank-20")
+		else if (telescope == "GreenBank-20" || telescope == "NRAO20")
 		{
 			accessExtTable20m(valArraySpectra, file);
 			if (file == lastFile)
