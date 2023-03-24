@@ -1,6 +1,6 @@
 #include "Debugger.h"
 #include <iostream>
-#include <String>
+#include <string>
 
 bool debugging = true;
 clock_t t_start;
