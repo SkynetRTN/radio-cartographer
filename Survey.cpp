@@ -273,7 +273,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 	std::string mapPattern = sdfits.getMapPattern();
 	std::string telescopeName = sdfits.getTelescope();
 
-	if (telescopeName == "GreenBank-20")
+	if (telescopeName == "GreenBank-20" || telescopeName == "NRAO20")
 	{
 		// Used for RFIMax
 		params.tele = TWENTY_METER;
