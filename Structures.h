@@ -4,8 +4,8 @@
 
 enum Channel
 {
-	LEFT,
 	RIGHT,
+	LEFT,
 	COMPOSITE
 };
 enum CalMethods
