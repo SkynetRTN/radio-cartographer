@@ -205,6 +205,7 @@ void Map::printSSSProcFluxMap()
 		file << "\n";
 	}
 	file.close();
+	std::cout << "[ SUCCESS ] Generating main map" << std::endl;
 }
 
 void Map::printLSSWeightMap()
@@ -431,6 +432,8 @@ void Map::printProcPathMap()
 		file << "\n";
 	}
 	file.close();
+
+	std::cout << "[ SUCCESS ] Generating path map" << std::endl;
 }
 void Map::printScanNumberMap()
 {

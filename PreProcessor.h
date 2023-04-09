@@ -4,7 +4,15 @@
 #include <vector>
 #include <CCfits/CCfits>
 
-enum Receiver { XX, YY };
+enum Receiver { 
+	XX, 
+	YY 
+};
+
+enum Resolution {
+	HIGH,
+	LOW
+};
 
 struct SpectralParameters
 {
@@ -141,10 +149,10 @@ private:
 	std::vector<std::vector<double>> weights;
 
 	// Observation Parameters
+	Resolution resolution;
 	std::string telescope;
 	double frequency;
 	double year;
-	bool hiRes;
 	int MJDate;
 
 	// Mapping Parameters

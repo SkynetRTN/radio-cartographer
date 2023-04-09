@@ -96,13 +96,13 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 	std::vector<std::future<std::vector<double>>> futureVec;
 	futureVec.resize(scans.size());
 
-	Debugger::clockTime(true);
+	std::cout << "Performing background subtraction..\r";
 
 	if (bgScaleBW != 0.0)
 	{
 		for (int i = 0; i < scans.size(); i++)
 		{
-			Debugger::print("Info", i);
+			std::cout << "Performing background subtraction.. " + std::to_string(i) + "\r";
 			bgCuda = BackgroundCUDA(scans[i], false);
 			futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW * psfFWHM);
 			counter++;
@@ -126,12 +126,13 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 		}
 	}
 
-	Debugger::clockTime(false);
+	std::cout << "[ SUCCESS ] Performing background subtraction" << std::endl;
 	survey.setScans(scans);
 }
 void Processor::performTimeShifting(Survey &survey)
 {
 	characterizeSurvey(survey);
+	std::cout << "Performing time shift correction..\r";
 
 	double t_int = 0;
 	int isTs = 0;
@@ -169,6 +170,7 @@ void Processor::performTimeShifting(Survey &survey)
 	PartitionSet partSet = determineProcSurveyDimensions(survey, false);
 	survey.setPartSetProcSSS(partSet);
 	classifySSS(survey);
+	std::cout << "[ SUCCESS ] Performing time shift correction" << std::endl;
 }
 void Processor::processLargeScaleStructure(Survey &survey)
 {
@@ -461,7 +463,7 @@ void Processor::set2DScatter(Survey &survey)
 }
 void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Survey> &surveys)
 {
-	Debugger::print("Info", "Starting RFI");
+	std::cout << "Performing RFI rejection..\r";
 	PartitionSet partSet;
 	partSet = determineProcCompositeDimensions(composite, false);
 	composite.setCompPartSetProcSSS(partSet);
@@ -520,6 +522,7 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 
 		for (int i = 0; i < scans.size(); i++)
 		{
+			std::cout << "Removing RFI.. " + std::to_string(i) + "\r";
 			scans[i].removeRFI(rfiSubtracted[i]); // resets the working channel
 												  // scans[i].removePoints(flags[i]); // removes flagged points (this is also used in trimming edges, so we might be able to just rewrite this as a clip RFI Data Function that takes in the RFISubtractedVector
 			scans[i].updateAngDistTemp(partSetProcSSS.centerDecDeg);
@@ -533,10 +536,11 @@ void Processor::performRFIRejectionMulti(Composite &composite, std::vector<Surve
 	partSet = determineProcCompositeDimensions(composite, false);
 	composite.setCompPartSetProcSSS(partSet);
 	classifySSS(composite);
+	std::cout << "[ SUCCESS ] Performing RFI rejection" << std::endl;
 }
 void Processor::calculateProcThetaGapMulti(Composite &composite)
 {
-	Debugger::print("Info", "Starting Theta Gap");
+	std::cout << "Calculating theta gap..\r";
 	std::vector<double> thetaGapVec;
 	std::vector<std::vector<double>> thetaGapGridSSS, thetaGapGridLSS;
 	std::vector<std::future<double>> futureVec;
@@ -613,6 +617,7 @@ void Processor::calculateProcThetaGapMulti(Composite &composite)
 	}
 	*/
 	composite.setScans(scans);
+	std::cout << "[ SUCCESS ] Calculating theta gap" << std::endl;
 }
 
 // data pre-processing
@@ -657,8 +662,6 @@ void Processor::determineDataBoundaries(Survey &survey)
 
 	rcr.performBulkRejection(raAll);
 	survey.setMedianRa(rcr.result.mu);
-
-	std::cout << "scan: " << scansInRaTemp << std::endl;
 
 	if (mapType != DAISY)
 	{
@@ -710,11 +713,6 @@ void Processor::determineDataBoundaries(Survey &survey)
 				maxDecVals.push_back(scanDecMax);
 			}
 		}
-
-		std::cout << minDecVals.size() << std::endl;
-		std::cout << maxDecVals.size() << std::endl;
-		std::cout << minRaVals.size() << std::endl;
-		std::cout << maxRaVals.size() << std::endl;
 
 		rcr.performBulkRejection(minDecVals);
 		if (globalMinDec > rcr.result.mu)
@@ -872,7 +870,7 @@ void Processor::characterizeData(Survey &survey)
 	}
 	survey.setScans(scans);
 
-	Debugger::print("Info", "Scatters loaded");
+	std::cout << "[ SUCCESS ] Loading scatters" << std::endl;
 }
 void Processor::switchChannels(Channel newChannel, Survey &survey)
 {
@@ -1365,7 +1363,7 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 		}
 		rcr.performBulkRejection(radiiHold);
 		partSetProc.edgeRadius = rcr.result.mu; // DEGREES
-		Debugger::print("Info", "Edge Radius in BW", partSetProc.edgeRadius / psfFWHM);
+		std::cout << "[ DETAILS ] Edge radius in beamwidths: " + std::to_string(partSetProc.edgeRadius / psfFWHM) << std::endl;
 	}
 
 	// If mapped in equatorial but want to process in galactic
@@ -1705,8 +1703,6 @@ double Processor::calculateShift(std::vector<std::vector<double>> &maxIfftInfo)
 		rcr.performBulkRejection(shiftsFinal);
 		result = rcr.result.mu;
 
-		Debugger::print("Info", rcr.result.mu, rcr.result.sigma);
-
 		flagHold = rcr.result.flags;
 
 		for (int i = 0; i < shiftsFinal.size(); i++)
@@ -1894,7 +1890,6 @@ std::vector<std::vector<double>> Processor::getScanToScanShifts(double sampling)
 		ifftResult.clear();
 		angleVec1.clear();
 		angleVec2.clear();
-		Debugger::print("Info", i);
 	}
 
 	return maxIfftInfo;
@@ -1997,7 +1992,7 @@ void Processor::lssDropCorrection(Survey &survey)
 
 		if (max < 0.5)
 		{
-			Debugger::print("Info", "No Drops");
+			std::cout << "[ DETAILS] No Drops" << std::endl;
 			return;
 		}
 		else
@@ -2360,7 +2355,6 @@ void Processor::lssElevationSubtraction(Survey &survey)
 
 	for (int i = 0; i < scans.size(); i++)
 	{
-		Debugger::print("Info", i);
 		bgCuda = BackgroundCUDA(scans[i], true);
 		futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW * psfFWHM);
 		counter++;
@@ -2817,21 +2811,7 @@ void Processor::correctDrop(std::vector<double> maxDetails)
 	RCR rcr2 = RCR(LS_MODE_DL);
 	rcr2.performBulkRejection(data);
 
-	std::ofstream outFile;
-	outFile.open("Rejections.txt");
-	outFile << "Indices:\t" << maxScan << "\t" << maxData << "\t" << scans[maxScan].getSize() << "\n";
-	// outFile << "Boost Value:\t" << boostValue << "\n";
-	flagHolder = rcr2.result.flags;
-	for (int q = 0; q < data.size(); q++)
-	{
-		outFile << data[q] << "\t" << flagHolder[q] << "\n";
-	}
-	outFile.close();
-
 	boostValue = 2 * rcr2.result.mu;
-
-	// std::cout << "Indices:\t" << maxScan << "\t" << maxData << "\t" << scans[maxScan].getSize() << "\n";
-	Debugger::print("Info", "Boost Value", boostValue);
 
 	for (int i = maxScan; i < scans.size(); i++)
 	{
@@ -3029,7 +3009,6 @@ void Processor::calculateSurveyElevationScatter()
 }
 void Processor::calculateElevationBG(int scanIndex, double baseline)
 {
-	Debugger::print("Info", scanIndex);
 	int size = scans[scanIndex].getSize();
 	double elevationScatter = scans[scanIndex].getElevationScatter();
 	std::vector<int> intFiller;

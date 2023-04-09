@@ -78,7 +78,7 @@ Map Cartographer::generateProcMapsMulti()
 	outputFile << "PIXLSIZE," << resolution / psfFWHM << ",Size of single pixel (beams)\n";
 	outputFile.close();
 
-	//std::cout << "Beginning Grid Interpolation\n";
+	std::cout << "[ SUCCESS ] Generating output file" << std::endl;
 
 	std::vector<std::future<std::vector<double>>> futureVec;
 	int xPixel, yPixel, yTemp;

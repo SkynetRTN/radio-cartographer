@@ -188,7 +188,7 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 }
 void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
-	double perform = atof(argv[16]);
+	double perform = atof(argv[14]);
 	pParams.innerRadius = atof(argv[15]);
 	pParams.outerRadius = atof(argv[16]);
 	std::string centroidType = argv[17];
@@ -224,7 +224,7 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.subScale = 0.0;
 	cParams.modSubScale = 0.0;
 	cParams.modSubZones = {}; //{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
-	cParams.receiver = YY;
+	cParams.receiver = XX;
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
@@ -344,29 +344,32 @@ int main(int argc, char *argv[])
 	ProcessorParameters procParams;
 	setInputProcessingParams(argv, procParams);
 
+	std::cout << "\n=================== PRE-PROCESSING ===================" << std::endl;
+
 	// SURVEY
-	// Survey survey(sParams, cParams, skynet_filename);
 	Survey survey(sParams, cParams, skynet_filename);
 	surveyHold.push_back(survey);
-	// Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
-	// surveyHold.push_back(survey2);
+	std::cout << "[ SUCCESS ] Creating Survey object" << std::endl;
 
 	// OUTPUT
 	Output output;
 	output.printTelescopeInfo(sParams);
 	output.printWScale(mParams.processedWeightScale);
 
-	std::cout << "Out of Survey\n";
 	rfiMax = setRFIMaxVal(sParams, (int)survey.getMJD());
+
+	std::cout << "\n===================== PROCESSING =====================" << std::endl;
 
 	// PROCESSOR
 	Processor processor(procParams);
 
+	std::cout << "Determining data boundaries..\r";
 	for (int i = 0; i < surveyHold.size(); i++)
 	{
 		processor.determineDataBoundaries(surveyHold[i]);
 	}
-	std::cout << "determined Data bapoundarie\n";
+	std::cout << "[ SUCCESS ] Determined data boundaries" << std::endl;
+
 	for (int i = 0; i < surveyHold.size(); i++)
 	{
 		processor.characterizeData(surveyHold[i]);
@@ -385,6 +388,8 @@ int main(int argc, char *argv[])
 	processor.performRFIRejectionMulti(composite, surveys);
 	processor.calculateProcThetaGapMulti(composite);
 
+	std::cout << "\n=================== GENERATING MAP ===================" << std::endl;
+
 	// PROCMAP
 	Cartographer cartographer(composite, mParams);
 	Map procMap = cartographer.generateProcMapsMulti();
@@ -394,15 +399,17 @@ int main(int argc, char *argv[])
 	// PHOTOMETRY AND OUTPUT
 	if (pParams.perform && !(procParams.raw))
 	{
+		std::cout << "\n===================== PHOTOMETRY =====================" << std::endl;
+
 		Analysis analysis(composite, mParams);
 		analysis.photometryMulti(procMap, pParams);
-
 		// procMap.printSSSCorrelationMap();
 	}
 	if (!(pParams.perform) || procParams.raw)
 	{
 		output.printPhotometryHolder();
 	}
+
 	// if (!(procParams.raw))
 	// {
 	procMap.printSSSScaleMap();
@@ -411,7 +418,7 @@ int main(int argc, char *argv[])
 	// }
 
 	// EXIT
-	std::cout << "The code has exited successfully with return code 0" << std::endl;
+	std::cout << "\n~*~*~*~*~*~*~*~*~*~*~* COMPLETE *~*~*~*~*~*~*~*~*~*~*~" << std::endl;
 
-	return 0;
+	return EXIT_SUCCESS;
 }
