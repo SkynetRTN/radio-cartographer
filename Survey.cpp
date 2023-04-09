@@ -4,7 +4,6 @@
 #include "FourtyParser.h"
 #include "OutputFile.h"
 #include "RCR.h"
-#include "Debugger.h"
 #include <time.h>
 #include <math.h>
 #include <sstream>
@@ -170,10 +169,8 @@ Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::strin
 		std::vector<std::vector<double>> sdfitsData;
 		PreProcessor sdfits = PreProcessor();
 		sdfitsData = sdfits.sdfitsReader(cParams);
-		std::cout << "Out of PreProcessor\n";
 		setSdfitsParams(sParams, sdfits);
 		initializeData(sdfitsData);
-		std::cout << "Out of Initialize\n";
 	}
 	else
 	{
@@ -264,7 +261,7 @@ void Survey::setTwentyParams(GBParser &gb)
 	if (mCoordinate == "")
 	{
 		mCoordinate = "equatorial";
-		Debugger::print("Warn", "No coordinate system found in header.. forced to equatorial");
+		std::cout << "[ WARNING ] No coordinate system found in header.. forced to equatorial" << std::endl;
 	}
 
 }
@@ -385,7 +382,7 @@ void Survey::initializeData(std::vector<std::vector<double> > data)
 	{
 		dataProc40(data);
 	}
-	Debugger::print("Info", "data loaded");
+	std::cout << "[ SUCCESS ] Initializing and loading data" << std::endl;
 }
 void Survey::dataProc(std::vector<std::vector<double> > &data)
 {
@@ -442,16 +439,13 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 			this->scans.push_back(Scan(times[i], decs[i], ras[i], elevations[i], dataDumps[i], fluxL[i], fluxR[i], fluxComp[i]));
 		}
 		else {
-			std::cout << "[ WARN ] No valid data found for scan " + i << std::endl;
+			std::cout << "[ WARNING ] Removed scan " + std::to_string(i) + " with no valid data" << std::endl;
 		}
 	}
-
-	Debugger::print("Info", "scans loaded");
 
 	if (mapType == DAISY)
 	{
 		findCenters();
-		Debugger::print("Info", "centers loaded");
 	}
 
 	for (int i = 0; i < scans.size(); i++)
@@ -624,7 +618,6 @@ void Survey::dataProc40(std::vector<std::vector<double> > &data)
 	{
 		scans[i].setScanNumberInSurvey(i);
 	}
-	Debugger::print("Info", "scans loaded");
 }
 void Survey::correctDec40(std::vector<std::vector<double> > &decs, std::vector<std::vector<double> > &times, int N)
 {
@@ -1072,20 +1065,20 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 	if (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2)
 	{
 		calMethod = POST;
-		Debugger::print("Warn", "No reliable pre-calibration data found");
-		Debugger::print("Warn", "Calibration method switched to post-calibration!");
+		std::cout << "[ WARNING ] No reliable pre-calibration data found" << std::endl;
+		std::cout << "[ WARNING ] Calibration method switched to post-calibration" << std::endl;
 	}
 	else if (lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2)
 	{
 		calMethod = PRE;
-		Debugger::print("Warn", "No reliable post-calibration data found");
-		Debugger::print("Warn", "Calibration method switched to pre-calibration!");
+		std::cout << "[ WARNING ] No reliable post-calibration data found" << std::endl;
+		std::cout << "[ WARNING ] Calibration method switched to pre-calibration" << std::endl;
 	}
 
 	if ((lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2) && (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2))
 	{
-		Debugger::print("Error", "No reliable calibration data found!");
-		//throw error for no reliable calibration data;
+		std::cout << "[ FAILURE ] No calibration data found";
+		std::exit(EXIT_FAILURE);
 	}
 
 	if (calMethod == INTERPOLATED)
@@ -2225,20 +2218,11 @@ void Survey::setStandardThetaGap()
 		std::vector<bool> flagsHold = rcr2.result.flags;
 		for (int i = 0; i < deltaAng.size(); i++)
 		{
-			if (i == 100)
-			{
-				Debugger::print("Info", rcr2.result.mu);
-				Debugger::print("Info", rcr2.result.sigma);
-			}
 			if (deltaAng[i] < minGapThreshold && flagsHold[i] == true)
 			{
 				this->minGapThreshold = deltaAng[i];
 			}
 		}
-
-		Debugger::print("Info", "MIN THETA GAP", minGapThreshold);
-		Debugger::print("Info", "MU", rcr2.result.mu);
-		Debugger::print("Info", "SIGMA", rcr2.result.sigma);
 
 		rcr2.performBulkRejection(deltaRa);
 		double medianRaDiff = rcr2.result.mu;
@@ -2328,11 +2312,6 @@ void Survey::setStandardThetaGap()
 			}
 		}
 
-		//this->minGapThreshold = 0.0;
-		Debugger::print("Info", "MIN THETA GAP", minGapThreshold);
-		Debugger::print("Info", "MU", rcr.result.mu * 4 / scans.size());
-		Debugger::print("Info", "SIGMA", rcr.result.sigma * 4 / scans.size());
-
 		for (int i = 0; i < scans.size(); i++)
 		{
 			scans[i].setIntraScanGap(StandardGap);
@@ -2342,7 +2321,7 @@ void Survey::setStandardThetaGap()
 		{
 			scans[i].setInterScanGap((M_PI / std::sqrt(2.0))*(partSetProcSSS.edgeRadius / scans.size()));
 		}
-		Debugger::print("Info", "Standard Gap in BW", StandardGap / psfFWHM);
+		// Debugger::print("Info", "Standard Gap in BW", StandardGap / psfFWHM);
 	}
 
 

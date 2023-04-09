@@ -183,8 +183,6 @@ double ProcessorTS::calculateShift(std::vector<std::vector<double> > &maxIfftInf
 		rcr.performBulkRejection(shiftsFinal);
 		result = rcr.result.mu;
 
-		Debugger::print("Info", rcr.result.mu, rcr.result.sigma);
-
 		flagHold = rcr.result.flags;
 
 		for (int i = 0; i < shiftsFinal.size(); i++)
@@ -373,7 +371,6 @@ std::vector<std::vector<double>> ProcessorTS::getScanToScanShifts(double samplin
 		ifftResult.clear();
 		angleVec1.clear();
 		angleVec2.clear();
-		Debugger::print("Info", i);
 	}
 
 	return maxIfftInfo;

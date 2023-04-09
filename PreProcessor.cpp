@@ -1,6 +1,5 @@
 #include "PreProcessor.h"
 #include "BackgroundCUDA.h"
-#include "Debugger.h"
 #include "Tools.h"
 #include "RCR.h"
 #include <cmath>
@@ -13,10 +12,7 @@
 #include "config.h"
 #endif
 
-PreProcessor::PreProcessor()
-{
-	this->hiRes = false;
-}
+PreProcessor::PreProcessor() {}
 
 class PointToPointFunc : public NonParametric
 {
@@ -31,13 +27,6 @@ public:
 
 };
 
-/* 
-	Hello. I recommend rewriting PrePrcoessor. It would
-	be nice if there were (at least) 3 classes. These
-	are: Input, PreProcessor, and Output.
-
-	It would greatly increase followability of the code.
-*/
 std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters cParams)
 {
 	CCfits::FITS::setVerboseMode(true);
@@ -46,14 +35,15 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 	setFilename(cParams);
 	determineTelescope();
 	accessFITS();
-	std::cout << "telescope" << telescope << std::endl;
+	
 	if (telescope == "GreenBank-20" || telescope == "NRAO20") 
 	{
 		if (cParams.subScale != 0.0) 
 		{
 			buildSpectra(spectra, cParams);
+			std::cout << "Performing spectral cleaning..\r";
 			performCleaningMulti(spectra, cParams.subScale);
-			//appendColumnData();
+			std::cout << "[ SUCCESS ] Performing spectral cleaning" << std::endl;
 		}
 
 		// temp
@@ -62,29 +52,21 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 		spectra.determineFrequency(freqStep, frequency, centerOffset);
 		// temp
 
+		std::cout << "Generating continuum data..\r";
 		averageSpectra(spectra.getFrequencies(), cParams.inclusionBand, cParams.exclusionBand);
+		std::cout << "[ SUCCESS ] Generating continuum data" << std::endl;
 	}
 
-	if ((telescope == "GreenBank-20" || telescope == "NRAO20") && hiRes)
+	if ((telescope == "GreenBank-20" || telescope == "NRAO20") && resolution == HIGH)
 	{
 		sortHiResData(cParams.receiver);
+		std::cout << "[ SUCCESS ] Sorting high resolution data" << std::endl;
 	}
 	else 
 	{
 		sortLowResData();
+		std::cout << "[ SUCCESS ] Sorting low resolution data" << std::endl;
 	}
-	/*std::cout << "out size 2 " << outputData[0].size() << std::endl;
-	for (int i = 0; i < outputData.size(); i++)
-	{
-		for (int j = 0; j < outputData[i].size(); j++)
-		{
-			if (j%2)
-			{
-				outputData[i].erase(outputData[i].begin() + j);
-			}
-		}
-	}
-	std::cout << "out size 2 " << outputData[0].size() << std::endl;*/
 
 	return outputData;
 }
@@ -99,7 +81,6 @@ int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpect
 	std::vector<string> columns;
 
 	std::string hdu = "SINGLE DISH"; // name of binary table
-	Debugger::print("Info", "Accessing extension table ", file);
 
 	// Open the binary table
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
@@ -134,8 +115,6 @@ int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpect
 		setMJD(MJDateHold);
 	}
 
-	Debugger::print("Info", inputData.size(), inputData[0].size());
-
 	return 0;
 }
 int PreProcessor::accessExtTable40f(int file)
@@ -146,7 +125,6 @@ int PreProcessor::accessExtTable40f(int file)
 	std::vector<string> columns;
 
 	std::string hdu = "SINGLE DISH"; // name of binary table
-	Debugger::print("Info", "Accessing extension table", file);
 
 	// Open the binary table
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
@@ -193,7 +171,6 @@ int PreProcessor::accessExtTableGBT(int file)
 
 	// Open the binary table
 	std::string hdu = "SINGLE DISH";
-	Debugger::print("Info", "Accessing extension table", file);
 
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
 	CCfits::ExtHDU& table = pInfile->extension(hdu);
@@ -261,7 +238,6 @@ int PreProcessor::primaryHeader()
 {
 	std::string obsDate;
 	std::string name = filename[0];
-	Debugger::print("Info", "Accessing the primary header");
 
 	// Open the primary header
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(name, CCfits::Read, true));
@@ -311,9 +287,11 @@ void PreProcessor::accessFITS()
 		else if (telescope == "GreenBank-20" || telescope == "NRAO20")
 		{
 			accessExtTable20m(valArraySpectra, file);
+			std::cout << "[ SUCCESS ] Accessing the FITS data table" << std::endl;
 			if (file == lastFile)
 			{
 				primaryHeader();
+				std::cout << "[ SUCCESS ] Accessing the FITS header" << std::endl;
 				formatSpectra20(valArraySpectra);
 			}
 		}
@@ -355,13 +333,19 @@ void PreProcessor::getHistoryInfo(const std::string history)
 		{
 			ssLine = line;
 		}
-		if (line.find("LOWRES") != line.npos)
+		if (line.find("DATAMODE") != line.npos)
 		{
 			resLine = line;;
 		}
 	}
 
-	setResolution(resLine);
+	try {
+		setResolution(resLine);
+	}
+	catch (const std::invalid_argument &e) {
+		std::exit(EXIT_FAILURE);
+	}
+	
 	formatHistoryInput(ssLine);
 }
 
@@ -377,7 +361,10 @@ void PreProcessor::buildSpectra(Spectra &spectra, SpectralParameters cParams)
 	spectra.exciseDropOuts(spectra20);
 
 	setScatterParams(spectra);
+
+	std::cout << "Determining Scatter..\r";
 	determineScatterMulti(spectra);
+	std::cout << "[ SUCCESS ] Determining Scatter" << std::endl;
 }
 void PreProcessor::performCleaningMulti(Spectra spectra, double baseline)
 {
@@ -394,8 +381,9 @@ void PreProcessor::performCleaningMulti(Spectra spectra, double baseline)
 	
 	for (int i = 0; i < spectra20.size(); i++)
 	{
+		std::cout << "Performing spectral cleaning.. " + std::to_string(i) + "\r";
+
 		scCuda = BackgroundCUDA(spectra, i);
-		Debugger::print("Info", "Cleaning Spectrum", i);
 
 		futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBG, scCuda, baseline);
 		counter++;
@@ -522,7 +510,7 @@ void PreProcessor::determineScatterMulti(Spectra &spectra)
 
 	for (int i = 0; i < spectra20.size(); i++)
 	{
-		Debugger::print("Info", i);
+		std::cout << "Determining scatter.. " << std::to_string(i) << "\r";
 		futureVec[i] = std::async(std::launch::async, &PreProcessor::calculateScatter, this, i);
 		counter++;
 		liveThreads++;
@@ -559,96 +547,15 @@ void PreProcessor::formatCoordinateSystem()
 }
 void PreProcessor::formatSpectra20(std::vector<valarray<double>> vaSpec)
 {
-
-	//intRanges[0] = 770;
-	//intRanges[1] = 800;
-
 	std::vector<double> vSpecHold;
 	vSpecHold.resize(intRanges[1] - intRanges[0] + 1);
-
-	/*std::ofstream cc1, cc2, cc3, cc4, cc5, cc6, cc7, cc8;
-	cc1.open("12344_raw.txt", std::ios_base::app);
-	cc2.open("12346_raw.txt", std::ios_base::app);
-	cc3.open("68432_raw.txt", std::ios_base::app);
-	cc4.open("74126_raw.txt", std::ios_base::app);
-	cc5.open("74128_raw.txt", std::ios_base::app);
-	cc6.open("74130_raw.txt", std::ios_base::app);
-	cc7.open("112558_raw.txt", std::ios_base::app);
-	cc8.open("112560_raw.txt", std::ios_base::app);*/
 
 	for (int i = 0; i < vaSpec.size(); i++)
 	{   // Convert from valarray to vector -- revese to match frequencies
 		std::copy(std::begin(vaSpec[i]) + intRanges[0] - 1, std::begin(vaSpec[i]) + intRanges[1], vSpecHold.begin());
 		std::reverse(vSpecHold.begin(), vSpecHold.end());
-
-		//if (i == 12344)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc1 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 12346)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc2 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 68432)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc3 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74126)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc4 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74128)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc5 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74130)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc6 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 112558)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc7 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 112560)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc8 << vSpecHold[j] << "\n";
-		//	}
-		//}
-
 		spectra20.push_back(vSpecHold);
 	}
-
-	/*cc1.close();
-	cc2.close();
-	cc3.close();
-	cc4.close();
-	cc5.close();
-	cc6.close();
-	cc7.close();
-	cc8.close();*/
 
 	// Center offset from new zero-th spot
 	if (intRanges[1] > 512)
@@ -659,13 +566,6 @@ void PreProcessor::formatSpectra20(std::vector<valarray<double>> vaSpec)
 	{
 		centerOffset = (vaSpec[0].size() / 2) - intRanges[0] + 1;
 	}
-
-	std::cout << "center:\t" << centerOffset << "\n";
-	std::cout << "range0:\t" << intRanges[0] << "\n";
-	std::cout << "range1:\t" << intRanges[1] << "\n";
-	std::cout << "size:\t" << vaSpec[0].size() - intRanges[1] << "\n";
-	std::cout << "size:\t" << vaSpec[0].size() / 2 << "\n";
-
 }
 void PreProcessor::formatGBTInput(std::string mode, std::vector<string> dates, std::vector<double> &utc)
 {	
@@ -812,6 +712,11 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 
 	return 0;
 }
+
+
+// Sorts the spectral data based on the recevier that took the data.
+// The output format is constrcuted to match the exisiting requirement
+// from the ASCII data format. I.e., the 11 column format.
 void PreProcessor::sortHiResData(Receiver receiver)
 {
 	// Input flux data is stored in a single column. We need to 
@@ -900,118 +805,15 @@ void PreProcessor::sortLowResData()
 			}
 		}
 	}
-
-	/*std::ofstream cc;
-	cc.open("outputData.txt", std::ios_base::app);
-	for (int i = 0; i < 11; i++)
-	{
-		for (int j = 0; j < continuum.size() / 2; j++)
-		{
-			cc << outputData[i][j] << "\n";
-		}
-	}
-	cc.close();*/
-
-	/*int place = 0;
-	int place245 = 0, place39 = 0, place357 = 0, place217 = 0;
-
-	for (int i = 0; i < outputData[0].size(); i++)
-	{
-		if (outputData[9][i] == 245 - 1)
-		{
-			if (place245 == 144 || place245 == 146)
-			{
-				outputData[6][place] = 999;
-				std::cout << "place245\t" << 2 * place << "\n";
-			}
-			place245++;
-		}*/
-		//if (outputData[9][i] == 39 - 1)
-		//{
-		//	if (place39 == 77 || place39 == 78)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place39\t" << 2 * place << "\n";
-		//	}
-		//	place39++;
-		//}
-		//if (outputData[9][i] == 357 - 1)
-		//{
-		//	if (place357 == 76 + 1 || place357 == 77 + 1)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place357\t" << 2 * place << "\n";
-		//	}
-		//	place357++;
-		//}
-		//if (outputData[9][i] == 217 - 1)
-		//{
-		//	if (place217 == 79)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place217\t" << 2 * place << "\n";
-		//	}
-		//	place217++;
-		//}
-		//place++;
-	//}
-	
-	// Not sure why I ever did this?
-	// Convert hours to degrees below
-	//if (telescope == "MightyForty")
-	//{
-	//	std::transform(outputData[1].begin(), outputData[1].end(), outputData[1].begin(),
-	//		std::bind1st(std::multiplies<double>(), 15.0));
-	//}
-
 }
 void PreProcessor::determineTelescope()
 {
 	// Open the primary header
-	std::cout << filename[0] << "\n";
-
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[0], CCfits::Read, true));
 	CCfits::PHDU& image = pInfile->pHDU();
 
 	// Get the telescope name
 	image.readKey("TELESCOP", telescope);
-}
-void PreProcessor::appendColumnData()
-{
-	// This function needs to seriously be thought over.
-	// If the code fails for any reason when appending
-	// columns, the input data file is wiped clean.
-	// This function should either be removed or
-	// another method needs to be found.
-
-	//string hduName("SINGLE DISH"); // DO NOT CHANGE THIS NAME! 
-	//std::valarray<double> valSpectrum, valBG;
-	//valSpectrum.resize(spectra20[0].size());
-	//valBG.resize(spectra20[0].size());
-	//std::vector<std::valarray<double>> valSpectra20, vecValBG;
-
-	//// Open sdfits file and open its binary table. This is risky. We are editing original data files!
-	//std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename, CCfits::Write, hduName, false));
-	//CCfits::ExtHDU& table = pInfile->extension(hduName);
-
-	//// Add empty columns to sdfits file.
-	//table.addColumn(CCfits::Tdouble, "BACKGROUND", spectra20[0].size());
-	//table.addColumn(CCfits::Tdouble, "CLEANED", spectra20[0].size());
-
-	//// We convert from vector<vector<>> to vector<valarray<>> here.
-	//for (int i = 0; i < spectra20.size(); i++)
-	//{
-	//	std::copy(spectra20[i].begin(), spectra20[i].end(), std::begin(valSpectrum));
-	//	valSpectra20.push_back(valSpectrum);
-
-	//	std::copy(bgOutput[i].begin(), bgOutput[i].end(), std::begin(valBG));
-	//	vecValBG.push_back(valBG);
-	//}
-
-	//// Write data to the columns.
-	//table.column("CLEANED").writeArrays(valSpectra20, 1);
-	//table.column("BACKGROUND").writeArrays(vecValBG, 1);
-
 }
 
 // Validators
@@ -1024,7 +826,7 @@ void PreProcessor::validator()
 	catch (const char* msg)
 	{
 		std::cerr << msg << std::endl;
-		exit(1);
+		std::exit(EXIT_FAILURE);
 	}
 	try {
 		validateFrequency();
@@ -1110,11 +912,14 @@ void PreProcessor::setResolution(std::string l)
 {
 	if (l.find("LOWRES") != l.npos)
 	{
-		this->hiRes = false;
+		this->resolution = LOW;
 	}
-	else
+	else if (l.find("HIRES") != l.npos)
 	{
-		this->hiRes = true;
+		this->resolution = HIGH;
+	}
+	else {
+		throw std::invalid_argument("Missing resolution information in header");
 	}
 }
 void PreProcessor::setFilename(SpectralParameters sp)
@@ -1202,7 +1007,6 @@ void Spectra::determineFrequency(double fStep, double obsFreq, double centerOffs
 	{
 		fdTemp[j] = fStep * (double)j;
 		fTemp[j] = zf + fdTemp[j];
-		//std::cout << fTemp[j] << "\n";
 	}
 
 	for (int i = 0; i < freqDists.size(); i++)
@@ -1210,8 +1014,6 @@ void Spectra::determineFrequency(double fStep, double obsFreq, double centerOffs
 		freqDists[i] = fdTemp;
 		frequencies[i] = fTemp;
 	}
-
-	std::cout << "Frequency size: " << frequencies[0].size() << "\n";
 
 	// Needed if first or last point is excised later
 	freqStart = frequencies[0][0];

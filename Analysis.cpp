@@ -131,10 +131,10 @@ void Analysis::photometryMulti(Map &mapHold, PhotoParams pParams)
     determinePixelParameters(maxPixelRa, maxPixelDec, centerPixelDec, centerPixelRa);
 
     // Output statements
-    Debugger::print("Info", "psfFWHM", psfFWHM);
-    Debugger::print("Info", "Resolution", map.getResolution());
-    Debugger::print("Info", "Max RA Coordinate", maxRaCoordinate);
-    Debugger::print("Info", "Map Size", map.getSize(0));
+    //Debugger::print("Info", "psfFWHM", psfFWHM);
+    //Debugger::print("Info", "Resolution", map.getResolution());
+    //Debugger::print("Info", "Max RA Coordinate", maxRaCoordinate);
+    //Debugger::print("Info", "Map Size", map.getSize(0));
 
     // Edges and Radii
     Dimensions dim;
