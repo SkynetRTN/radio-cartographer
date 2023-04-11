@@ -104,6 +104,9 @@ void setInputMapParams(char *argv[], MapParameters &mParams)
 	mParams.pixelSize = 0.05;
 	mParams.rfiScale = atof(argv[11]);
 
+	// WHY DO WE HAVE MULTIPLE VARIABLES FOR THE SAMRE VALUE ?
+	mParams.processedWeightScale = atof(argv[13]);
+
 	if (m10PlusCriteria == 1)
 	{
 		mParams.m10PlusProcessing = true;
