@@ -4,7 +4,10 @@
 #include <vector>
 #include <CCfits/CCfits>
 
-enum Receiver { XX, YY };
+namespace instrument
+{
+	enum Receiver { LEFT, RIGHT };
+}
 
 struct SpectralParameters
 {
@@ -17,7 +20,7 @@ struct SpectralParameters
 
 	std::vector<std::string> files;
 	std::vector<double> modSubZones;
-	Receiver receiver;
+	instrument::Receiver receiver;
 };
 
 class Spectra
@@ -130,7 +133,7 @@ private:
 
 	// Misc Functions
 	void sortLowResData();
-	void sortHiResData(Receiver);
+	void sortHiResData(instrument::Receiver);
 	void appendColumnData();
 	int averageSpectra(std::vector<std::vector<double>>, std::vector<double>, std::vector<double>);
 

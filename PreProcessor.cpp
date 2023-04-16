@@ -812,7 +812,7 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 
 	return 0;
 }
-void PreProcessor::sortHiResData(Receiver receiver)
+void PreProcessor::sortHiResData(instrument::Receiver receiver)
 {
 	// Input flux data is stored in a single column. We need to 
 	// separate flux into left/right channels for compatabilty in Survey.
@@ -824,7 +824,7 @@ void PreProcessor::sortHiResData(Receiver receiver)
 	dubFiller.resize(continuum.size() / 4);
 	outputData.resize(11, dubFiller);
 
-	if (receiver == XX)
+	if (receiver == instrument::LEFT)
 	{
 		rs = 0;
 		ls = 2;

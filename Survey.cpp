@@ -742,7 +742,6 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		//CALIBRATION DATA DURING TRANSITION
 
 		while (i < data[0].size())
-		//while (i < 1223)
 		{
 			//STORE ALL INITIAL CALIBRATION DATA AND ZERO SCAN DATA
 			if ((data[9][i] == 0 && data[10][i] == 0))
@@ -810,7 +809,6 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		scanCount = 2;
 
 		while (i < data[0].size())
-		//while (i < 1223)
 		{
 			//STORE NON-TRANSITION DATA FOR REMAINING SCANS
 			if (data[9][i] != scanCount - 1 && data[9][i] != 0)
@@ -860,7 +858,6 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 
 		//POST CALIBRATION 
 		while (i < data[0].size())
-		//while (i < 1223)
 		{
 			times[scanCount].push_back(data[0][i]);
 			ras[scanCount].push_back(15.0*data[1][i]);
@@ -959,38 +956,6 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 			i++;
 		}
 	}
-	std::ofstream times1;
-	std::ofstream ras1;
-	std::ofstream decs1;
-	std::ofstream fluxL1;
-	std::ofstream fluxR1;
-	std::ofstream dataDumps1;
-
-	// times1.open("times.txt", std::ios_base::app);
-	// ras1.open("ras.txt", std::ios_base::app);
-	// decs1.open("decs.txt", std::ios_base::app);
-	// fluxL1.open("fluxR.txt", std::ios_base::app);
-	// fluxR1.open("fluxL.txt", std::ios_base::app);
-	// dataDumps1.open("dataDumps.txt", std::ios_base::app);
-	
-	// for (int i = 0; i < times.size(); i++)
-	// {
-	// 	for (int j = 0; j < times[i].size(); j++)
-	// 	{
-	// 		times1 << times[i][j] << std::endl;
-	// 		ras1 << ras[i][j] << std::endl;
-	// 		decs1 << decs[i][j] << std::endl;
-	// 		fluxL1 << fluxL[i][j] << std::endl;
-	// 		fluxR1 << fluxR[i][j] << std::endl;
-	// 		dataDumps1 << dataDumps[i][j] << std::endl;
-	// 	}
-	// }
-	// times1.close();
-	// ras1.close();
-	// decs1.close();
-	// fluxL1.close();
-    // fluxR1.close();
-	// dataDumps1.close();
 }
 
 //calibration
@@ -1008,7 +973,6 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 	switch (chan)
 	{
 	case LEFT:
-
 		flux = fluxL;
 		break;
 	case RIGHT:
@@ -1069,20 +1033,20 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		}
 	}
 
-	if (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2)
+	if (lowFluxArrayStart.size() < 10 || highFluxArrayStart.size() < 10)
 	{
 		calMethod = POST;
 		Debugger::print("Warn", "No reliable pre-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to post-calibration!");
 	}
-	else if (lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2)
+	else if (lowFluxArrayEnd.size() < 10 || highFluxArrayEnd.size() < 10)
 	{
 		calMethod = PRE;
 		Debugger::print("Warn", "No reliable post-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to pre-calibration!");
 	}
 
-	if ((lowFluxArrayEnd.size() < 2 || highFluxArrayEnd.size() < 2) && (lowFluxArrayStart.size() < 2 || highFluxArrayStart.size() < 2))
+	if ((lowFluxArrayEnd.size() < 10 || highFluxArrayEnd.size() < 10) && (lowFluxArrayStart.size() < 10 || highFluxArrayStart.size() < 10))
 	{
 		Debugger::print("Error", "No reliable calibration data found!");
 		//throw error for no reliable calibration data;

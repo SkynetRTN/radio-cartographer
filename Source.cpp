@@ -104,7 +104,7 @@ void setInputMapParams(char *argv[], MapParameters &mParams)
 	mParams.pixelSize = 0.05;
 	mParams.rfiScale = atof(argv[11]);
 
-	// WHY DO WE HAVE MULTIPLE VARIABLES FOR THE SAMRE VALUE ?
+	// WHY DO WE HAVE MULTIPLE VARIABLES FOR THE SAME VALUE ?
 	mParams.processedWeightScale = atof(argv[13]);
 
 	if (m10PlusCriteria == 1)
@@ -227,7 +227,7 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.subScale = 0.0;
 	cParams.modSubScale = 0.0;
 	cParams.modSubZones = {}; //{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
-	cParams.receiver = YY;
+	cParams.receiver = instrument::RIGHT;
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
