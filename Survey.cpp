@@ -1033,20 +1033,20 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		}
 	}
 
-	if (lowFluxArrayStart.size() < 10 || highFluxArrayStart.size() < 10)
+	if (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3)
 	{
 		calMethod = POST;
 		Debugger::print("Warn", "No reliable pre-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to post-calibration!");
 	}
-	else if (lowFluxArrayEnd.size() < 10 || highFluxArrayEnd.size() < 10)
+	else if (lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3)
 	{
 		calMethod = PRE;
 		Debugger::print("Warn", "No reliable post-calibration data found");
 		Debugger::print("Warn", "Calibration method switched to pre-calibration!");
 	}
 
-	if ((lowFluxArrayEnd.size() < 10 || highFluxArrayEnd.size() < 10) && (lowFluxArrayStart.size() < 10 || highFluxArrayStart.size() < 10))
+	if ((lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3) && (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3))
 	{
 		Debugger::print("Error", "No reliable calibration data found!");
 		//throw error for no reliable calibration data;
