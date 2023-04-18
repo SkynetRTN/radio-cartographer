@@ -95,17 +95,17 @@ double setRFIMaxVal(SurveyParameters sParams, int MJD)
 void setInputMapParams(char *argv[], MapParameters &mParams)
 {
 	// TEMPORARY
-	double photometryOn = atof(argv[14]);
-	double m10PlusCriteria = atof(argv[12]);
-	double largeScaleStruct = atof(argv[20]);
+	double photometryOn = atof(argv[15]);
+	double m10PlusCriteria = atof(argv[13]);
+	double largeScaleStruct = atof(argv[21]);
 
 	// PERMANENT
 	mParams.SSSMapping = true;
 	mParams.pixelSize = 0.05;
-	mParams.rfiScale = atof(argv[11]);
+	mParams.rfiScale = atof(argv[12]);
 
 	// WHY DO WE HAVE MULTIPLE VARIABLES FOR THE SAME VALUE ?
-	mParams.processedWeightScale = atof(argv[13]);
+	mParams.processedWeightScale = atof(argv[14]);
 
 	if (m10PlusCriteria == 1)
 	{
@@ -139,12 +139,12 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 	// TEMPORARY
 	std::string inputChannel = argv[2];
 	std::string inputCalibrationMethod = argv[3];
-	std::string inputProcessingCoordinates = argv[4];
+	std::string inputProcessingCoordinates = argv[5];
 
 	// DEBUGGING
 	sParams.forcedTS = 0.0;
 	sParams.tele = TWENTY_METER;
-	sParams.trimSize = atof(argv[19]);
+	sParams.trimSize = atof(argv[20]);
 
 	// MISC
 	sParams.tracking = false;
@@ -191,10 +191,10 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 }
 void setInputPhotoParams(char *argv[], PhotoParams &pParams)
 {
-	double perform = atof(argv[16]);
-	pParams.innerRadius = atof(argv[15]);
-	pParams.outerRadius = atof(argv[16]);
-	std::string centroidType = argv[17];
+	double perform = atof(argv[15]);
+	pParams.innerRadius = atof(argv[16]);
+	pParams.outerRadius = atof(argv[17]);
+	std::string centroidType = argv[18];
 
 	if (perform)
 	{
@@ -227,12 +227,15 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.subScale = 0.0;
 	cParams.modSubScale = 0.0;
 	cParams.modSubZones = {}; //{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
-	cParams.receiver = instrument::RIGHT;
+	cParams.receiver = instrument::LEFT;
+	if (argv[3] == '2')
+		cParams.receiver = instrument::RIGHT;
+
 	cParams.velocity = 0.0;
 
 	// FREQUENCY SELECTION
-	double minFreq = atof(argv[8]);
-	double maxFreq = atof(argv[9]);
+	double minFreq = atof(argv[9]);
+	double maxFreq = atof(argv[10]);
 	cParams.inclusionBand = {minFreq, maxFreq}; // MHz
 	cParams.exclusionBand = {};
 	for (int i = 21; i < argc; i++)
@@ -249,14 +252,14 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 }
 void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 {
-	double photometryOn = atof(argv[14]);
-	double rawMap = atof(argv[6]);
+	double photometryOn = atof(argv[15]);
+	double rawMap = atof(argv[8]);
 
-	procParams.bgScaleBW = atof(argv[10]);
-	procParams.rfiScaleBW = atof(argv[11]);
-	procParams.timeShift = argv[5];
-	procParams.timeShiftValue = atof(argv[6]);
-	procParams.wScaleBW = atof(argv[13]);
+	procParams.bgScaleBW = atof(argv[11]);
+	procParams.rfiScaleBW = atof(argv[12]);
+	procParams.timeShift = argv[6];
+	procParams.timeShiftValue = atof(argv[7]);
+	procParams.wScaleBW = atof(argv[14]);
 
 	if (photometryOn)
 	{
