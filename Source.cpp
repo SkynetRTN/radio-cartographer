@@ -238,7 +238,7 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	double maxFreq = atof(argv[10]);
 	cParams.inclusionBand = {minFreq, maxFreq}; // MHz
 	cParams.exclusionBand = {};
-	for (int i = 21; i < argc; i++)
+	for (int i = 22; i < argc; i++)
 	{
 		cParams.exclusionBand.push_back(atof(argv[i]));
 	}
