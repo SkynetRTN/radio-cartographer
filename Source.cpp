@@ -227,9 +227,9 @@ void setInputSpectralParams(int argc, char *argv[], SpectralParameters &cParams)
 	cParams.subScale = 0.0;
 	cParams.modSubScale = 0.0;
 	cParams.modSubZones = {}; //{1423.929214, 1424.051278, 1424.066536, 1424.219116, 1424.234374, 1424.310664};// {1435.0, 1447.5, 1522.5, 1630.0};
-	cParams.receiver = instrument::LEFT;
+	cParams.receiver = HI;
 	if (atoi(argv[3]) == 2)
-		cParams.receiver = instrument::RIGHT;
+		cParams.receiver = LO;
 
 	cParams.velocity = 0.0;
 

@@ -4,10 +4,9 @@
 #include <vector>
 #include <CCfits/CCfits>
 
-namespace instrument
-{
-	enum Receiver { LEFT, RIGHT };
-}
+
+enum Receiver { HI, LO };
+
 
 struct SpectralParameters
 {
@@ -20,7 +19,7 @@ struct SpectralParameters
 
 	std::vector<std::string> files;
 	std::vector<double> modSubZones;
-	instrument::Receiver receiver;
+	Receiver receiver;
 };
 
 class Spectra
@@ -77,11 +76,11 @@ public:
 	std::vector<std::vector<double>> sdfitsReader(SpectralParameters);
 
 	// Input functions
-	int accessExtTable20m(std::vector<valarray<double>>&, int);
+	int accessExtTable20m(std::vector<valarray<double>>&, Receiver, int);
 	int accessExtTable40f(int);
 	int accessExtTableGBT(int);
 	int primaryHeader();
-	void accessFITS();
+	void accessFITS(Receiver);
 
 	void getHistoryInfo(const std::string);	
 
@@ -133,7 +132,7 @@ private:
 
 	// Misc Functions
 	void sortLowResData();
-	void sortHiResData(instrument::Receiver);
+	void sortHiResData(Receiver);
 	void appendColumnData();
 	int averageSpectra(std::vector<std::vector<double>>, std::vector<double>, std::vector<double>);
 

@@ -31,13 +31,7 @@ public:
 
 };
 
-/* 
-	Hello. I recommend rewriting PrePrcoessor. It would
-	be nice if there were (at least) 3 classes. These
-	are: Input, PreProcessor, and Output.
 
-	It would greatly increase followability of the code.
-*/
 std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters cParams)
 {
 	CCfits::FITS::setVerboseMode(true);
@@ -45,7 +39,7 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 
 	setFilename(cParams);
 	determineTelescope();
-	accessFITS();
+	accessFITS(cParams.receiver);
 	std::cout << "telescope" << telescope << std::endl;
 	if (telescope == "GreenBank-20" || telescope == "NRAO20") 
 	{
@@ -90,7 +84,7 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 }
 
 // Input Data
-int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpectra, int file)
+int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpectra, Receiver receiver, int file)
 {
 	// Declarations
 	std::vector<valarray<double>> vasTemp;
@@ -107,6 +101,27 @@ int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpect
 
 	columns = { "UTSECS", "CRVAL2", "CRVAL3", "AZIMUTH", "ELEVATIO", "NSAMPS", "CALSTATE", "SWPINDEX", "SWPVALID", "CDELT1" };
 	inputTemp.resize(columns.size());
+
+	// this works for lo res as well
+	std::vector<double> tempFrequency;
+	table.column("OBSFREQ").read(tempFrequency, 1, 2);
+	double hiFrequency, loFrequency;
+
+	if (tempFrequency[0] > tempFrequency[1]) {
+		hiFrequency = tempFrequency[0];
+		loFrequency = tempFrequency[1];
+	}
+	else {
+		hiFrequency = tempFrequency[1];
+		loFrequency = tempFrequency[0];
+	}
+
+	if (receiver == HI){
+		frequency = hiFrequency / pow(10., 6.);
+	}
+	else {
+		frequency = loFrequency / pow(10., 6.);
+	}
 
 	table.column("DATA").readArrays(vasTemp, 1, 999999);
 
@@ -269,7 +284,7 @@ int PreProcessor::primaryHeader()
 
 	image.readKey("DATE", obsDate);
 	image.readKey("OBSMODE", pattern);
-	image.readKey("OBSFREQ", frequency);
+	//image.readKey("OBSFREQ", frequency);
 
 	formatObservationYear(obsDate);
 
@@ -293,7 +308,7 @@ int PreProcessor::primaryHeader()
 
 	return 0;
 }
-void PreProcessor::accessFITS()
+void PreProcessor::accessFITS(Receiver receiver)
 {
 	const int lastFile = filename.size();
 	std::vector<valarray<double>> valArraySpectra;
@@ -310,7 +325,7 @@ void PreProcessor::accessFITS()
 		}
 		else if (telescope == "GreenBank-20" || telescope == "NRAO20")
 		{
-			accessExtTable20m(valArraySpectra, file);
+			accessExtTable20m(valArraySpectra, receiver, file);
 			if (file == lastFile)
 			{
 				primaryHeader();
@@ -812,7 +827,7 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies, s
 
 	return 0;
 }
-void PreProcessor::sortHiResData(instrument::Receiver receiver)
+void PreProcessor::sortHiResData(Receiver receiver)
 {
 	// Input flux data is stored in a single column. We need to 
 	// separate flux into left/right channels for compatabilty in Survey.
@@ -824,7 +839,7 @@ void PreProcessor::sortHiResData(instrument::Receiver receiver)
 	dubFiller.resize(continuum.size() / 4);
 	outputData.resize(11, dubFiller);
 
-	if (receiver == instrument::LEFT)
+	if (receiver == HI)
 	{
 		rs = 0;
 		ls = 2;
@@ -1027,7 +1042,7 @@ void PreProcessor::validator()
 		exit(1);
 	}
 	try {
-		validateFrequency();
+		//validateFrequency();
 		validateSystem();
 	}
 	catch (const char* msg)
