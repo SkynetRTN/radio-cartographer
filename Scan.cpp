@@ -246,6 +246,9 @@ void Scan::calculateScatter()
 
 		rcr.setNonParametricModel(ptpf);
 		rcr.performRejection(dataProperties.dataDumps, fluxes.workingChannel);
+
+		// RCR has ~0.2% chance of a runaway rejection which results in a nan sigma.
+		// We remove these points (In Processor) before making the model
 		this->scanProperties.scatter = .8197*rcr.result.sigma;
 		for (int i = 0; i < rcr.result.cleanW.size(); i++)
 		{

@@ -889,9 +889,12 @@ void Processor::calculateScatter()
 	for (int j = 0; j < scans.size(); j++)
 	{
 		scans[j].calculateScatter();
-		scatters.push_back(scans[j].getScatter());
-		dumpSums.push_back(scans[j].getDumpSum());
-		indices.push_back(j);
+
+		if (scans[j].getScatter() == scans[j].getScatter()) {
+			scatters.push_back(scans[j].getScatter());
+			dumpSums.push_back(scans[j].getDumpSum());
+			indices.push_back(j);
+		}
 	}
 
 	RCR rcr = RCR(LS_MODE_68);

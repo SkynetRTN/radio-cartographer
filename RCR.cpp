@@ -5940,6 +5940,10 @@ void RCR::iterativeSingleSigmaRCR(std::vector<double> &w, std::vector<double> &y
 			trueYHold = trueY;
 			trueWHold = trueW;
 
+			if (trueY.size() == 0 || trueW.size() == 0) {
+				return;
+			}
+
 			mu = handleMuTechSelect(trueW, trueY);
 
 			trueW = trueWHold;
