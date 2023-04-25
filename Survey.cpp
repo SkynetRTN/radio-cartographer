@@ -438,7 +438,7 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 
 	for (int i = offset; i < times.size() - offset; i++)
 	{
-		if (times[i].size() != 0) {
+		if (times[i].size() > 1) {
 			this->scans.push_back(Scan(times[i], decs[i], ras[i], elevations[i], dataDumps[i], fluxL[i], fluxR[i], fluxComp[i]));
 		}
 		else {
