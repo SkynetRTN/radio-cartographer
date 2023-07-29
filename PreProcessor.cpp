@@ -67,18 +67,6 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 	{
 		sortLowResData();
 	}
-	/*std::cout << "out size 2 " << outputData[0].size() << std::endl;
-	for (int i = 0; i < outputData.size(); i++)
-	{
-		for (int j = 0; j < outputData[i].size(); j++)
-		{
-			if (j%2)
-			{
-				outputData[i].erase(outputData[i].begin() + j);
-			}
-		}
-	}
-	std::cout << "out size 2 " << outputData[0].size() << std::endl;*/
 
 	return outputData;
 }
@@ -574,96 +562,15 @@ void PreProcessor::formatCoordinateSystem()
 }
 void PreProcessor::formatSpectra20(std::vector<valarray<double>> vaSpec)
 {
-
-	//intRanges[0] = 770;
-	//intRanges[1] = 800;
-
 	std::vector<double> vSpecHold;
 	vSpecHold.resize(intRanges[1] - intRanges[0] + 1);
-
-	/*std::ofstream cc1, cc2, cc3, cc4, cc5, cc6, cc7, cc8;
-	cc1.open("12344_raw.txt", std::ios_base::app);
-	cc2.open("12346_raw.txt", std::ios_base::app);
-	cc3.open("68432_raw.txt", std::ios_base::app);
-	cc4.open("74126_raw.txt", std::ios_base::app);
-	cc5.open("74128_raw.txt", std::ios_base::app);
-	cc6.open("74130_raw.txt", std::ios_base::app);
-	cc7.open("112558_raw.txt", std::ios_base::app);
-	cc8.open("112560_raw.txt", std::ios_base::app);*/
 
 	for (int i = 0; i < vaSpec.size(); i++)
 	{   // Convert from valarray to vector -- revese to match frequencies
 		std::copy(std::begin(vaSpec[i]) + intRanges[0] - 1, std::begin(vaSpec[i]) + intRanges[1], vSpecHold.begin());
 		std::reverse(vSpecHold.begin(), vSpecHold.end());
-
-		//if (i == 12344)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc1 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 12346)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc2 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 68432)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc3 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74126)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc4 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74128)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc5 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 74130)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc6 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 112558)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc7 << vSpecHold[j] << "\n";
-		//	}
-		//}
-		//if (i == 112560)
-		//{
-		//	for (int j = 0; j < vSpecHold.size(); j++)
-		//	{
-		//		cc8 << vSpecHold[j] << "\n";
-		//	}
-		//}
-
 		spectra20.push_back(vSpecHold);
 	}
-
-	/*cc1.close();
-	cc2.close();
-	cc3.close();
-	cc4.close();
-	cc5.close();
-	cc6.close();
-	cc7.close();
-	cc8.close();*/
 
 	// Center offset from new zero-th spot
 	if (intRanges[1] > 512)
@@ -915,71 +822,8 @@ void PreProcessor::sortLowResData()
 			}
 		}
 	}
-
-	/*std::ofstream cc;
-	cc.open("outputData.txt", std::ios_base::app);
-	for (int i = 0; i < 11; i++)
-	{
-		for (int j = 0; j < continuum.size() / 2; j++)
-		{
-			cc << outputData[i][j] << "\n";
-		}
-	}
-	cc.close();*/
-
-	/*int place = 0;
-	int place245 = 0, place39 = 0, place357 = 0, place217 = 0;
-
-	for (int i = 0; i < outputData[0].size(); i++)
-	{
-		if (outputData[9][i] == 245 - 1)
-		{
-			if (place245 == 144 || place245 == 146)
-			{
-				outputData[6][place] = 999;
-				std::cout << "place245\t" << 2 * place << "\n";
-			}
-			place245++;
-		}*/
-		//if (outputData[9][i] == 39 - 1)
-		//{
-		//	if (place39 == 77 || place39 == 78)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place39\t" << 2 * place << "\n";
-		//	}
-		//	place39++;
-		//}
-		//if (outputData[9][i] == 357 - 1)
-		//{
-		//	if (place357 == 76 + 1 || place357 == 77 + 1)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place357\t" << 2 * place << "\n";
-		//	}
-		//	place357++;
-		//}
-		//if (outputData[9][i] == 217 - 1)
-		//{
-		//	if (place217 == 79)
-		//	{
-		//		outputData[6][place] = 999;
-		//		std::cout << "place217\t" << 2 * place << "\n";
-		//	}
-		//	place217++;
-		//}
-		//place++;
-	//}
-	
-	// Not sure why I ever did this?
-	// Convert hours to degrees below
-	//if (telescope == "MightyForty")
-	//{
-	//	std::transform(outputData[1].begin(), outputData[1].end(), outputData[1].begin(),
-	//		std::bind1st(std::multiplies<double>(), 15.0));
-	//}
-
 }
+
 void PreProcessor::determineTelescope()
 {
 	// Open the primary header
@@ -990,43 +834,6 @@ void PreProcessor::determineTelescope()
 
 	// Get the telescope name
 	image.readKey("TELESCOP", telescope);
-}
-void PreProcessor::appendColumnData()
-{
-	// This function needs to seriously be thought over.
-	// If the code fails for any reason when appending
-	// columns, the input data file is wiped clean.
-	// This function should either be removed or
-	// another method needs to be found.
-
-	//string hduName("SINGLE DISH"); // DO NOT CHANGE THIS NAME! 
-	//std::valarray<double> valSpectrum, valBG;
-	//valSpectrum.resize(spectra20[0].size());
-	//valBG.resize(spectra20[0].size());
-	//std::vector<std::valarray<double>> valSpectra20, vecValBG;
-
-	//// Open sdfits file and open its binary table. This is risky. We are editing original data files!
-	//std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename, CCfits::Write, hduName, false));
-	//CCfits::ExtHDU& table = pInfile->extension(hduName);
-
-	//// Add empty columns to sdfits file.
-	//table.addColumn(CCfits::Tdouble, "BACKGROUND", spectra20[0].size());
-	//table.addColumn(CCfits::Tdouble, "CLEANED", spectra20[0].size());
-
-	//// We convert from vector<vector<>> to vector<valarray<>> here.
-	//for (int i = 0; i < spectra20.size(); i++)
-	//{
-	//	std::copy(spectra20[i].begin(), spectra20[i].end(), std::begin(valSpectrum));
-	//	valSpectra20.push_back(valSpectrum);
-
-	//	std::copy(bgOutput[i].begin(), bgOutput[i].end(), std::begin(valBG));
-	//	vecValBG.push_back(valBG);
-	//}
-
-	//// Write data to the columns.
-	//table.column("CLEANED").writeArrays(valSpectra20, 1);
-	//table.column("BACKGROUND").writeArrays(vecValBG, 1);
-
 }
 
 // Validators

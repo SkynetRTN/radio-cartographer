@@ -55,7 +55,8 @@ std::vector<std::vector<double> > FourtyParser::parseFile()
 	}
 	catch (const char* e)
 	{
-		std::cout << e;
+		std::cerr << e;
+		std::exit(EXIT_FAILURE);
 	}
 	return dataInColumns;
 }
