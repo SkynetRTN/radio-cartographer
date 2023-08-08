@@ -171,9 +171,13 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 	{
 		sParams.calMethod = POST;
 	}
-	else
+	else if (inputCalibrationMethod == "interpolated")
 	{
 		sParams.calMethod = INTERPOLATED;
+	}
+	else
+	{
+		sParams.calMethod = NONE;
 	}
 	// SET PROCESSING COORDINATES
 	if (inputProcessingCoordinates == "equatorial")

@@ -12,7 +12,8 @@ enum CalMethods
 {
 	PRE,
 	POST,
-	INTERPOLATED
+	INTERPOLATED,
+	NONE
 };
 enum Coordinates
 {

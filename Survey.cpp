@@ -413,7 +413,7 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	Output output;
 	output.printCalibrationHeader();
 	
-	if (telescope != GBT)
+	if (telescope != GBT && calMethod != NONE)
 	{
 		gainCalibration(LEFT, channel);
 		gainCalibration(RIGHT, channel);
