@@ -138,7 +138,7 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 {
 	// TEMPORARY
 	std::string inputChannel = argv[2];
-	std::string inputCalibrationMethod = argv[3];
+	std::string inputCalibrationMethod = argv[4];
 	std::string inputProcessingCoordinates = argv[5];
 
 	// DEBUGGING
