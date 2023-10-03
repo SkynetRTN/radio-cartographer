@@ -35,7 +35,7 @@ void FourtyParser::setDataFile(std::string dataFile)
 	this->dataFile = dataFile;
 	this->hasFile = true;
 }
-std::vector<std::vector<double> > FourtyParser::parseFile()
+Input FourtyParser::parseFile()
 {
 	try
 	{
@@ -58,7 +58,14 @@ std::vector<std::vector<double> > FourtyParser::parseFile()
 		std::cerr << e;
 		std::exit(EXIT_FAILURE);
 	}
-	return dataInColumns;
+
+	Input input(dataFile);
+	input.convertFromColumnData(dataInColumns);
+
+	// Meta data
+	input.telescope = "MightyForty";
+
+	return input;
 }
 
 void FourtyParser::reflectMatrix40()
@@ -112,7 +119,6 @@ void FourtyParser::reflectMatrix40()
 
 	}
 }
-
 
 void FourtyParser::readFile()
 {

@@ -1,4 +1,5 @@
 #pragma once
+#include "Input.h"
 #include <string>
 #include <vector>
 
@@ -10,7 +11,7 @@ public:
 	FourtyParser(std::vector<std::string>);
 	FourtyParser(std::string, std::string);
 	void setDataFile(std::string);
-	std::vector<std::vector<double> > parseFile();
+	Input parseFile();
 	~FourtyParser();
 
 private:
@@ -39,10 +40,8 @@ private:
 	void splitLines();
 	void reflectMatrix();
 	void reflectMatrix40();
-	void readFile40();
 	void parseData();
 	double doubleConvert(std::string);
-
 };
 
 

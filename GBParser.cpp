@@ -1,4 +1,4 @@
-#include "GBParser.h"//Dylan
+#include "GBParser.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -9,12 +9,14 @@ GBParser::GBParser()
 	this->hasFile = false;
 	this->hasData = false;
 }
+
 GBParser::GBParser(std::string dataFile)
 {
 	this->dataFile = dataFile;
 	this->hasFile = true;
 	this->hasData = false;
 }
+
 GBParser::GBParser(std::vector<std::string> data)
 {
 	this->fullLineSet = data;
@@ -28,7 +30,7 @@ void GBParser::setDataFile(std::string dataFile)
 	this->dataFile = dataFile;
 	this->hasFile = true;
 }
-std::vector<std::vector<double> > GBParser::parseFile()
+Input GBParser::parseFile()
 {
 	try
 	{
@@ -52,7 +54,18 @@ std::vector<std::vector<double> > GBParser::parseFile()
 	{
 		std::cout << e;
 	}
-	return dataInColumns;
+
+	Input input(dataFile);
+	input.convertFromColumnData(dataInColumns);
+
+	// Transfer the meta data
+	input.telescope = "GreenBank-20";
+	input.scanType = paramScanType;
+	input.mapPattern = paramMapType;
+	input.coordinate = paramCoordinate;
+	input.observedFrequencies.emplace_back(paramFrequency);
+
+	return input;
 }
 
 
@@ -205,7 +218,7 @@ void GBParser::reflectMatrix()
 {
 	bool crosscheck = false; 
 	double minRA = DBL_MAX;
-	double maxRA = -1.0*DBL_MAX;
+	double maxRA = -1.0 * DBL_MAX;
 
 	std::vector<double> dubFiller;
 	dubFiller.resize(dataPointCount);
@@ -216,7 +229,6 @@ void GBParser::reflectMatrix()
 		{
 			dataInColumns[j][i] = dataPoints[i][j];
 		}
-		//dataInColumns[0][i] += 10000.0;
 		if (dataInColumns[0][i] > 86400.0)
 		{
 			dataInColumns[0][i] -= 86400.0;

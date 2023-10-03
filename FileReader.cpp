@@ -18,8 +18,7 @@ FileReader::FileReader(std::string filename) {
 	setFileType(filename);
 
 	if (!exists(filename)) {
-		std::cerr << "No input files were provided.\n";
-		std::exit(EXIT_FAILURE);
+		throw "No input files were provided.\n";
 	}
 }
 
@@ -27,24 +26,20 @@ FileReader::FileReader(std::vector<std::string> filenames) {
 	this->filenames = filenames;
 
 	if (filenames.size() < 1) {
-		std::cerr << "No input files were provided.\n";
-		std::exit(EXIT_FAILURE);
+		throw "No input files were provided.\n";
 	}
 
 	setFileType(filenames[0]);
 
 	for (const std::string filename : filenames) {
 		if (!exists(filename)) {
-			std::cerr << filename + " does not exist.\n";
-			std::exit(EXIT_FAILURE);
+			throw filename + " does not exist.\n";
 		}
 	}
 
 	// If providing one forty foot input, use other constructor method
 	if (fileType == FileType::MD2 && filenames.size() != 2) {
-		std::cerr << "Expected two input files but received ";
-		std::cerr << std::to_string(filenames.size()) + ".\n";
-		std::exit(EXIT_FAILURE);
+		throw "Expected two input files";
 	}
 }
 
@@ -53,7 +48,7 @@ FileReader::FileReader(std::vector<std::string> filenames) {
  *
  * @return 2D vector containing relevant data
  */
-std::vector<std::vector<double>> FileReader::read() {
+Input FileReader::read() {
 	if (fileType == FileType::FITS) {
 		FitsParser parser = FitsParser(filename);
 		return parser.parse();
@@ -109,6 +104,10 @@ void FileReader::setFileType(std::string filename) {
 		std::cerr << "Unsupported file type provided: " + filename + "\n";
 		std::exit(EXIT_FAILURE);
 	}
+}
+
+FileReader::FileType FileReader::getFileType() {
+	return this->fileType;
 }
 
 FileReader::~FileReader() {

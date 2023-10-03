@@ -3,94 +3,13 @@
 #include "Composite.h"
 #include "OutputFile.h"
 #include "Analysis.h"
+#include "FileReader.h"
 #include <stdexcept>
 #include <iostream>
+#include "PreProcessorNew.h"
 
-double rfiMax;
-bool LSSProcessing;
+bool LSSProcessing = false;
 std::string skynet_filename;
-
-double setRFIMaxVal(SurveyParameters sParams, int MJD)
-{
-	// WE NEED EXCEPTION HANDLING FOR FREQUENCIES/CONFIGURATIONS THAT DON'T ALIGN WITH THESE FREQUENCIES
-	// RFI Max can't be used for multiple surveys with different dates yet.
-	// RFIMax() needs exception handling for different configurations.
-
-	double maxRFI;
-	if (sParams.tele == FOURTY_FOOT)
-	{
-		if (sParams.frequency == 1.405)
-		{
-			if (sParams.channel == COMPOSITE)
-			{
-				maxRFI = 0.7;
-			}
-			else
-			{
-				maxRFI = 0.7;
-			}
-		}
-	}
-	else
-	{
-		if (sParams.frequency == 9.000)
-		{
-			if (sParams.channel == COMPOSITE)
-			{
-				maxRFI = 0.8;
-			}
-			else
-			{
-				maxRFI = 0.8;
-			}
-		}
-		else if (sParams.frequency == 1.395 && MJD < 56870)
-		{
-			if (sParams.channel == COMPOSITE)
-			{
-				maxRFI = 0.8;
-			}
-			else
-			{
-				maxRFI = 0.7;
-			}
-		}
-		else if (sParams.frequency == 1.550)
-		{
-			if (sParams.channel == COMPOSITE)
-			{
-				maxRFI = 0.9;
-			}
-			else
-			{
-				maxRFI = 0.8;
-			}
-		}
-		else if ((sParams.frequency == 1.680 || sParams.frequency == 1.700) && MJD < 56870)
-		{
-			if (sParams.channel == COMPOSITE)
-			{
-				maxRFI = 1.1;
-			}
-			else
-			{
-				maxRFI = 0.9;
-			}
-		}
-	}
-
-	// if (sParams.simulation == true)
-	//{
-	//	maxRFI = 0.95;
-	// }
-	// else
-	//{
-	//	maxRFI = 0.8;
-	// }
-	maxRFI = 0.8;
-
-	return maxRFI;
-}
 
 void setInputMapParams(char *argv[], MapParameters &mParams)
 {
@@ -278,7 +197,6 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 		procParams.raw = false;
 	}
 
-	// HARD-CODED FOR NOW
 	procParams.lssProc = false;
 }
 
@@ -322,36 +240,54 @@ int main(int argc, char *argv[])
 	-> 1 or 0 corresponds to true/on or false/off
 	*/
 
-	// WELCOME TO RDP_2.0! INSTRUCTIONS IN COMMENTS BELOW
-	std::vector<Survey> surveyHold;
-	std::vector<Survey> surveys;
-	std::ofstream outputFile;
-
-	// FILENAME
+	//=================================================================
+	//================== PARSE THE INPUT ARGUMENTS ====================
+	//=================================================================
 	skynet_filename = argv[1];
 
-	// MAP
 	MapParameters mParams;
 	setInputMapParams(argv, mParams);
 
-	// SURVEY
 	SurveyParameters sParams;
 	setInputSurveyParams(argv, sParams);
 
-	// SPECTRAL
 	SpectralParameters cParams;
 	setInputSpectralParams(argc, argv, cParams);
 
-	// PHOTOMETRY
 	PhotoParams pParams;
 	setInputPhotoParams(argv, pParams);
 
-	// PROCESSING
 	ProcessorParameters procParams;
 	setInputProcessingParams(argv, procParams);
 
-	// SURVEY
-	// Survey survey(sParams, cParams, skynet_filename);
+	//=================================================================
+	//====================== READ IN DATA FILE ========================
+	//=================================================================
+	FileReader reader(skynet_filename);
+	Input input = reader.read();
+
+	//=================================================================
+	//===================== PREPROCESS THE DATA =======================
+	//=================================================================
+	if (reader.getFileType() == FileReader::FileType::FITS) {
+		// PreProcesser(cParams, input)
+	}
+
+	PreProcessingParameters ppParams;
+	ppParams.inclusionBands.emplace_back(std::make_pair(1355.0 * pow(10.0, 6.0), 1400.0* pow(10.0, 6.0)));
+	//ppParams.modifiedSubtractionBands.emplace_back(std::make_pair(1300.0 * pow(10.0, 6.0), 1500.0 * pow(10.0, 6.0)));
+	ppParams.subtractionScale = 6.0;
+
+	PreProcessorNew preProcessor = PreProcessorNew();
+	preProcessor.process(ppParams, input);
+
+	//=================================================================
+	//====================== CREATE THE SURVEY ========================
+	//=================================================================
+	//Survey survey(sParams, input);
+
+	std::vector<Survey> surveyHold, surveys;
+
 	Survey survey(sParams, cParams, skynet_filename);
 	surveyHold.push_back(survey);
 	// Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
@@ -362,17 +298,17 @@ int main(int argc, char *argv[])
 	output.printTelescopeInfo(sParams);
 	output.printWScale(mParams.processedWeightScale);
 
-	std::cout << "Out of Survey\n";
-	rfiMax = setRFIMaxVal(sParams, (int)survey.getMJD());
-
-	// PROCESSOR
+	//=================================================================
+	//====================== PROCESS THE DATA =========================
+	//=================================================================
 	Processor processor(procParams);
 
 	for (int i = 0; i < surveyHold.size(); i++)
 	{
 		processor.determineDataBoundaries(surveyHold[i]);
 	}
-	std::cout << "determined Data bapoundarie\n";
+
+	// BACKGROUND SUBTRACTION
 	for (int i = 0; i < surveyHold.size(); i++)
 	{
 		processor.characterizeData(surveyHold[i]);
@@ -391,13 +327,15 @@ int main(int argc, char *argv[])
 	processor.performRFIRejectionMulti(composite, surveys);
 	processor.calculateProcThetaGapMulti(composite);
 
-	// PROCMAP
+	// PROCESSED MAP
 	Cartographer cartographer(composite, mParams);
 	Map procMap = cartographer.generateProcMapsMulti();
 	procMap.printSSSProcFluxMap();
 	procMap.printProcPathMap();
 
-	// PHOTOMETRY AND OUTPUT
+	//=================================================================
+	//===================== PERFORM PHOTOMETRY ========================
+	//=================================================================
 	if (pParams.perform && !(procParams.raw))
 	{
 		Analysis analysis(composite, mParams);
@@ -416,8 +354,5 @@ int main(int argc, char *argv[])
 	procMap.printSSSCorrelationMap();
 	// }
 
-	// EXIT
-	std::cout << "The code has exited successfully with return code 0" << std::endl;
-
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -160,6 +160,49 @@ Survey::Survey()
 {
 
 }
+Survey::Survey(SurveyParameters &sParams, Input input)
+{
+	setParams(sParams);
+	setTelescopeParams(sParams, input);
+	//initializeData(input);
+}
+
+void Survey::setTelescopeParams(SurveyParameters &params, Input input) {
+
+	if (input.telescope == "GreenBank-20" || "NRAO20") {
+		this->telescope = TWENTY_METER;
+
+		params.frequency = input.observedFrequencies[0];
+
+		this->telescopeFrequency = params.frequency * pow(10, 6);
+		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
+
+		setMappingCoordinate(input.coordinate);
+
+		if (input.mapPattern == "ralongmap")
+		{
+			this->mapType = RASTER;
+			this->scansInRa = true;
+		}
+		else if (input.mapPattern == "declatmap")
+		{
+			this->mapType = RASTER;
+			this->scansInRa = false;
+		}
+		else
+		{
+			this->mapType = DAISY;
+			this->scansInRa = false;
+		}
+	}
+	else if (input.telescope == "MightyForty") {
+		this->telescope = FOURTY_FOOT;
+	}
+	else {
+		throw "Unsupported telescope: " + input.telescope + "\n";
+	}
+}
+
 Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::string filename)
 {
 	setParams(sParams);
@@ -175,7 +218,7 @@ Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::strin
 		initializeData(sdfitsData);
 		std::cout << "Out of Initialize\n";
 	}
-	else
+	/*else
 	{
 		if (telescope == TWENTY_METER)
 		{
@@ -191,11 +234,11 @@ Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::strin
 			setFortyParams(gb);
 			initializeData(gbData);
 		}
-	}
+	}*/
 }
 Survey::Survey(SurveyParameters params, std::string fileName, std::string fileNameB)
 {
-	setParams(params);
+	/*setParams(params);
 	this->channel = COMPOSITE;
 
 	if (telescope == TWENTY_METER)
@@ -211,13 +254,12 @@ Survey::Survey(SurveyParameters params, std::string fileName, std::string fileNa
 		gbData = gb.parseFile();
 		setFortyParams(gb);
 		initializeData(gbData);
-	}
+	}*/
 }
 
 //automated preprocessing
 void Survey::setParams(SurveyParameters params)
 {
-	this->telescope = params.tele;
 	this->calMethod = params.calMethod;
 	this->channel = params.channel;
 	this->tracking = params.tracking;
@@ -236,11 +278,6 @@ void Survey::setTwentyParams(GBParser &gb)
 	std::string scanTypeStr = gb.getParamScanType();
 	std::string mapTypeStr = gb.getParamMapType();
 	double obsTemp = gb.getParamFrequency();
-
-	if (obsTemp == 1.550)
-	{	
-		//obsTemp = 1.395;
-	}
 
 	this->telescopeFrequency = obsTemp*pow(10, 9);
 	this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
@@ -302,7 +339,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 			this->scansInRa = false;
 		}
 	}
-	else if (telescopeName == "NRAO_GBT")
+	/*else if (telescopeName == "NRAO_GBT")
 	{
 		params.tele = GBT;
 		params.frequency = sdfits.getFrequency() / pow(10, 9);
@@ -329,7 +366,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 			this->mapType = DAISY;
 			this->scansInRa = false;
 		}
-	}
+	}*/
 	else // forty foot
 	{
 		params.tele = FOURTY_FOOT;

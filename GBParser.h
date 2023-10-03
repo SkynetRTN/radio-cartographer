@@ -1,4 +1,5 @@
 #pragma once
+#include "Input.h"
 #include <string>
 #include <vector>
 
@@ -9,7 +10,7 @@ public:
 	GBParser(std::string);
 	GBParser(std::vector<std::string>);
 	void setDataFile(std::string);
-	std::vector<std::vector<double> > parseFile();
+	Input parseFile();
 
 	//getters
 	double getParamFrequency();
@@ -48,6 +49,5 @@ private:
 	void findParams();//DYLAN
 	void splitLines();
 	void reflectMatrix();
-
 };
 

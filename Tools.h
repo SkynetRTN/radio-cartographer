@@ -58,5 +58,6 @@ namespace Tools
 	double getPythDistance(double, double, double, double);
 	int determinePixel(double, double, double);
 	int determineNearestIndex(int, std::vector<double> &, std::vector<double> &);
+	void interpolate(std::vector<double>&, double);
 }
 

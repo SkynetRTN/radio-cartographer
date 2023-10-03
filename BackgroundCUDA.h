@@ -39,6 +39,7 @@ public:
 	BackgroundCUDA();
 	BackgroundCUDA(Scan&, bool);
 	BackgroundCUDA(Spectra&, int);
+	BackgroundCUDA(std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, double);
 	std::vector<double> calculateBG(double);
 	std::vector<double> calculateBGMulti(double);
 

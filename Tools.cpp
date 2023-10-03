@@ -798,271 +798,6 @@ namespace Tools
 		return coefficents;
 	}
 
-	/*
-	//regression without pivoting
-	std::vector<double> fixedRegression(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis, double horizAxisCoordinate, double vertAxisCoordinate)
-	{
-		double xx = 0, xy = 0;
-		double m, b;
-		double horizHold, vertHold;
-		std::vector<double> ret;
-		ret.resize(2);
-
-		for (int i = start; i <= end; i++)
-		{
-			if (checks[i])
-			{
-				//horizHold = horizAxis[i] - horizAxisCoordinate;
-				//vertHold = vertAxis[i] - vertAxisCoordinate;
-				horizHold = horizAxis[i] - horizAxis[0];
-				vertHold = vertAxis[i] - vertAxis[0];
-
-				xx += weights[i] * horizHold*horizHold;
-				xy += weights[i] * horizHold*vertHold;
-			}
-		}
-
-		m = xy / xx;
-		//b = vertAxisCoordinate - m*horizAxisCoordinate;
-		b = vertAxis[0] - m*horizAxis[0];
-
-		ret[0] = b;
-		ret[1] = m;
-
-		return ret;
-	}
-	std::vector<double> fixedQuadraticRegression(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis, double xAnchor, double yAnchor)
-	{
-		double w = 0;
-		double xSum = 0, ySum = 0;
-		double pivot, swap, multiplier;
-		double finalAnswer;
-		int pivotIndex;
-		int columnCount = 3;
-		std::vector<double> A;
-		std::vector<double> b;
-		A.resize(columnCount * columnCount, 0.0);
-		b.resize(columnCount, 0.0);
-
-		std::vector<double> ret;
-		ret.resize(3);
-		double x2Sum = 0, x3Sum = 0, x4Sum = 0, yxSum = 0, yx2Sum = 0, error = 0, horizHold, vertHold;
-		double wHold, xHold, yHold;
-		double wx = 0, wxx = 0, wxxx = 0, wxxxx = 0;
-		double wy = 0, wyx = 0, wyxx = 0;
-		for (int i = start; i <= end; i++)
-		{
-			if (checks[i])
-			{
-				wHold = weights[i];
-				xHold = (horizAxis[i] - xAnchor);
-				yHold = (vertAxis[i] - yAnchor);
-				w += wHold;
-				wx+= wHold * xHold;
-				wxx += wHold * xHold*xHold;
-				wxxx += wHold * xHold*xHold*xHold;
-				wxxxx += wHold * xHold*xHold*xHold*xHold;
-
-				wy += wHold * yHold;
-				wyx += wHold * yHold*xHold;
-				wyxx += wHold * yHold*xHold*xHold;
-			}
-		}
-
-		double c = (wyx / wxx - wyxx / wxxx) / (wxxx / wxx - wxxxx / wxxx);
-		double temp = (wyx - c * wxxx) / wxx;
-		double f = temp - 2 * c* xAnchor;
-		double a = yAnchor - temp * xAnchor + c * xAnchor*xAnchor;
-
-
-
-		//double c = (yxSum / x2Sum - yx2Sum / x3Sum) / (x3Sum / x2Sum - x4Sum / x3Sum);
-		//double temp = (yxSum - c * x3Sum) / x2Sum;
-		//double f = temp - 2 * c*xAnchor;
-		//double a = yAnchor - temp*xAnchor + c*xAnchor*xAnchor;
-
-		ret[0] = a;
-		ret[1] = f;
-		ret[2] = c;
-		return ret;
-	}
-	
-
-	//regression with pivoting
-	std::vector<double> regressionPivot(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis)
-	{
-		double xfirst = horizAxis[0], yfirst = vertAxis[0];
-		double wxSum = 0, wySum = 0, wSum = 0, wxBar, wyBar, top = 0, bottom = 0, m, b;
-		std::vector<double> toRet;
-		toRet.resize(2, 0.0);
-		for (int i = 0; i < horizAxis.size(); i++)
-		{
-			if (checks[i])
-			{
-				wySum += weights[i] * vertAxis[i];
-				wxSum += weights[i] * horizAxis[i];
-				wSum += weights[i];
-			}
-		}
-		wyBar = wySum / wSum;
-		wxBar = wxSum / wSum;
-		for (int i = 0; i < horizAxis.size(); i++)
-		{
-			if (checks[i])
-			{
-				//top += weights[i] * (horizAxis[i] - wxBar) * (vertAxis[i] - wyBar);
-				//bottom += weights[i] * (horizAxis[i] - wxBar) * (horizAxis[i] - wxBar);
-				top += weights[i] * (horizAxis[i] - xfirst) * (vertAxis[i] - yfirst);
-				bottom += weights[i] * (horizAxis[i] - xfirst) * (horizAxis[i] - xfirst);
-			}
-		}
-		m = top / bottom;
-		//b = wyBar;
-		b = yfirst;
-
-		toRet[0] = b;
-		toRet[1] = m;
-		//std::cout << "M: " << m << " B: " << b << "xBar: " << xBar << "\n";
-		return toRet;
-	}
-	std::vector<double> quadraticRegressionPivot(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis)
-	{
-		std::vector<double> A;
-		std::vector<double> b;
-		std::vector<double> coef;
-		int columnCount = 3;
-		A.resize(columnCount * columnCount, 0.0);
-		b.resize(columnCount, 0.0);
-		double wHold, xHold, yHold, w = 0, wx = 0, wy = 0, wxx = 0, wxy = 0, wxxx = 0, wxxy = 0, wxxxx = 0;
-
-		std::vector<double> ret;
-		ret.resize(3);
-		
-		for (int i = start; i <= end; i++)
-		{
-			if (checks[i])
-			{
-				wHold = weights[i];
-				xHold = horizAxis[i];
-				yHold = vertAxis[i];
-				w += wHold;
-				wx += wHold*xHold;
-				wy += wHold*yHold;
-				wxx += wHold*xHold*xHold;
-				wxy += wHold*xHold*yHold;
-				wxxx += wHold*xHold*xHold*xHold;
-				wxxy += wHold*xHold*xHold*yHold;
-				wxxxx += wHold*xHold*xHold*xHold*xHold;
-
-
-
-				//horizHold = horizAxis[i];
-				//vertHold = vertAxis[i];
-				//xSum += weights[i] * horizHold;
-				//xSquareSum += weights[i] * horizHold * horizHold;
-				//xCubeSum += weights[i] * horizHold * horizHold * horizHold;
-				//xQuartSum += weights[i] * horizHold * horizHold * horizHold * horizHold;
-				//prodSum += weights[i] * horizHold * vertHold;
-				//ySum += weights[i] * vertHold;
-				//xSquareYSum += weights[i] * horizHold * horizHold * vertHold;
-				//length += weights[i];
-			}
-		}
-
-
-		A[0] = w; A[1] = wx; A[2] = wxx;
-		A[3] = wx; A[4] = wxx; A[5] = wxxx;
-		A[6] = wxx; A[7] = wxxx; A[8] = wxxxx;
-		b[0] = wy; b[1] = wxy; b[2] = wxxy;
-
-		coef = performPivot(columnCount, A, b);
-
-		ret[0] = coef[0];
-		ret[1] = coef[1];
-		ret[2] = coef[2];
-
-		return ret;
-	}
-	std::vector<double> fixedRegressionPivot(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis, double horizAxisCoordinate, double vertAxisCoordinate)
-	{
-		double xx = 0, xy = 0;
-		double m, b;
-		double horizHold, vertHold;
-		std::vector<double> ret;
-		ret.resize(2);
-
-		for (int i = start; i <= end; i++)
-		{
-			if (checks[i])
-			{
-				horizHold = horizAxis[i] - horizAxisCoordinate;
-				vertHold = vertAxis[i] - vertAxisCoordinate;
-
-				xx += weights[i] * horizHold*horizHold;
-				xy += weights[i] * horizHold*vertHold;
-			}
-		}
-
-		m = xy / xx;
-		b = vertAxisCoordinate - m*horizAxisCoordinate;
-
-		ret[0] = b;
-		ret[1] = m;
-
-		return ret;
-	}
-	std::vector<double> fixedQuadraticRegressionPivot(int start, int end, std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &horizAxis, std::vector<double> &vertAxis, double horizAxisCoordinate, double vertAxisCoordinate)
-	{
-		std::vector<double> coef;
-		double w = 0;
-		double xSum = 0, ySum = 0;
-		double pivot, swap, multiplier;
-		double finalAnswer;
-		int pivotIndex;
-		int columnCount = 3;
-		std::vector<double> A;
-		std::vector<double> b;
-		A.resize(columnCount * columnCount, 0.0);
-		b.resize(columnCount, 0.0);
-
-		std::vector<double> ret;
-		ret.resize(4);
-		double x2Sum = 0, x3Sum = 0, x4Sum = 0, yxSum = 0, yx2Sum = 0, error = 0, horizHold, vertHold;
-		for (int i = start; i <= end; i++)
-		{
-			if (checks[i])
-			{
-				horizHold = (horizAxis[i] - horizAxisCoordinate);
-				vertHold = (vertAxis[i] - vertAxisCoordinate);
-				w += weights[i];
-
-				ySum += weights[i] * vertHold;
-				xSum += weights[i] * horizHold;
-				x2Sum += weights[i] * horizHold*horizHold;
-				x3Sum += weights[i] * horizHold*horizHold*horizHold;
-				x4Sum += weights[i] * horizHold*horizHold*horizHold*horizHold;
-				yxSum += weights[i] * vertHold*horizHold;
-				yx2Sum += weights[i] * vertHold*horizHold*horizHold;
-			}
-		}
-
-		
-
-		A[0] = w; A[1] = xSum; A[2] = x2Sum;
-		A[3] = xSum; A[4] = x2Sum; A[5] = x3Sum;
-		A[6] = x2Sum; A[7] = x3Sum; A[8] = x4Sum;
-		b[0] = ySum; b[1] = yxSum; b[2] = yx2Sum;
-
-		coef = performPivot(columnCount, A, b);
-
-		ret[0] = coef[0];
-		ret[1] = coef[1];
-		ret[2] = coef[2];
-		ret[3] = 0;
-
-		return ret;
-	}
-	*/
 
 	//regression with pivoting
 	std::vector<double> regressionPivot(std::vector<bool> &checks, std::vector<double> &weights, std::vector<double> &xAxis, std::vector<double> &yAxis)
@@ -1516,6 +1251,39 @@ namespace Tools
 			}
 		}
 		return j;
+	}
+	void interpolate(std::vector<double>& vec, double threshold) 
+	{
+		// threshold is inclusive
+		for (int k = 0; k < vec.size(); ++k)
+		{
+			if (vec[k] < threshold)
+			{
+				int low = Tools::max(0, k - 1);
+				int high = Tools::min(k + 1, vec.size() - 1);
+				
+				while (vec[low] <= threshold && low > 1)
+				{
+					low--;
+				}
+				while (vec[high] <= threshold && high < vec.size() - 1)
+				{
+					high++;
+				}
+				if (vec[low] > threshold && vec[high] > threshold)
+				{
+					vec[k] = vec[low] + (vec[high] - vec[low]) / (high - low)*(k - low);
+				}
+				else if (vec[low] <= threshold)
+				{
+					vec[low] = vec[high];
+				}
+				else if (vec[high] <= threshold)
+				{
+					vec[high] = vec[low];
+				}
+			}
+		}
 	}
 
 	//cartographer tools

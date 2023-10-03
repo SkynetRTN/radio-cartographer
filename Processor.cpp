@@ -102,7 +102,6 @@ void Processor::performBGSubtractionMulti(Survey &survey)
 	{
 		for (int i = 0; i < scans.size(); i++)
 		{
-			Debugger::print("Info", i);
 			bgCuda = BackgroundCUDA(scans[i], false);
 			futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBGMulti, bgCuda, bgScaleBW * psfFWHM);
 			counter++;

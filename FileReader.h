@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Input.h"
 
 class FileReader {
 public:
@@ -13,16 +14,17 @@ public:
 		FITS
 	};
 
+	Input read();
+	FileType getFileType();
+
+	~FileReader();
+
 private:
 
 	std::string filename = "";
 	std::vector<std::string> filenames;
 	FileType fileType;
 
-	std::vector<std::vector<double>> read();
-
 	bool exists(std::string);
 	void setFileType(std::string);
-
-protected:
 };

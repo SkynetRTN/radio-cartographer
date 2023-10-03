@@ -14,6 +14,7 @@ public:
 
 	//constructors
 	Survey();
+	Survey(SurveyParameters &, Input);
 	Survey(SurveyParameters &, SpectralParameters, std::string);
 	Survey(SurveyParameters, std::string, std::string);
 
@@ -28,10 +29,10 @@ public:
 	//data pre-processing
 	void setParams(SurveyParameters);
 	void setTwentyParams(GBParser &);    //DYLAN
-	void setSdfitsParams(SurveyParameters &, PreProcessor);//DYLAN
+	void setTelescopeParams(SurveyParameters&, Input input);
+	void setSdfitsParams(SurveyParameters&, PreProcessor);//DYLAN
 	void determineInputFile(std::string); //DYLAN
-	void setFortyParams(FourtyParser &); // DYLAN
-	void process(bool, bool, bool, double, double);
+	void setFortyParams(FourtyParser&); // DYLAN
 	void switchChannels(Channel);
 
 	//setters
@@ -163,10 +164,8 @@ private:
 	//misc
 	std::string mCoordinate;
 	void daisySweepBreaker();
-	void findCenter();
 	void daisyPrelim();
 	void findCenters();
-	void set2DScatter();
 
 	double gauss(double, double);
 	void addBackgroundSignal(std::vector<std::vector<double>> &, std::vector<std::vector<double>> &, std::vector<std::vector<double>> &);

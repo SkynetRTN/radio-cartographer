@@ -47,7 +47,6 @@ std::vector<std::vector<double>> PreProcessor::sdfitsReader(SpectralParameters c
 		{
 			buildSpectra(spectra, cParams);
 			performCleaningMulti(spectra, cParams.subScale);
-			//appendColumnData();
 		}
 
 		// temp
@@ -437,65 +436,15 @@ void PreProcessor::setBG(std::vector<double> bg, int index)
 }
 void PreProcessor::removeBG()
 {
-	std::ofstream cc1;// , cc2, cc3, cc4, cc5, cc6, cc7, cc8;
-	cc1.open("12344.txt", std::ios_base::app);
-	//cc2.open("12346.txt", std::ios_base::app);
-	//cc3.open("68432.txt", std::ios_base::app);
-	//cc4.open("74126.txt", std::ios_base::app);
-	//cc5.open("74128.txt", std::ios_base::app);
-	//cc6.open("74130.txt", std::ios_base::app);
-	//cc7.open("112558.txt", std::ios_base::app);
-	//cc8.open("112560.txt", std::ios_base::app);
-
 	for (int i = 0; i < spectra20.size(); i++)
 	{
 		for (int j = 0; j < spectra20[i].size(); j++)
 		{
 			spectra20[i][j] = spectra20[i][j] - bgOutput[i][j];
-
-			if (i == 1)
-			{
-				cc1 << bgOutput[i][j] << "\n";
-			}
-			/*if (i == 12346)
-			{
-				cc2 << bgOutput[i][j] << "\n";
-			}
-			if (i == 68432)
-			{
-				cc3 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74126)
-			{
-				cc4 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74128)
-			{
-				cc5 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74130)
-			{
-				cc6 << bgOutput[i][j] << "\n";
-			}
-			if (i == 112558)
-			{
-				cc7 << bgOutput[i][j] << "\n";
-			}
-			if (i == 112560)
-			{
-				cc8 << bgOutput[i][j] << "\n";
-			}*/
 		}
 	}
 
-	cc1.close();
-	//cc2.close();
-	//cc3.close();
-	//cc4.close();
-	//cc5.close();
-	//cc6.close();
-	//cc7.close();
-	//cc8.close();
+
 }
 
 // Scatter
@@ -998,14 +947,6 @@ void Spectra::determineBaselines(SpectralParameters sp)
 	}
 
 	velocityToFrequency(sp);
-
-	//std::ofstream cc;
-	/*cc.open("baselines.txt", std::ios_base::app);
-	for (int z = 0; z < baselines[1000].size(); z++)
-	{
-		cc << baselines[1000][z] << "\n";
-	}
-	cc.close();*/
 }
 void Spectra::determineFrequency(double fStep, double obsFreq, double centerOffset)
 {
@@ -1153,16 +1094,6 @@ void Spectra::keepBackground(std::vector<std::vector<double>> &bgOutput, double 
 
 	freqStep = std::abs(freqStep);
 
-	std::ofstream cc1;//, cc2, cc3, cc4, cc5, cc6, cc7, cc8;
-	cc1.open("12344.txt", std::ios_base::app);
-	//cc2.open("12346.txt", std::ios_base::app);
-	//cc3.open("68432.txt", std::ios_base::app);
-	//cc4.open("74126.txt", std::ios_base::app);
-	//cc5.open("74128.txt", std::ios_base::app);
-	//cc6.open("74130.txt", std::ios_base::app);
-	//cc7.open("112558.txt", std::ios_base::app);
-	//cc8.open("112560.txt", std::ios_base::app);
-
 	if (excisedIndices.size() != 0)
 	{
 		for (auto i : excisedIndices)
@@ -1205,57 +1136,8 @@ void Spectra::keepBackground(std::vector<std::vector<double>> &bgOutput, double 
 			{				
 				flux[i][j] = flux[i][j] - bgOutput[i][j];
 			}
-			if (i == 1)
-			{
-				cc1 << flux[i][j] << "\t";
-				cc1 << bgOutput[i][j] << "\n";
-			}
-			if (i == 12346)
-			{
-				//cc2 << flux[i][j] << "\n";
-				//cc2 << bgOutput[i][j] << "\n";
-			}
-			if (i == 68432)
-			{
-				//cc3 << flux[i][j] << "\n";
-				//cc3 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74126)
-			{
-				//cc4 << flux[i][j] << "\n";
-				//cc4 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74128)
-			{
-			//	cc5 << flux[i][j] << "\n";
-				//cc5 << bgOutput[i][j] << "\n";
-			}
-			if (i == 74130)
-			{
-				//cc6 << flux[i][j] << "\n";
-				//cc6 << bgOutput[i][j] << "\n";
-			}
-			if (i == 112558)
-			{
-				//cc7 << flux[i][j] << "\n";
-				//cc7 << bgOutput[i][j] << "\n";
-			}
-			if (i == 112560)
-			{
-				//cc8 << flux[i][j] << "\n";
-				//cc8 << bgOutput[i][j] << "\n";
-			}
 		}
 	}
-
-	cc1.close();
-	//cc2.close();
-	//cc3.close();
-	//cc4.close();
-	//cc5.close();
-	//cc6.close();
-	//cc7.close();
-	//cc8.close();
 }
 void Spectra::insertPoints(std::vector<std::vector<double>> &bgOutput, double freqStep, int i, int j, std::string position)
 {

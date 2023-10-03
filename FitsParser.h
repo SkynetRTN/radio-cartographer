@@ -3,16 +3,20 @@
 #include <vector>
 #include <utility>
 
+#include "Input.h"
+
 class FitsParser {
 public:
 	FitsParser(std::string);
-	std::vector<std::vector<double>> parse();
+	FitsParser(std::string, bool);
+
+	Input input;
+	Input parse();
+
+	~FitsParser();
 
 private:
-	enum class Resolution {
-		HIGH,
-		LOW,
-	};
+	bool logToConsole;
 
 	// FITS Primary Header Keys
 	std::string kObsDate = "DATE";
@@ -26,44 +30,38 @@ private:
 	std::string kMJulianDate = "MJD"; 
 
 	// FITS Binary Table Keys
-	std::vector<std::string> columns = { "UTSECS", "CRVAL2", "CRVAL3", "AZIMUTH", "ELEVATIO", 
-										 "NSAMPS", "CALSTATE", "SWPINDEX", "SWPVALID", "CDELT1" };
+	std::string kUtcSecs = "UTSECS";
+	std::string kRaDegs = "CRVAL2";
+	std::string kDecDegs = "CRVAL3";
+	std::string kAzimuth = "AZIMUTH";
+	std::string kElevation = "ELEVATIO";
+	std::string kDataDump = "NSAMPS";
+	std::string kCalibrationState = "CALSTATE";
+	std::string kSweepIndex = "SWPINDEX";
+	std::string kSweepValid = "SWPVALID";
+	std::string kFrequencyStep = "CDELT1";
 
-	// Inputs
-	std::string filename;
-
-	// Extracted Data
-	std::string telescope;
-	std::string obsDate;
-	std::string obsMode;
-	std::string coordinate;
-
-	Resolution resolution;
-	std::pair<std::int32_t, std::int32_t> integratedIndexRange;
-	std::pair<std::int32_t, std::int32_t> observedFrequencyRange;
-
-	// Outputs
+	// FITS Binary Table Data
 	std::vector<double> times;
 	std::vector<double> ras;
 	std::vector<double> decs;
 	std::vector<double> azimuths;
 	std::vector<double> elevations;
-	std::vector<double> fluxesL;
-	std::vector<double> fluxesR;
-	std::vector<double> fluxesComp;
-	std::vector<double> calibrations;
 	std::vector<double> dataDumps;
+	std::vector<double> calibrations;
+	std::vector<double> sweepIndices;
+	std::vector<double> valids;
 
-	// Methods
+	std::vector<std::vector<double>> spectra;
+
+	std::string filename;
+
 	int parseMetaData();
-	void parseHistoryData(std::string);
 	int parseExtensionTable();
 
+	void sortLowResolutionData();
+	void sortHighResoultionData();
+	void parseHistoryData(std::string);
 	void parseDataResolution(std::string);
-
-	void setIntegratedIndexRange(std::string);
-	void setDataResolution(Resolution);
-
-	std::pair<double, double> getIntegratedFrequencyRange();
-	std::pair<double, double> getObserveddFrequencyRange();
+	void parseIntegratedIndexRange(std::string);
 };

@@ -515,6 +515,17 @@ BackgroundCUDA::BackgroundCUDA(Spectra &spectra, int i)
 
     size = flux.size();
 }
+BackgroundCUDA::BackgroundCUDA(std::vector<double> baselines, std::vector<double> distances, std::vector<double> weights, std::vector<double> data, double scatter)
+{
+	// Spectral Constructor
+	baselineVec = baselines;
+	angDist = distances;
+	dataDumps = weights;
+	flux = data;
+	this->scatter = scatter;
+
+	size = flux.size();
+}
 BackgroundCUDA::~BackgroundCUDA()
 {
 }
