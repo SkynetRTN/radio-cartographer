@@ -11,7 +11,6 @@
 #include "Analysis.h"
 #include "OutputFile.h"
 #include "FileReader.h"
-#include <json/json.h>
 
 bool LSSProcessing = false;
 std::string skynet_filename;
@@ -207,44 +206,6 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 
 int main(int argc, char *argv[])
 {
-	/*
-	The inputs are as follows:
-	arg 1 = filename
-	-> The file to be processed
-	arg 2 = Processing Coordinates
-	-> These are the coordinates that we process the data in
-	arg 3 = Flux Channel
-	-> Processing channel
-	arg 4 = Calibration Method
-	-> Which calibration data to be used
-	arg 5 = Background Scalecoo
-	-> In beamwidths
-	arg 6 = RFI Scale
-	-> In beamwidths
-	arg 7 = Weight Scale
-	-> ...
-	arg 8 = Time Shifting
-	-> 1 or 0 corresponds to true/on or false/off
-	arg 9 = Raw
-	-> Generate a raw map
-	arg 10 = LSS
-	-> Interested in large
-	arg 11 = photometry on
-	-> ...
-	arg 12 = Aperture Radius
-	-> The radius around the source
-	arg 13 = Annulus Radius
-	-> The outer radius for background measurements
-	arg 14 = Centroid Finding Method
-	-> Look for center, brightest, or coordinates
-	arg 15 = Coordinates
-	-> Location of sources
-	arg 16 = Trim Size
-	-> Trims the turning edges
-	arg 17 = m10+ Criteria
-	-> 1 or 0 corresponds to true/on or false/off
-	*/
-
 	//=================================================================
 	//================== PARSE THE INPUT ARGUMENTS ====================
 	//=================================================================
@@ -269,36 +230,47 @@ int main(int argc, char *argv[])
 	//====================== READ IN DATA FILE ========================
 	//=================================================================
 
-
 	FileReader reader(skynet_filename);
 	Input input = reader.read();
+
+	/*FileReader reader2("G28_C02.raw.dcr.fits");
+	Input input2 = reader2.read();
+
+	FileReader reader3("G28_C03.raw.dcr.fits");
+	Input input3 = reader3.read();*/
+
+	/*FileReader reader20M("0088749.fits");
+	Input input20M = reader20M.read();*/
 
 	//=================================================================
 	//===================== PREPROCESS THE DATA =======================
 	//=================================================================
-	if (reader.getFileType() == FileReader::FileType::FITS) {
-		// PreProcesser(cParams, input)
+	if (reader.getFileType() == FileReader::FileType::FITS_20M) {
+		PreProcessingParameters ppParams;
+		//ppParams.inclusionBands.emplace_back(std::make_pair(1355.0 * pow(10.0, 6.0), 1400.0* pow(10.0, 6.0)));
+		//ppParams.modifiedSubtractionBands.emplace_back(std::make_pair(1300.0 * pow(10.0, 6.0), 1500.0 * pow(10.0, 6.0)));
+		//ppParams.subtractionScale = 6.0;
+
+		PreProcessorNew preProcessor = PreProcessorNew();
+		preProcessor.process(ppParams, input);
 	}
-
-	PreProcessingParameters ppParams;
-	ppParams.inclusionBands.emplace_back(std::make_pair(1355.0 * pow(10.0, 6.0), 1400.0* pow(10.0, 6.0)));
-	//ppParams.modifiedSubtractionBands.emplace_back(std::make_pair(1300.0 * pow(10.0, 6.0), 1500.0 * pow(10.0, 6.0)));
-	ppParams.subtractionScale = 6.0;
-
-	PreProcessorNew preProcessor = PreProcessorNew();
-	preProcessor.process(ppParams, input);
 
 	//=================================================================
 	//====================== CREATE THE SURVEY ========================
 	//=================================================================
-	//Survey survey(sParams, input);
 
 	std::vector<Survey> surveyHold, surveys;
-
-	Survey survey(sParams, cParams, skynet_filename);
+	Survey survey(sParams, input);
 	surveyHold.push_back(survey);
-	// Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
-	// surveyHold.push_back(survey2);
+
+	/*Survey survey2(sParams, input2);
+	surveyHold.push_back(survey2);
+
+	Survey survey3(sParams, input3);
+	surveyHold.push_back(survey3);*/
+
+	//Survey survey2(sParams, cParams, skynet_filename);
+	//surveyHold.push_back(survey2);
 
 	// OUTPUT
 	Output output;
@@ -326,7 +298,7 @@ int main(int argc, char *argv[])
 		surveyHold[i].calculateEdgeParameters();
 	}
 
-	processor.levelLSSData(surveyHold);
+	//processor.levelLSSData(surveyHold);
 	surveys = surveyHold;
 	Composite composite(surveys);
 

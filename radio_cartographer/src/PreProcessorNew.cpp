@@ -97,9 +97,8 @@ void PreProcessorNew::setPreProcessingParams(PreProcessingParameters params, Inp
 		leftRawSpectra[i].erase(leftRawSpectra[i].begin(), leftRawSpectra[i].begin() + input.getLowerIntegratedIndex());
 		leftRawSpectra[i].erase(leftRawSpectra[i].begin() + (input.getHigherIntegratedIndex() - input.getLowerIntegratedIndex() + 1), leftRawSpectra[i].end());
 
-
-		// rightRawSpectra[i].erase(rightRawSpectra[i].begin()+ input.getHigherIntegratedIndex(), rightRawSpectra[i].end());
-		// rightRawSpectra[i].erase(rightRawSpectra[i].begin(), rightRawSpectra[i].begin() + input.getLowerIntegratedIndex());
+		rightRawSpectra[i].erase(rightRawSpectra[i].begin(), rightRawSpectra[i].begin() + input.getLowerIntegratedIndex());
+		rightRawSpectra[i].erase(rightRawSpectra[i].begin() + (input.getHigherIntegratedIndex() - input.getLowerIntegratedIndex() + 1), rightRawSpectra[i].end());
 	}
 
 	dataSize = leftRawSpectra[0].size();

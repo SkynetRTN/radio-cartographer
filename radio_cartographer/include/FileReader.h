@@ -11,7 +11,8 @@ public:
 	enum class FileType {
 		MD2,
 		TEXT,
-		FITS
+		FITS_20M,
+		FITS_GBT
 	};
 
 	Input read();

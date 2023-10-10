@@ -164,18 +164,23 @@ Survey::Survey(SurveyParameters &sParams, Input input)
 {
 	setParams(sParams);
 	setTelescopeParams(sParams, input);
-	//initializeData(input);
+	determineInputFile(input.filename);
+	initializeData(input);
 }
 
 void Survey::setTelescopeParams(SurveyParameters &params, Input input) {
 
-	if (input.telescope == "GreenBank-20" || "NRAO20") {
-		this->telescope = TWENTY_METER;
+	if (input.telescope == "GreenBank-20" || input.telescope == "NRAO20" || input.telescope ==  "NRAO_GBT") {
+
+		if (input.telescope != "NRAO_GBT") this->telescope = TWENTY_METER;
+		else this->telescope = GBT;
+		
+		double telescopeDiameter = this->telescope == GBT ? 105.0 : 20.0;
 
 		params.frequency = input.observedFrequencies[0];
 
-		this->telescopeFrequency = params.frequency * pow(10, 6);
-		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
+		this->telescopeFrequency = params.frequency;
+		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * telescopeDiameter * M_PI);
 
 		setMappingCoordinate(input.coordinate);
 
@@ -339,7 +344,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 			this->scansInRa = false;
 		}
 	}
-	/*else if (telescopeName == "NRAO_GBT")
+	else if (telescopeName == "NRAO_GBT")
 	{
 		params.tele = GBT;
 		params.frequency = sdfits.getFrequency() / pow(10, 9);
@@ -366,7 +371,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 			this->mapType = DAISY;
 			this->scansInRa = false;
 		}
-	}*/
+	}
 	else // forty foot
 	{
 		params.tele = FOURTY_FOOT;
@@ -412,6 +417,32 @@ void Survey::switchChannels(Channel newChannel)
 }
 
 //file processors
+void Survey::initializeData(Input input) {
+	std::vector<std::vector<double>> data;
+	data.resize(11);
+
+	data[0] = input.times;
+	data[1] = input.ras;
+	data[2] = input.decs;
+	data[3] = input.azimuths;
+	data[4] = input.elevations;
+	data[5] = input.lContinuum;
+	data[6] = input.rContinuum;
+	data[7] = input.dataDumps;
+	data[8] = input.calibrations;
+	data[9] = input.sweepIndices;
+	data[10] = input.valids;
+
+	if (telescope == TWENTY_METER || telescope == GBT)
+	{
+		dataProc(data);
+	}
+	else
+	{
+		dataProc40(data);
+	}
+}
+
 void Survey::initializeData(std::vector<std::vector<double> > data)
 {
 	if (telescope == TWENTY_METER || telescope == GBT)
@@ -455,7 +486,6 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 		gainCalibration(LEFT, channel);
 		gainCalibration(RIGHT, channel);
 	}
-
 
 	for (int i = 0; i < fluxL.size(); i++)
 	{

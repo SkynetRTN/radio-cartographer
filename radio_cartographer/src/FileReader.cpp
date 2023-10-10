@@ -1,6 +1,7 @@
 #include "FileReader.h"
 #include "FourtyParser.h"
 #include "FitsParser.h"
+#include "GBTParser.h"
 #include "GBParser.h"
 
 #include <fstream>
@@ -8,8 +9,8 @@
 
 
 /**
- * Supported file formats include '.md2', '.txt' and '.fits'.
- * Supported telescopes include the twenty meter and forty foot.
+ * Supported file formats include '.md2', '.txt', '.dcr.fits', and '.cyb.fits'.
+ * Supported telescopes include the the forty foot, twenty meter, and the Green Bank Telescope
  */
  
 
@@ -50,8 +51,12 @@ FileReader::FileReader(std::vector<std::string> filenames) {
  * @return 2D vector containing relevant data
  */
 Input FileReader::read() {
-	if (fileType == FileType::FITS) {
+	if (fileType == FileType::FITS_20M) {
 		FitsParser parser = FitsParser(filename);
+		return parser.parse();
+	}
+	else if (fileType == FileType::FITS_GBT) {
+		GBTParser parser = GBTParser(filename);
 		return parser.parse();
 	}
 	else if (fileType == FileType::TEXT) {
@@ -98,12 +103,14 @@ void FileReader::setFileType(std::string filename) {
 	else if (filename.find(".md2") != std::string::npos) {
 		fileType = FileType::MD2;
 	}
+	else if (filename.find(".dcr.fits") != std::string::npos) {
+		fileType = FileType::FITS_GBT;
+	}
 	else if (filename.find(".fits") != std::string::npos) {
-		fileType = FileType::FITS;
+		fileType = FileType::FITS_20M;
 	}
 	else {
-		std::cerr << "Unsupported file type provided: " + filename + "\n";
-		std::exit(EXIT_FAILURE);
+		throw "Unsupported file type provided: " + filename + "\n";
 	}
 }
 

@@ -155,6 +155,7 @@ private:
 	void correctDec40(std::vector<std::vector<double> > &, std::vector<std::vector<double> > &, int);
 	void formatData11(std::vector<std::vector<double> >&);
 	void initializeData(std::vector<std::vector<double> >);
+	void initializeData(Input);
 	void gainCalibration(Channel, Channel);
 	void janskyCalibration(double, Channel);
 
