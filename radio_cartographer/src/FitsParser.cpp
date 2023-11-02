@@ -10,8 +10,7 @@
  */
 
 FitsParser::FitsParser(std::string filename) {
-	this->input.filename = filename;
-	this->logToConsole = false;
+	FitsParser(filename, false);
 }
 
 FitsParser::FitsParser(std::string filename, bool logToConsole) {
@@ -195,7 +194,7 @@ void FitsParser::parseDataResolution(std::string line) {
 		input.setDataResolution(Input::Resolution::HIGH);
 	}
 	else {
-		throw "Unable to find the observation's resolution.\n";
+		throw "Not Found: Observation's resolution.\n";
 	}
 }
 

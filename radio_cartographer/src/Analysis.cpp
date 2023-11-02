@@ -24,7 +24,7 @@ Analysis::Analysis(Composite composite, MapParameters mParams)
 }
 
 // Callers
-void Analysis::photometry(Map &mapHold, PhotoParams pParams)
+void Analysis::photometry(Map &mapHold, PhotometryParams pParams)
 {
     // Map
     map = mapHold;
@@ -111,7 +111,7 @@ void Analysis::photometry(Map &mapHold, PhotoParams pParams)
     Output output;
     output.printPhotometry(results);
 }
-void Analysis::photometryMulti(Map &mapHold, PhotoParams pParams)
+void Analysis::photometryMulti(Map &mapHold, PhotometryParams pParams)
 {
     // Map
     map = mapHold;
@@ -263,7 +263,7 @@ std::vector<double> Analysis::photometer(int index, std::vector<double> coordina
 }
 
 // Determiners
-void Analysis::determineDimensions(std::vector<double> coords, Dimensions &dim, PhotoParams pParams)
+void Analysis::determineDimensions(std::vector<double> coords, Dimensions &dim, PhotometryParams pParams)
 {
     // Define edge of map
     dim.minRa = map.getMinRa();

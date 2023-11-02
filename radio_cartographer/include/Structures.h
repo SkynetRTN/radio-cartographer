@@ -1,7 +1,12 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <type_traits>
 
+enum Receiver2 {
+	HIGH,
+	LOW,
+};
 enum Channel
 {
 	LEFT,
@@ -48,6 +53,13 @@ enum Quadrant
 	DIAG_BOTTOM_RIGHT,
 	DIAG_TOP_LEFT,
 	DIAG_BOTTOM_LEFT
+};
+
+enum CentroidMethods 
+{ 
+	CENTER, 
+	BRIGHTEST,
+	COORDINATES 
 };
 
 struct PartitionSet
@@ -97,6 +109,31 @@ struct PartitionSet
 	bool tracking; // DYLAN
 	double trimSize;
 	double edgeRadius;
+};
+
+struct PreProcessingParameters
+{
+	double velocity = 0.0;
+
+	double subtractionScale = 0.0;
+	double modifiedSubtractionScale = 0.0;;
+
+	std::vector<double> exclusionBand;
+	std::vector<std::pair<double, double>> inclusionBands;
+	std::vector<std::pair<double, double>> modifiedSubtractionBands;
+
+	Receiver2 receiver;
+};
+
+struct PhotometryParams
+{
+	int perform;
+	int numberOfSources;
+	double innerRadius;
+	double outerRadius;
+	CentroidMethods centroidType;
+	std::vector<double> coordinatesDeg;
+	std::vector<double> coordinatesPixels;
 };
 
 struct SurveyParameters
@@ -152,3 +189,30 @@ struct RFIParameters
 	double standardGap;
 	PartitionSet partSetProcSSS;
 };
+
+//template<typename Enum>
+//Enum mapStringToEnum(const std::string& enumStr) {
+//	//std::transform(enumStr.begin(), enumStr.end(), enumStr.begin(), ::toupper);
+//
+//	if (std::is_same<Enum, CentroidMethods>::value) {
+//		if (enumStr == "CENTER") return Enum::CENTER;
+//		if (enumStr == "BRIGHTEST") return Enum::BRIGHTEST;
+//		if (enumStr == "COORDINATES") return Enum::COORDINATES;
+//	}
+//	else if (std::is_same<Enum, Coordinates>::value) {
+//		if (enumStr == "EQUATORIAL") return Enum::EQUATORIAL;
+//		if (enumStr == "GALACTIC") return Enum::GALACTIC;
+//	}
+//	else if (std::is_same<Enum, CalMethods>::value) {
+//		if (enumStr == "PRE") return Enum::PRE;
+//		if (enumStr == "POST") return Enum::POST;
+//		if (enumStr == "INTERPOLATED") return Enum::INTERPOLATED;
+//	}
+//	else if (std::is_same<Enum, Channel>::value) {
+//		if (enumStr == "left") return Enum::LEFT;
+//		if (enumStr == "right") return Enum::RIGHT;
+//		if (enumStr == "composite") return Enum::COMPOSITE;
+//	}
+//
+//	throw "Invalid enum string parsed from configuration file: " + enumStr;
+//}

@@ -4,18 +4,6 @@
 #include "Composite.h"
 #include "Cartographer.h"
 
-enum CentroidMethods {CENTER, BRIGHTEST, COORDINATES};
-
-struct PhotoParams
-{
-	int perform;
-	int numberOfSources;
-	double innerRadius;
-	double outerRadius;
-	CentroidMethods centroidType;
-	std::vector<double> coordinatesDeg;
-	std::vector<double> coordinatesPixels;
-};
 
 struct Dimensions
 {
@@ -40,11 +28,11 @@ public:
 	std::vector<Scan> scans;
 
 	// Callers
-	void photometry(Map &, PhotoParams);
+	void photometry(Map &, PhotometryParams);
 	std::vector<double> photometer(int, std::vector<double>, Dimensions);
 
 	// Multi-Threaded Callers
-	void photometryMulti(Map &, PhotoParams);
+	void photometryMulti(Map &, PhotometryParams);
 
 	// Annulus & Aperture
 	std::vector<double> annulusCalculations(Dimensions, std::vector<double>);
@@ -69,7 +57,7 @@ private:
 
 	// Determining Functions
 	void determinePixelParameters(double &, double &, double &, double &);
-	void determineDimensions(std::vector<double>, Dimensions &, PhotoParams);
+	void determineDimensions(std::vector<double>, Dimensions &, PhotometryParams);
 	double determineAnnulusSigma(double, double);
 	double determineAnnulusMu(std::vector<double>, std::vector<double>);
 	std::vector<std::vector<double>> determineNRValues(std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<bool>);

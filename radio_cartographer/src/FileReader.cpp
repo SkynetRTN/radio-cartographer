@@ -10,18 +10,22 @@
 
 /**
  * Supported file formats include '.md2', '.txt', '.dcr.fits', and '.cyb.fits'.
- * Supported telescopes include the the forty foot, twenty meter, and the Green Bank Telescope
+ * Supported telescopes include the the forty-foot, twenty-meter, and the Green Bank Telescope.
  */
  
 
 FileReader::FileReader(std::string filename) {
-	this->filename = filename;
+	FileReader(filename, false);
+}
 
-	setFileType(filename);
-
-	if (!exists(filename)) {
-		throw "No input files were provided.\n";
+FileReader::FileReader(std::string filename, bool logToConsole) {
+	if (!exists(filename)) 
+	{
+		throw "The provided file does not exsit: " + filename + "\n";
 	}
+	setFileType(filename);
+	this->filename = filename;
+	this->logToConsole = logToConsole;
 }
 
 FileReader::FileReader(std::vector<std::string> filenames) {
@@ -88,7 +92,6 @@ bool FileReader::exists(std::string filename) {
 	FILE* file = std::fopen(filename.c_str(), mode.c_str());
 
 	if (!file) {
-		std::cerr << "File " + filename + " does not exist.\n";
 		return false;
 	}
 	std::fclose(file);

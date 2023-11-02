@@ -7,8 +7,8 @@
 #include "RCR.h"
 
 
-int _MAX_BACKGROUND_THREADS = 8; //50
-int _MAX_SCATTER_THREADS = 8; //125
+int _MAX_BACKGROUND_THREADS = 8; // server = 50
+int _MAX_SCATTER_THREADS = 8;    // server = 125
 
 class PointToPointFunc : public NonParametric
 {
@@ -118,7 +118,7 @@ void PreProcessorNew::averageSpectra(PreProcessingParameters params, Input& inpu
 	for (int i = 0; i < numberOfPoints; ++i) {
 
 		if (leftCleanSpectra[i].size() != rightCleanSpectra[i].size())
-			throw "Mismatch in the number of data points for spectra " + std::to_string(i);
+			throw "Mismatch in the number of data points for spectra " + std::to_string(i) + "\n";
 
 		int pointsInSum = 0;
 		double leftSum = 0, rightSum = 0;
@@ -251,7 +251,7 @@ double PreProcessorNew::calculateScatter(std::vector<double> data)
 	rcr.setNonParametricModel(ptpf);
 	rcr.performRejection(weights, data);
 
-	return 0.8197*rcr.result.sigma;
+	return 0.8197 * rcr.result.sigma;
 }
 
 void PreProcessorNew::constructWeights()
@@ -313,7 +313,7 @@ void PreProcessorNew::interpolateFluxDropouts()
 		bool interpolateLeft = false;
 		bool interpolateRight = false;
 
-		// right and left data should always contain same number of points
+		// Right and left data should always contain same number of points
 		for (int j = 0; j < dataSize; ++j) {
 			if (leftRawSpectra[i][j] < minFluxValue)
 				interpolateLeft = true;

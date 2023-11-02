@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <iostream>
-
 #include <fstream>
 
 
@@ -8,9 +7,13 @@
 #include "Processor.h"
 #include "Cartographer.h"
 #include "Composite.h"
-#include "Analysis.h"
 #include "OutputFile.h"
+#include "Analysis.h"
 #include "FileReader.h"
+#include "io\config\ConfigParser.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 bool LSSProcessing = false;
 std::string skynet_filename;
@@ -112,7 +115,7 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams)
 		sParams.pCoordinate = EQUATORIAL;
 	}
 }
-void setInputPhotoParams(char *argv[], PhotoParams &pParams)
+void setInputPhotoParams(char *argv[], PhotometryParams &pParams)
 {
 	double perform = atof(argv[15]);
 	pParams.innerRadius = atof(argv[16]);
@@ -205,7 +208,7 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams)
 }
 
 int main(int argc, char *argv[])
-{
+{	
 	//=================================================================
 	//================== PARSE THE INPUT ARGUMENTS ====================
 	//=================================================================
@@ -220,7 +223,7 @@ int main(int argc, char *argv[])
 	SpectralParameters cParams;
 	setInputSpectralParams(argc, argv, cParams);
 
-	PhotoParams pParams;
+	PhotometryParams pParams;
 	setInputPhotoParams(argv, pParams);
 
 	ProcessorParameters procParams;
@@ -230,8 +233,18 @@ int main(int argc, char *argv[])
 	//====================== READ IN DATA FILE ========================
 	//=================================================================
 
+	ConfigParser configuration("example.json");
+	configuration.parse();
+
 	FileReader reader(skynet_filename);
 	Input input = reader.read();
+
+	std::vector<std::string> filenamesX = {"x", "y", "z"};
+	std::vector<FileReader> x = {};
+
+	for (int i = 0; i < 3; ++i) {
+		x.emplace_back(FileReader(filenamesX[i]));
+	}
 
 	/*FileReader reader2("G28_C02.raw.dcr.fits");
 	Input input2 = reader2.read();

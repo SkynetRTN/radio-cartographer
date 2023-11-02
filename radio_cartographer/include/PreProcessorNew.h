@@ -1,26 +1,8 @@
 #pragma once
 #include <vector>
 #include "Input.h"
+#include "Structures.h"
 
-
-enum class Receiver2 {
-	HIGH,
-	LOW,
-};
-
-struct PreProcessingParameters
-{
-	double velocity = 0.0;
-
-	double subtractionScale = 0.0;
-	double modifiedSubtractionScale = 0.0;;
-
-	std::vector<double> exclusionBand;
-	std::vector<std::pair<double, double>> inclusionBands;
-	std::vector<std::pair<double, double>> modifiedSubtractionBands;
-
-	Receiver2 receiver;
-};
 
 class PreProcessorNew {
 public:
