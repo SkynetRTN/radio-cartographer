@@ -739,22 +739,36 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		dataDumps.push_back(dubFiller);
 		calibrationFlags.push_back(dubFiller);
 
-		//CALIBRATION DATA DURING TRANSITION
+		// Store the data collection start time. This is needed to 
+		// distinguish between pre-calibration off data from the 
+		// transition data at the end of the 0th scan.
+		double startDataTime = data[0][data[0].size() - 1];
+		for (int i = 0; i < data[0].size(); ++i)
+		{
+			if (data[9][i] == 0 && data[10][i] == 1)
+			{
+				startDataTime = data[0][i];
+				break;
+			}
+		}
 
 		while (i < data[0].size())
 		{
-			//STORE ALL INITIAL CALIBRATION DATA AND ZERO SCAN DATA
+			//STORE ALL INITIAL CALIBRATION DATA
 			if ((data[9][i] == 0 && data[10][i] == 0))
 			{
-				times[0].push_back(data[0][i]);
-				ras[0].push_back(15.0*data[1][i]);
-				decs[0].push_back(data[2][i]);
-				azimuths[0].push_back(data[3][i]);
-				elevations[0].push_back(data[4][i]);
-				fluxL[0].push_back(data[5][i]);
-				fluxR[0].push_back(data[6][i]);
-				dataDumps[0].push_back(data[7][i]);
-				calibrationFlags[0].push_back(data[8][i]);
+				if (data[0][i] < startDataTime)
+				{
+					times[0].push_back(data[0][i]);
+					ras[0].push_back(15.0*data[1][i]);
+					decs[0].push_back(data[2][i]);
+					azimuths[0].push_back(data[3][i]);
+					elevations[0].push_back(data[4][i]);
+					fluxL[0].push_back(data[5][i]);
+					fluxR[0].push_back(data[6][i]);
+					dataDumps[0].push_back(data[7][i]);
+					calibrationFlags[0].push_back(data[8][i]);
+				}
 			}
 			else if (data[9][i] == 0 && data[10][i] == 1 && data[8][i] == 1)
 			{
@@ -778,6 +792,7 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 				dataDumps[1].push_back(data[7][i]);
 				calibrationFlags[1].push_back(data[8][i]);
 			}
+			// STORE THE ZEROTH SCAN DATA
 			else if (data[9][i] == 0 && data[10][i] == 1)
 			{
 				times[1].push_back(data[0][i]);
