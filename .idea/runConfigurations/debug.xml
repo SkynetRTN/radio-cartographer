@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="debug" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="/skynet/radio-cartographer/testing/Skynet_58273_Rosette-map_34069_34878.cyb.fits composite 1 interpolated equatorial auto None 0 1355.0 1435.0 6.0 0.35 1 0.333333 0 1.25 5.0 brightest 0 0.0 0" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://./testing/Temporary" PASS_PARENT_ENVS_2="true" PROJECT_NAME="radio_cartographer" TARGET_NAME="main" CONFIG_NAME="Debug-Docker" RUN_TARGET_PROJECT_NAME="radio_cartographer" RUN_TARGET_NAME="main">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

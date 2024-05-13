@@ -1,0 +1,9 @@
+<toolSet name="External Tools">
+  <tool name="clang" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="g++" />
+      <option name="PARAMETERS" value="-I/usr/local/include -L/usr/local/lib -lfftw3 -lcfitsio -lccfits Source.cpp Composite.cpp Processor.cpp PreProcessor.cpp Map.cpp Pixel.cpp Analysis.cpp OutputFile.cpp Survey.cpp Scan.cpp Tools.cpp Cartographer.cpp FourtyParser.cpp RCR.cpp GBParser.cpp NonParametric.cpp FunctionalForm.cpp BackgroundCUDA.cpp ProcessorRFI.cpp ProcessorThetaGap.cpp Debugger.cpp ProcessorTS.cpp -std=c++11 -pthread" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Skynet/radio-cartographer/radio-cartographer" />
+    </exec>
+  </tool>
+</toolSet>

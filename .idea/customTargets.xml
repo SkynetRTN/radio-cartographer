@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="276f1700-e4e2-4e71-a060-7ef8a2d6a1ee" name="RDP.out" defaultType="TOOL">
+      <configuration id="41a513b2-f366-4648-a526-3f6e3bf36f5c" name="RDP.out" toolchainName="Default">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_clang" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>
