@@ -1,2 +1,10 @@
 .idea
-**.txt
+**/.DS_Store
+CMakeFiles/
+.cmake/
+cmake-build-debug
+cmake-build-debug-docker
+CMakeCache.txt
+main
+Makefile
+cmake_install.cmake
