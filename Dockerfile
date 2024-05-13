@@ -81,6 +81,3 @@ WORKDIR /skynet/radio-cartographer
 RUN cmake .
 RUN cmake --build .
 WORKDIR /skynet
-
-## Make TMP directory
-RUN mkdir /skynet/tmp
