@@ -1,3 +1,5 @@
+# docker build -t radio-cartographer .
+
 FROM ubuntu:22.04
 
 #set up file system
@@ -38,20 +40,20 @@ RUN apt-get -y install g++
 RUN export CXX=g++
 
 ## CFITSIO
-RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.4.0.tar.gz -o /skynet/cfitsio-4.4.0.tar.gz
-RUN tar -xf cfitsio-4.4.0.tar.gz
-RUN mkdir /skynet/cfitsio.build
-WORKDIR /skynet/cfitsio.build
-RUN cmake ../cfitsio-4.4.0 -DCMAKE_PREFIX_PATH=/skynet/zlib
-RUN cmake --build . --config Release
-RUN cmake --install .
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3430.tar.gz -o /skynet/cfitsio3430.tar.gz
+RUN tar -xf cfitsio3430.tar.gz
+WORKDIR /skynet/cfitsio
+RUN ./configure --prefix=/usr/local
+RUN make
+RUN make install
 WORKDIR /skynet
+
 
 ## CCFits
 RUN curl https://heasarc.gsfc.nasa.gov/fitsio/CCfits/CCfits-2.6.tar.gz -o /skynet/CCfits-2.6.tar.gz
 RUN tar -xf CCfits-2.6.tar.gz
 WORKDIR /skynet/CCfits-2.6
-RUN ./configure --with-cfitsio=/skynet/cfitsio-4.4.0
+RUN ./configure --with-cfitsio=/usr/local --prefix=/usr/local
 RUN gmake
 RUN make install
 WORKDIR /skynet
@@ -63,6 +65,11 @@ WORKDIR /skynet/fftw-3.3.10
 RUN ./configure
 RUN make
 RUN make install
+WORKDIR /skynet
+
+## Set environment
+ENV LD_LIBRARY_PATH /usr/local/lib
+RUN ldconfig
 
 # Setup RC
 ## Transfer files
@@ -71,4 +78,9 @@ COPY . /skynet/radio-cartographer/
 
 ## Build
 WORKDIR /skynet/radio-cartographer
-RUN ./compileStandard.sh
+RUN cmake .
+RUN cmake --build .
+WORKDIR /skynet
+
+## Make TMP directory
+RUN mkdir /skynet/tmp
