@@ -1,6 +1,6 @@
 #include "Scan.h"
-#include "Tools.h"
-#include "RCR.h"
+#include "utils\Tools.h"
+#include "utils\RCR.h"
 #include <iostream>
 #include <cmath>
 #include <math.h>

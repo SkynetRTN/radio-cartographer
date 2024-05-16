@@ -1,14 +1,15 @@
 #include "Survey.h"
-#include "Tools.h"
-#include "GBParser.h"
-#include "FourtyParser.h"
-#include "OutputFile.h"
-#include "RCR.h"
-#include "Debugger.h"
+#include "utils\Tools.h"
+#include "io\OutputFile.h"
+#include "utils\RCR.h"
+
 #include <time.h>
 #include <math.h>
 #include <sstream>
-#include <iomanip> 
+#include <iomanip>
+
+#include "io\observation\FortyFootParser.h"
+#include "io\observation\LegacyTwentyParser.h"
 
 static double toRad = M_PI / 180.0;
 static double toDeg = 180.0 / M_PI;
@@ -160,27 +161,33 @@ Survey::Survey()
 {
 
 }
-Survey::Survey(SurveyParameters &sParams, Input input)
+Survey::Survey(SurveyParameters &sParams, Observation input)
 {
 	setParams(sParams);
 	setTelescopeParams(sParams, input);
-	determineInputFile(input.filename);
+	determineObservationFile(input.filename);
 	initializeData(input);
 }
 
-void Survey::setTelescopeParams(SurveyParameters &params, Input input) {
-
+void Survey::setTelescopeParams(SurveyParameters &params, Observation input) 
+{
 	if (input.telescope == "GreenBank-20" || input.telescope == "NRAO20" || input.telescope ==  "NRAO_GBT") {
 
-		if (input.telescope != "NRAO_GBT") this->telescope = TWENTY_METER;
-		else this->telescope = GBT;
-		
+		if (input.telescope != "NRAO_GBT") {
+			params.tele = TWENTY_METER;
+			this->telescope = TWENTY_METER;
+		}
+		else {
+			params.tele = GBT;
+			this->telescope = GBT;
+		}
 		double telescopeDiameter = this->telescope == GBT ? 105.0 : 20.0;
 
 		params.frequency = input.observedFrequencies[0];
 
 		this->telescopeFrequency = params.frequency;
 		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * telescopeDiameter * M_PI);
+		params.frequency /= pow(10, 9);
 
 		setMappingCoordinate(input.coordinate);
 
@@ -201,17 +208,26 @@ void Survey::setTelescopeParams(SurveyParameters &params, Input input) {
 		}
 	}
 	else if (input.telescope == "MightyForty") {
+		params.tele = FOURTY_FOOT;
+		params.frequency = 1.405;
+
+		setMappingCoordinate("equatorial");
+
+		this->scansInRa = false;
+		this->mapType = NODDING;
 		this->telescope = FOURTY_FOOT;
+		this->telescopeFrequency = 1.405 * pow(10, 9);
+		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 12.192 * M_PI);
 	}
 	else {
-		throw "Unsupported telescope: " + input.telescope + "\n";
+		throw std::invalid_argument("Unsupported telescope: " + input.telescope);
 	}
 }
 
 Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::string filename)
 {
 	setParams(sParams);
-	determineInputFile(filename);
+	determineObservationFile(filename);
 
 	if (!ASCII)
 	{
@@ -277,7 +293,7 @@ void Survey::setTwentyParams(GBParser &gb)
 {
 	// Set parameters specific to the 20m
 
-	this->MJD = gb.getParamMJD();
+	//this->MJD = gb.getParamMJD();
 	setMappingCoordinate(gb.getParamCoordinate());
 
 	std::string scanTypeStr = gb.getParamScanType();
@@ -306,7 +322,6 @@ void Survey::setTwentyParams(GBParser &gb)
 	if (mCoordinate == "")
 	{
 		mCoordinate = "equatorial";
-		Debugger::print("Warn", "No coordinate system found in header.. forced to equatorial");
 	}
 
 }
@@ -321,7 +336,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 		params.tele = TWENTY_METER;
 		params.frequency = sdfits.getFrequency() / 1000.0;
 
-		this->MJD = sdfits.getMJDate();
+		//this->MJD = sdfits.getMJDate();
 		this->telescope = TWENTY_METER;
 		this->telescopeFrequency = sdfits.getFrequency() * pow(10, 6);
 		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
@@ -350,7 +365,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 		params.frequency = sdfits.getFrequency() / pow(10, 9);
 
 		this->telescope = GBT;
-		this->MJD = sdfits.getMJDate();
+		//this->MJD = sdfits.getMJDate();
 		this->telescopeFrequency = sdfits.getFrequency();
 		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 105.0 * M_PI);
 
@@ -393,7 +408,7 @@ void Survey::setFortyParams(FourtyParser &gb)
 	this->telescopeFrequency = 1.405*pow(10, 9);
 	this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 12.192 * M_PI);
 }
-void Survey::determineInputFile(std::string fileName)
+void Survey::determineObservationFile(std::string fileName)
 {
 	if (fileName.find(".txt") != fileName.npos || fileName.find(".md2") != fileName.npos)
 	{
@@ -417,7 +432,7 @@ void Survey::switchChannels(Channel newChannel)
 }
 
 //file processors
-void Survey::initializeData(Input input) {
+void Survey::initializeData(Observation input) {
 	std::vector<std::vector<double>> data;
 	data.resize(11);
 
@@ -453,7 +468,6 @@ void Survey::initializeData(std::vector<std::vector<double> > data)
 	{
 		dataProc40(data);
 	}
-	Debugger::print("Info", "data loaded");
 }
 void Survey::dataProc(std::vector<std::vector<double> > &data)
 {
@@ -463,12 +477,12 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	}
 	else
 	{
-		//throw error for unrecognized data format;
+		throw std::runtime_error("[ Survey ] Invalid data format");
 	}
 
-	//WHEN YOU TAKE OBSERVATIONS WITH SKYNET IN GALACTIC COORDINATES, THE
-	//TEXT FILE WILL STILL BE IN RA AND DEC. IN ORDER TO GET THE SQUARE
-	//GRID, YOU NEED TO CONVERT THE COORDINATES TO GALACTIC INITIALLY.
+	// WHEN YOU TAKE OBSERVATIONS WITH SKYNET IN GALACTIC COORDINATES, THE
+	// TEXT FILE WILL STILL BE IN RA AND DEC. IN ORDER TO GET THE SQUARE
+	// GRID, YOU NEED TO CONVERT THE COORDINATES TO GALACTIC INITIALLY.
 	if (mCoordinate == "galactic")
 	{
 		convertToGalacticInitial();
@@ -481,8 +495,10 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	Output output;
 	output.printCalibrationHeader();
 	
-	if (telescope != GBT)
-	{
+	if (telescope == GBT) {
+		gbtCalibration();
+	}
+	else {
 		gainCalibration(LEFT, channel);
 		gainCalibration(RIGHT, channel);
 	}
@@ -513,25 +529,22 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 		}
 	}
 
-	Debugger::print("Info", "scans loaded");
-
 	if (mapType == DAISY)
 	{
 		findCenters();
-		Debugger::print("Info", "centers loaded");
 	}
 
 	for (int i = 0; i < scans.size(); i++)
 	{
 		if (mapType == DAISY)
 		{
-			scans[i].undoCosTransform(0, partSetProcSSS.medianDec, partSetProcSSS.medianRa);// in daisyPrelim, to divide scans we transform onto the center of the grid and calculated distances and times to break apart scans.  We want to undo this for generality
+			// In daisyPrelim, to divide scans we transform onto the center of the grid and calculated 
+			// distances and times to break apart scans.  We want to undo this for generality.
+			scans[i].undoCosTransform(0, partSetProcSSS.medianDec, partSetProcSSS.medianRa);
 			scans[i].updateAngDistTemp(partSetProcSSS.centerDecDeg);
 		}
 		scans[i].setScanNumberInSurvey(i);
 	}
-
-
 
 }
 void Survey::dataProc40(std::vector<std::vector<double> > &data)
@@ -691,7 +704,6 @@ void Survey::dataProc40(std::vector<std::vector<double> > &data)
 	{
 		scans[i].setScanNumberInSurvey(i);
 	}
-	Debugger::print("Info", "scans loaded");
 }
 void Survey::correctDec40(std::vector<std::vector<double> > &decs, std::vector<std::vector<double> > &times, int N)
 {
@@ -774,6 +786,53 @@ void Survey::correctDec40(std::vector<std::vector<double> > &decs, std::vector<s
 		replacementDecs.clear();
 	}
 }
+
+/**
+ * Separates the GBT data into vectors representing scans.
+ *
+ * This method is much simpler than the method for Twenty Meter data.
+ * The GBT does not have a pre- and post-map calibration scan, nor
+ * does it have a data field representing valid data.
+ */
+void Survey::formatDataGBT(std::vector<std::vector<double> > &data) 
+{
+	std::vector<double> dubFiller;
+	const int dataCount = data[0].size();
+	const int scanCount = data[9][data[9].size() - 1] + 1;
+
+	// Initialize size for scan data
+	for (int i = 0; i < scanCount + 2; ++i) 
+	{
+		times.push_back(dubFiller);
+		ras.push_back(dubFiller);
+		decs.push_back(dubFiller);
+		azimuths.push_back(dubFiller);
+		elevations.push_back(dubFiller);
+		fluxL.push_back(dubFiller);
+		fluxR.push_back(dubFiller);
+		dataDumps.push_back(dubFiller);
+		calibrationFlags.push_back(dubFiller);
+	}
+
+	int index;
+
+	// Populate the scan data
+	for (int i = 0; i < dataCount; ++i)
+	{
+		index = data[9][i] + 1;
+
+		times[index].push_back(data[0][i]);
+		ras[index].push_back(data[1][i]);
+		decs[index].push_back(data[2][i]);
+		azimuths[index].push_back(data[3][i]);
+		elevations[index].push_back(data[4][i]);
+		fluxL[index].push_back(data[5][i]);
+		fluxR[index].push_back(data[6][i]);
+		dataDumps[index].push_back(data[7][i]);
+		calibrationFlags[index].push_back(data[8][i]);
+	}
+}
+
 void Survey::formatData11(std::vector<std::vector<double> > &data)
 {
 	int i = 0;
@@ -806,22 +865,34 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 		dataDumps.push_back(dubFiller);
 		calibrationFlags.push_back(dubFiller);
 
-		//CALIBRATION DATA DURING TRANSITION
+		// Store the data collection start time. This is needed to 
+		// distinguish between pre-calibration off data from the 
+		// transition data at the end of the 0th scan.
+		double startDataTime = data[0][data[0].size() - 1];
+		for (int j = 0; j < data[0].size(); ++j) {
+			if (data[9][j] == 0 && data[10][j] == 1) {
+				startDataTime = data[0][i];
+				break;
+			}
+		}
 
 		while (i < data[0].size())
 		{
-			//STORE ALL INITIAL CALIBRATION DATA AND ZERO SCAN DATA
+			// Store the initial calibration data
 			if ((data[9][i] == 0 && data[10][i] == 0))
 			{
-				times[0].push_back(data[0][i]);
-				ras[0].push_back(15.0*data[1][i]);
-				decs[0].push_back(data[2][i]);
-				azimuths[0].push_back(data[3][i]);
-				elevations[0].push_back(data[4][i]);
-				fluxL[0].push_back(data[5][i]);
-				fluxR[0].push_back(data[6][i]);
-				dataDumps[0].push_back(data[7][i]);
-				calibrationFlags[0].push_back(data[8][i]);
+				if (data[0][i] < startDataTime)
+				{
+					times[0].push_back(data[0][i]);
+					ras[0].push_back(15.0*data[1][i]);
+					decs[0].push_back(data[2][i]);
+					azimuths[0].push_back(data[3][i]);
+					elevations[0].push_back(data[4][i]);
+					fluxL[0].push_back(data[5][i]);
+					fluxR[0].push_back(data[6][i]);
+					dataDumps[0].push_back(data[7][i]);
+					calibrationFlags[0].push_back(data[8][i]);
+				}
 			}
 			else if (data[9][i] == 0 && data[10][i] == 1 && data[8][i] == 1)
 			{
@@ -847,6 +918,7 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 			}
 			else if (data[9][i] == 0 && data[10][i] == 1)
 			{
+				// Sotre the first scan data
 				times[1].push_back(data[0][i]);
 				ras[1].push_back(15.0*data[1][i]);
 				decs[1].push_back(data[2][i]);
@@ -1025,7 +1097,76 @@ void Survey::formatData11(std::vector<std::vector<double> > &data)
 	}
 }
 
-//calibration
+/**
+ * Calibrates the GBT Data by dividing by the average of the 
+ * On - Off values.
+ */
+void Survey::gbtCalibration()
+{
+	if (telescope != GBT) {
+		throw std::runtime_error("Attempted to use the GBT Calibration method for non-GBT data.");
+	}
+
+	/*RCR rcr = RCR(LS_MODE_DL);
+	rcr.setMuType(VALUE);
+
+	std::vector<double> rcrAvgs, avgs;*/
+
+	// Skip first and last dummy vector when iterating
+	for (int i = 1; i < times.size() - 1; ++i) 
+	{
+		std::vector<double> diffs, cleanWeights, cleanTimes;
+		double sum = 0.0, avg;
+
+		// Calculate on - off
+		for (int j = 0; j < times[i].size(); ++j) 
+		{
+			diffs.emplace_back(fluxR[i][j] - fluxL[i][j]);
+			sum += (fluxR[i][j] - fluxL[i][j]);
+		}
+		avg = sum / times[i].size();
+		//avgs.emplace_back(avg);
+
+		//LinearModel model = LinearModel(dataDumps[i], times[i], diffs);
+		//rcr.setParametricModel(model);
+		//rcr.performBulkRejection(dataDumps[i], diffs);
+
+		//// Reject points and fit to a line
+		//std::vector<bool> flagHolder = rcr.result.flags;
+		//for (int k = 0; k < flagHolder.size(); k++)
+		//{
+		//	cleanWeights.emplace_back(dataDumps[i][k]);
+		//	cleanTimes.emplace_back(times[i][k]);
+		//	if (flagHolder[k])
+		//	{
+		//		cleanWeights.emplace_back(dataDumps[i][k]);
+		//		cleanTimes.emplace_back(times[i][k]);
+		//	}
+		//}
+
+		//double averageTime = Tools::getMean(cleanWeights, cleanTimes);
+		//double delta = std::abs(model.m * (averageTime - model.xBar) + model.b);
+		//rcrAvgs.emplace_back(delta);
+
+		// We don't want to accidently process the CAL ON data, so
+		// overwrite with the actual data.
+		for (int l = 0; l < times[i].size(); ++l)
+		{
+			fluxL[i][l] /= avg;
+			fluxR[i][l] = fluxL[i][l];
+		}
+	}
+
+	/*std::ofstream outputFile;
+	outputFile.open("average.txt", std::ios_base::app);
+	for (int i = 0; i < avgs.size(); ++i) {
+		outputFile << avgs[i] << "\t";
+		outputFile << rcrAvgs[i] << "\n";
+	}
+	outputFile.close();*/
+
+}
+
 void Survey::gainCalibration(Channel chan, Channel janskyChan)
 {
 	RCR rcr = RCR(LS_MODE_DL);
@@ -1103,20 +1244,19 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 	if (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3)
 	{
 		calMethod = POST;
-		Debugger::print("Warn", "No reliable pre-calibration data found");
-		Debugger::print("Warn", "Calibration method switched to post-calibration!");
+		std::cout << "[ WARNING ] No reliable pre-calibration data found" << std::endl;
+		std::cout << "[ WARNING ] Calibration method switched to post-calibration." << std::endl;
 	}
 	else if (lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3)
 	{
 		calMethod = PRE;
-		Debugger::print("Warn", "No reliable post-calibration data found");
-		Debugger::print("Warn", "Calibration method switched to pre-calibration!");
+		std::cout << "[ WARNING ] No reliable post-calibration data found." << std::endl;
+		std::cout << "[ WARNING ] Calibration method switched to pre-calibration." << std::endl;
 	}
 
 	if ((lowFluxArrayEnd.size() < 3 || highFluxArrayEnd.size() < 3) && (lowFluxArrayStart.size() < 3 || highFluxArrayStart.size() < 3))
 	{
-		Debugger::print("Error", "No reliable calibration data found!");
-		//throw error for no reliable calibration data;
+		throw std::invalid_argument("[ Gain Cailbration ] No reliable calibration data found.");
 	}
 
 	if (calMethod == INTERPOLATED)
@@ -2108,7 +2248,7 @@ void Survey::convertToGalacticInitial()
 	std::vector<double> bVec;
 	std::vector<double> lVec;
 
-	for (int i = 0; i < decs.size(); i++)
+	for (int i = 1; i < decs.size(); i++)
 	{
 		bVec.resize(0);
 		lVec.resize(0);
@@ -2129,6 +2269,14 @@ void Survey::convertToGalacticInitial()
 		ras[i] = lVec;
 	}
 }
+
+/**
+ * Checks if the map crossed the zero galactic coordinate while mapping.
+ *
+ * Compares the middle point of the i-th scan to the middle point of the
+ * i-th - 1 scan. If the ra or dec has decreased, then it is considered 
+ * to have crossed the zero coordinate.
+ */
 void Survey::zeroCrossCheck()
 {
 	bool cross = false;
@@ -2136,6 +2284,14 @@ void Survey::zeroCrossCheck()
 
 	for (int i = 1; i < decs.size(); i++)
 	{
+		if (decs[i - 1].size() == 0 || decs[i].size() == 0) {
+			continue;
+		}
+
+		if (ras[i - 1].size() == 0 || ras[i].size() == 0) {
+			continue;
+		}
+
 		// Sweeps can be unstable near edges
 		mp1 = floor(decs[i - 1].size() / 2);
 		mp2 = floor(decs[i].size() / 2);
@@ -2239,7 +2395,6 @@ void Survey::setStandardThetaGap()
 			}
 		}
 
-
 		//WE OVERWRITE MEDIAN DEC AFTER COSINE DEC TRANSFORMATION
 		RCR rcr2 = RCR(LS_MODE_DL);
 
@@ -2256,20 +2411,11 @@ void Survey::setStandardThetaGap()
 		std::vector<bool> flagsHold = rcr2.result.flags;
 		for (int i = 0; i < deltaAng.size(); i++)
 		{
-			if (i == 100)
-			{
-				Debugger::print("Info", rcr2.result.mu);
-				Debugger::print("Info", rcr2.result.sigma);
-			}
 			if (deltaAng[i] < minGapThreshold && flagsHold[i] == true)
 			{
 				this->minGapThreshold = deltaAng[i];
 			}
 		}
-
-		Debugger::print("Info", "MIN THETA GAP", minGapThreshold);
-		Debugger::print("Info", "MU", rcr2.result.mu);
-		Debugger::print("Info", "SIGMA", rcr2.result.sigma);
 
 		rcr2.performBulkRejection(deltaRa);
 		double medianRaDiff = rcr2.result.mu;
@@ -2279,7 +2425,7 @@ void Survey::setStandardThetaGap()
 
 		if (telescope == TWENTY_METER || telescope == GBT)
 		{
-			this->StandardGap = Tools::max(Tools::min(medianRaDiff, medianDecDiff), medianDiffAlongSweeps);//DEGREES
+			this->StandardGap = Tools::max(Tools::min(medianRaDiff, medianDecDiff), medianDiffAlongSweeps); //DEGREES
 			for (int i = 0; i < scans.size(); i++)
 			{
 				scans[i].setIntraScanGap(StandardGap);
@@ -2359,11 +2505,6 @@ void Survey::setStandardThetaGap()
 			}
 		}
 
-		//this->minGapThreshold = 0.0;
-		Debugger::print("Info", "MIN THETA GAP", minGapThreshold);
-		Debugger::print("Info", "MU", rcr.result.mu * 4 / scans.size());
-		Debugger::print("Info", "SIGMA", rcr.result.sigma * 4 / scans.size());
-
 		for (int i = 0; i < scans.size(); i++)
 		{
 			scans[i].setIntraScanGap(StandardGap);
@@ -2373,7 +2514,6 @@ void Survey::setStandardThetaGap()
 		{
 			scans[i].setInterScanGap((M_PI / std::sqrt(2.0))*(partSetProcSSS.edgeRadius / scans.size()));
 		}
-		Debugger::print("Info", "Standard Gap in BW", StandardGap / psfFWHM);
 	}
 
 
@@ -2534,10 +2674,6 @@ double Survey::getProcEdgeRadius()
 double Survey::getTimeShift()
 {
 	return t_int;
-}
-double Survey::getMJD()
-{
-	return this->MJD;
 }
 bool Survey::getScanDirection()
 {

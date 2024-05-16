@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <math.h>
-#include "GBParser.h"
-#include "FourtyParser.h"
+#include "io\observation\LegacyTwentyParser.h"
+#include "io\observation\FortyFootParser.h"
 #include "PreProcessor.h"
 #include "Scan.h"
 
@@ -14,25 +14,25 @@ public:
 
 	//constructors
 	Survey();
-	Survey(SurveyParameters &, Input);
+	Survey(SurveyParameters &, Observation);
 	Survey(SurveyParameters &, SpectralParameters, std::string);
 	Survey(SurveyParameters, std::string, std::string);
 
 	void calculateEdgeParameters();
 
-	std::vector<std::vector<double> > gbData; //DYLAN
+	std::vector<std::vector<double> > gbData;
 
 	//coordinate transforms
-	void convertToGalacticInitial(); //DYLAN
-	void zeroCrossCheck(); // DYLAN
+	void convertToGalacticInitial();
+	void zeroCrossCheck();
 
 	//data pre-processing
 	void setParams(SurveyParameters);
-	void setTwentyParams(GBParser &);    //DYLAN
-	void setTelescopeParams(SurveyParameters&, Input input);
-	void setSdfitsParams(SurveyParameters&, PreProcessor);//DYLAN
-	void determineInputFile(std::string); //DYLAN
-	void setFortyParams(FourtyParser&); // DYLAN
+	void setTwentyParams(GBParser &);
+	void setTelescopeParams(SurveyParameters&, Observation input);
+	void setSdfitsParams(SurveyParameters&, PreProcessor);
+	void determineObservationFile(std::string);
+	void setFortyParams(FourtyParser&);
 	void switchChannels(Channel);
 
 	//setters
@@ -58,17 +58,16 @@ public:
 	bool getScanDirection();
 	bool getTracking();
 	Channel getChannel();
-	Coordinates getProcessingCoordinate();//DYLAN
+	Coordinates getProcessingCoordinate();
 	std::string getMappingCoordinate();
 	double getDiffAlongSweeps();
 	double getForcedTS();
 	double getMedianDec();
 	double getMedianDiffAlongSweeps();
-	double getMedianLatiMap(); //DYLAN
-	double getMedianLongMap(); //DYLAN
+	double getMedianLatiMap();
+	double getMedianLongMap();
 	double getMedianRa();
 	double getMinGapThreshold();
-	double getMJD();
 	double getProcEdgeRadius();
 	double getPSFFWHM();
 	double getRFIScale();
@@ -95,7 +94,7 @@ private:
 	PartitionSet partSetProcSSS;
 	PartitionSet partSetProcLSS;
 	Channel channel;
-	Coordinates pCoordinate;//DYLAN
+	Coordinates pCoordinate;
 
 	//processing information
 	double t_int;
@@ -106,12 +105,10 @@ private:
 	int numberOfPetals;
 	int scanCount;
 	int surveyNumber;
-	int MJD;
-	int yearOfObs;
 
 	bool scansInRa = false;
 	bool tracking;
-	bool conversion;//DYLAN
+	bool conversion;
 	bool debugging;
 	bool ASCII;
 
@@ -154,8 +151,10 @@ private:
 	void dataProc40(std::vector<std::vector<double> >&);
 	void correctDec40(std::vector<std::vector<double> > &, std::vector<std::vector<double> > &, int);
 	void formatData11(std::vector<std::vector<double> >&);
+	void formatDataGBT(std::vector<std::vector<double> >&);
 	void initializeData(std::vector<std::vector<double> >);
-	void initializeData(Input);
+	void initializeData(Observation);
+	void gbtCalibration();
 	void gainCalibration(Channel, Channel);
 	void janskyCalibration(double, Channel);
 
@@ -168,6 +167,7 @@ private:
 	void daisyPrelim();
 	void findCenters();
 
+	// used for simulations in the paper
 	double gauss(double, double);
 	void addBackgroundSignal(std::vector<std::vector<double>> &, std::vector<std::vector<double>> &, std::vector<std::vector<double>> &);
 	void addElevationSignal(std::vector<std::vector<double>> &, std::vector<std::vector<double>> &);

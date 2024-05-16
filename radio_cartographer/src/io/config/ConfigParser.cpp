@@ -16,7 +16,7 @@ ConfigParser::ConfigParser(std::string filename) {
 	}
 
 	setFileType(filename);
-	this->filename = filename;
+	this->configFilename = filename;
 }
 
 /**

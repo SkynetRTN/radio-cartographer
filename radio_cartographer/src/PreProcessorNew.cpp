@@ -2,13 +2,10 @@
 #include <future>
 
 #include "PreProcessorNew.h"
-#include "BackgroundCUDA.h"
-#include "Tools.h"
-#include "RCR.h"
+#include "processor\BackgroundCUDA.h"
+#include "utils\Tools.h"
+#include "utils\RCR.h"
 
-
-int _MAX_BACKGROUND_THREADS = 8; // server = 50
-int _MAX_SCATTER_THREADS = 8;    // server = 125
 
 class PointToPointFunc : public NonParametric
 {
@@ -23,20 +20,28 @@ public:
 
 };
 
-PreProcessorNew::PreProcessorNew() 
-{
+PreProcessorNew::PreProcessorNew(PreProcessingParameters params) : PreProcessorNew(params, 8, 8) {}
 
+PreProcessorNew::PreProcessorNew(PreProcessingParameters params, int bgThreads, int scatterThreads)
+{
+	this->params = params;
+	this->_MAX_BACKGROUND_THREADS = bgThreads;    // unc server = 50
+	this->_MAX_SCATTER_THREADS = scatterThreads;  // unc server = 125
 }
 
-void PreProcessorNew::process(PreProcessingParameters params, Input& input) 
+void PreProcessorNew::process(Observation& input) 
 {
 	std::vector<double> scatters;
 	std::vector<std::vector<double>> background;
 
-	setPreProcessingParams(params, input);
+	setRawData(input);
+	constructFrequencies(input);
 	
-	if (params.subtractionScale != 0.0) {
-		constructCleaningParams(params, input);
+	if (params.perform) 
+	{
+		constructWeights();
+		constructBaselines();
+		interpolateFluxDropouts();
 
 		scatters = calculateScatterMulti(leftRawSpectra);
 		leftCleanSpectra = performCleaningMulti(leftRawSpectra, scatters, params.subtractionScale);
@@ -49,13 +54,13 @@ void PreProcessorNew::process(PreProcessingParameters params, Input& input)
 		rightCleanSpectra = rightRawSpectra;
 	}
 
-	averageSpectra(params, input);
+	averageSpectra(input);
 }
 
 /**
  * Sets the to-be-cleaned data based on the data resolution and user-provided receiver.
  */
-void PreProcessorNew::setPreProcessingParams(PreProcessingParameters params, Input input) 
+void PreProcessorNew::setRawData(Observation input) 
 {
 	if (input.observedFrequencies.size() != 2) {
 		throw "Expected two observing frequencies (equal for low res data).";
@@ -64,11 +69,11 @@ void PreProcessorNew::setPreProcessingParams(PreProcessingParameters params, Inp
 	// Default to lower frequency, override in next step if necessary
 	observingFrequency = input.observedFrequencies[0];
 
-	if (input.getDataResolution() == Input::Resolution::LOW) {
+	if (input.getDataResolution() == Observation::Resolution::LOW) {
 		leftRawSpectra = input.lSpectra;
-		rightRawSpectra = input.lSpectra;
+		rightRawSpectra = input.rSpectra;
 	}
-	else if (input.getDataResolution() == Input::Resolution::HIGH) {
+	else if (input.getDataResolution() == Observation::Resolution::HIGH) {
 		if (params.receiver == Receiver2::LOW) {
 			leftRawSpectra = input.lLowFrequencySpectra;
 			rightRawSpectra = input.rLowFrequencySpectra;
@@ -81,69 +86,61 @@ void PreProcessorNew::setPreProcessingParams(PreProcessingParameters params, Inp
 		}
 	}
 	else {
-		throw "Unsupported data resolution provided.";
+		throw std::invalid_argument("Unsupported data resolution provided.");
 	}
 
 	if (leftRawSpectra.empty() || rightRawSpectra.empty()) {
-		throw "Empty data set in either the left or right channel.";
+		throw std::runtime_error("Empty data set in either the left or right channel.");
 	}
 
 	if (leftRawSpectra.size() != rightRawSpectra.size()) {
-		throw "Mismatch in the number of spectra for the left and right channels.";
+		throw std::runtime_error("Mismatch in the number of spectra for the left and right channels.");
 	}
 
 	// Trim the data to the integrated points only
+	originalDataSize = leftRawSpectra[0].size();
 	for (int i = 0; i < leftRawSpectra.size(); ++i) {
+		leftRawSpectra[i].erase(leftRawSpectra[i].begin() + input.getHigherIntegratedIndex(), leftRawSpectra[i].end());
 		leftRawSpectra[i].erase(leftRawSpectra[i].begin(), leftRawSpectra[i].begin() + input.getLowerIntegratedIndex());
-		leftRawSpectra[i].erase(leftRawSpectra[i].begin() + (input.getHigherIntegratedIndex() - input.getLowerIntegratedIndex() + 1), leftRawSpectra[i].end());
 
+		rightRawSpectra[i].erase(rightRawSpectra[i].begin() + input.getHigherIntegratedIndex(), rightRawSpectra[i].end());
 		rightRawSpectra[i].erase(rightRawSpectra[i].begin(), rightRawSpectra[i].begin() + input.getLowerIntegratedIndex());
-		rightRawSpectra[i].erase(rightRawSpectra[i].begin() + (input.getHigherIntegratedIndex() - input.getLowerIntegratedIndex() + 1), rightRawSpectra[i].end());
 	}
-
 	dataSize = leftRawSpectra[0].size();
 }
 
 /**
  * Averages each spectra to a single continuum data point.
  */
-void PreProcessorNew::averageSpectra(PreProcessingParameters params, Input& input)
+void PreProcessorNew::averageSpectra(Observation& input)
 {
-	if (params.exclusionBand.empty())
-		params.exclusionBand.emplace_back(DBL_MAX);
-		params.exclusionBand.emplace_back(DBL_MIN);
-
 	int numberOfPoints = leftCleanSpectra.size();
 
-	for (int i = 0; i < numberOfPoints; ++i) {
-
+	for (int i = 0; i < numberOfPoints; ++i) 
+	{
 		if (leftCleanSpectra[i].size() != rightCleanSpectra[i].size())
-			throw "Mismatch in the number of data points for spectra " + std::to_string(i) + "\n";
+			throw std::runtime_error("Mismatch in the number of data points for spectra " + std::to_string(i));
 
 		int pointsInSum = 0;
 		double leftSum = 0, rightSum = 0;
 
 		for (int j = 0; j < dataSize; ++j) {
-			leftSum += leftCleanSpectra[i][j];
-			rightSum += rightCleanSpectra[i][j];
-
-			pointsInSum += 1;
+			if (!Tools::isInRange(frequencies[j], params.exclusionBands) && Tools::isInRange(frequencies[j], params.inclusionBands)) 
+			{
+				leftSum += leftCleanSpectra[i][j];
+				rightSum += rightCleanSpectra[i][j];
+				pointsInSum += 1;
+			}
 		}
-
 		input.lContinuum.emplace_back(leftSum / pointsInSum);
 		input.rContinuum.emplace_back(rightSum / pointsInSum);
 	}
 }
 
-
-void PreProcessorNew::constructCleaningParams(PreProcessingParameters params, Input input)
-{
-	constructWeights();
-	constructFrequencies(input);
-	constructBaselines(params);
-	interpolateFluxDropouts();
-}
-
+/**
+ * Performs a multi-threaded background subtraction routine. The measured
+ * background is saved as the cleaned data.
+ */
 std::vector<std::vector<double>> PreProcessorNew::performCleaningMulti(std::vector<std::vector<double>> data, std::vector<double> scatters, double subtractionScale)
 {
 	int counter = 0, completedThreads = 0, liveThreads = 0; 
@@ -254,27 +251,69 @@ double PreProcessorNew::calculateScatter(std::vector<double> data)
 	return 0.8197 * rcr.result.sigma;
 }
 
+/**
+ * Constructs the weight vector for background subtraction.
+ *
+ * There are no weights associated with the input data. However, a weight vector
+ * is needed for point rejection, so we construct a dummy vector here.
+ */
 void PreProcessorNew::constructWeights()
 {
 	weights = std::vector<double>(dataSize, 1.0);
 }
 
 /**
- * Converts index values to their coresponding frequency values.
+ * Converts index values to their coresponding frequency values. 
+ *
+ * Constructs the frequency vector for the original data size and the truncates
+ * it to the trimmed data size. This is done to prevent messy logic that results
+ * from data files only storing the center frequency value and the possibility 
+ * of integrated ranges being before, intersecting or after the center.
  */
-void PreProcessorNew::constructFrequencies(Input input)
+void PreProcessorNew::constructFrequencies(Observation input)
 {
 	double step = std::abs(input.frequencyStep);
-	double zerothFrequency = observingFrequency - (step * (dataSize) / 2.0) + step;
 
-	for (int i = input.getLowerIntegratedIndex(); i < input.getHigherIntegratedIndex() + 1; ++i)
+	frequencies.resize(originalDataSize);
+
+	// Construct the lower half
+	for (int i = 0; i <= originalDataSize / 2; ++i)
+		frequencies[(originalDataSize / 2) - i] = observingFrequency + (i * step);
+
+	// Construct the upper half
+	for (int i = originalDataSize / 2; i < originalDataSize; ++i)
+		frequencies[i] = observingFrequency - ((i - (originalDataSize / 2)) * step);
+
+	// Keep only the values in the integration range
+	frequencies.erase(frequencies.begin() + input.getHigherIntegratedIndex(), frequencies.end());
+	frequencies.erase(frequencies.begin(), frequencies.begin() + input.getLowerIntegratedIndex());
+
+	frequencyDistances.resize(frequencies.size());
+	for (int i = 0; i < frequencyDistances.size(); ++i) {
+		frequencyDistances[i] = i * step;
+	}
+
+	// Check if the inclusion and exclusion bands excludes all data points
+	int includedCount = 0;
+	for (int i = 0; i < frequencies.size(); ++i)
 	{
-		frequencyDistances.emplace_back(step * (i - input.getLowerIntegratedIndex()));
-		frequencies.emplace_back(zerothFrequency + (step * i));
+		if (!Tools::isInRange(frequencies[i], params.exclusionBands) &&
+			Tools::isInRange(frequencies[i], params.inclusionBands))
+		{
+			includedCount += 1;
+		}
+	}
+
+	if (includedCount == 0) {
+		throw std::runtime_error("The inclusion or exclusion bands provided excluded all data.");
 	}
 }
 
-void PreProcessorNew::constructBaselines(PreProcessingParameters params)
+/**
+ * Constructs the baseline vector used for background subtraction. Accounts
+ * for user input that modifies the baselines.
+ */
+void PreProcessorNew::constructBaselines()
 {
 	baselines.resize(dataSize);
 	std::pair<double, double> velocityRange;
@@ -289,21 +328,21 @@ void PreProcessorNew::constructBaselines(PreProcessingParameters params)
 	}
 
 	for (int i = 0; i < frequencies.size(); ++i) {
-		if (isInRange(frequencies[i], params.modifiedSubtractionBands)) {
-			baselines[i] = params.modifiedSubtractionScale;
+		if (Tools::isInRange(frequencies[i], params.modifiedSubtractionBands)) {
+			baselines[i] = params.modifiedSubtractionScale * pow(10, 6);
 		}
-		else if (params.velocity != 0.0 && frequencies[i] >= velocityRange.first && frequencies[i] <= velocityRange.second) {
+		else if (params.velocity != NULL && Tools::isInRange(frequencies[i], { velocityRange })) {
 			baselines[i] = 0.0;
 		}
-		else
-		{
-			baselines[i] = params.subtractionScale;
+		else{
+			baselines[i] = params.subtractionScale * pow(10, 6);
 		}
 	}
 }
 
 /**
- * Replaces invalid values using an interpolated value from the two nearest valid values.
+ * Replaces invalid (negative) flux values using an interpolated value from the two 
+ * nearest valid (non-negative) flux values.
  */
 void PreProcessorNew::interpolateFluxDropouts() 
 {
@@ -328,20 +367,14 @@ void PreProcessorNew::interpolateFluxDropouts()
 	}
 }
 
-bool PreProcessorNew::isInRange(double value, std::vector<std::pair<double, double>> ranges)
-{
-	for (const std::pair<double, double> &range : ranges) {
-		if (value > range.first && value < range.second) {
-			return true;
-		}
-	}
-	return false;
-}
-
 std::vector<std::vector<double>> PreProcessorNew::getLeftCleanSpectra() {
 	return leftCleanSpectra;
 }
 
 std::vector<std::vector<double>> PreProcessorNew::getRightCleanSpectra() {
 	return rightCleanSpectra;
+}
+
+PreProcessorNew::~PreProcessorNew()
+{
 }

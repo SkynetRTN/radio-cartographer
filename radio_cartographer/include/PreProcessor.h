@@ -46,7 +46,7 @@ public:
 	std::vector<std::vector<double>> getFreqDists();
 	std::vector<std::vector<double>> getWeights();
 	std::vector<std::vector<double>> getFrequencies();
-	std::vector<std::vector<double>> baselines; // Should live in SpectralParameters
+	std::vector<std::vector<double>> baselines;
 	
 	std::vector<int> excisedIndices;
 	void keepBackground(std::vector<std::vector<double>>&, double);
@@ -89,7 +89,6 @@ public:
 	double calculateScatter(int);
 
 	// Getters
-	int getMJDate();
 	bool getScanningDirection();
 	double getYear();
 	double getFrequency();
@@ -125,7 +124,6 @@ private:
 	void formatGBTInput(std::string, std::vector<string>, std::vector<double>&);
 
 	// Setter Functions
-	void setMJD(std::vector<double>);
 	void setResolution(std::string);
 	void setFilename(SpectralParameters);
 	void setScatterParams(Spectra);
@@ -133,7 +131,6 @@ private:
 	// Misc Functions
 	void sortLowResData();
 	void sortHiResData(Receiver);
-	void appendColumnData();
 	int averageSpectra(std::vector<std::vector<double>>, std::vector<double>, std::vector<double>);
 
 	// Misc Variables

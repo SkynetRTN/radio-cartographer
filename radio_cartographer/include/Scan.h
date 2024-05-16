@@ -1,8 +1,7 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #include <vector>
-#include "Structures.h"
-
+#include "utils\Structures.h"
 
 
 class Scan
@@ -11,16 +10,14 @@ public:
 	Scan(std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>);
 
 	//functions
-	std::vector<bool> determineTSEdgePoints(std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, bool);
 	void updateAngDist();
 	void updateAngDistTemp(double);
 	void cosDecTransform(double, double, double, double);
 	void undoCosTransform(double, double, double);
-	void dynamicCosDecTransform(double, double, double, std::vector<double>);//DYLAN
-	void undoDynamicCosDecTransform(double, double, double, std::vector<double>);//DYLAN
+	void dynamicCosDecTransform(double, double, double, std::vector<double>);
+	void undoDynamicCosDecTransform(double, double, double, std::vector<double>);
 	void calculateScatter();
 	void calculateElevationScatter();
-	void calculateBackground(double);
 
 	//raw data
 	bool getCentroidFlag(int);
@@ -43,8 +40,8 @@ public:
 	double getLSSRa(int);
 	double getLSSThetaGap(int);
 	double getLSSThetaWPrime(int);
-	double getOrigDec(int);//DYLAN
-	double getOrigRa(int); //DYLAN
+	double getOrigDec(int);
+	double getOrigRa(int);
 	double getRa(int);
 	double getRawDec(int);
 	double getRawRa(int);
@@ -58,9 +55,9 @@ public:
 	int getCenter();
 	int getDropFlag(int);
 	int getEdgePointFlag(int);
-	int getExtraLocalModelCount(int);//DYLAN
+	int getExtraLocalModelCount(int);
 	int getIntHolder(int);
-	int getLocalModelCount(int);//DYLAN
+	int getLocalModelCount(int);
 	int getLocalModelInstances(int);
 	int getLocalModelRejections(int);
 	int getLSSSize();
@@ -72,7 +69,7 @@ public:
 	int getScanNumberInSurvey();
 	int getSize();
 	int getSurveyNumber();
-	int getTurningPointFlag(int);//DYLAN
+	int getTurningPointFlag(int);
 
 	std::vector<double> getFlux();
 	std::vector<double> getLFlux();
@@ -119,7 +116,7 @@ public:
 	void setIntHolder(int, int);
 	void setIntraScanGap(double);
 	void setLastScan(bool);
-	void setSSSCorrelation(int, double); //Sets theta_corr.
+	void setSSSCorrelation(int, double);
 	void setLocalModelCount(int, double);
 	void setLocalModelInstances(int, int);
 	void setLocalModelRejections(int, int);
@@ -137,14 +134,14 @@ public:
 	void setScanInRa(bool);
 	void setScanNumberInSurvey(int);
 	void setScatter(double);
-	void setSize(int);//DYLAN
+	void setSize(int);
 	void setGMWeight(int, double);
 	void setSurveyNumber(int);
 	void setThetaGap(int, double);
 	void setThetaGap(std::vector<double>);
 	void setTSDec(std::vector<double>);
 	void setTSRa(std::vector<double>);
-	void setTurningPointFlag(std::vector<bool>);//DYLAN
+	void setTurningPointFlag(std::vector<bool>);
 	void switchChannels(Channel);
 
 	virtual ~Scan();
@@ -178,7 +175,7 @@ private:
 		std::vector<bool> centroidFlag;
 		std::vector<bool> edgePointFlag;
 		std::vector<bool> rfiFlags;
-		std::vector<bool> turningPointFlag;//DYLAN
+		std::vector<bool> turningPointFlag;
 		std::vector<int> dropFlag;
 	} flags;
 
@@ -219,9 +216,9 @@ private:
 		std::vector<int> localModelInstances;
 		std::vector<int> localModelRejections;
 		std::vector<double> GMWeights;
-		std::vector<double> localModelCount;		//DYLAN
-		std::vector<double> extraLocalModelCount;   //DYLAN
-		std::vector<double> SSSCorrelation;  //DYLAN
+		std::vector<double> localModelCount;
+		std::vector<double> extraLocalModelCount;
+		std::vector<double> SSSCorrelation;
 		std::vector<double> centroidLocations;
 	} photometryProperties;
 

@@ -1,0 +1,53 @@
+{
+    "meta": {
+        "filename": "0106037.fits",
+        "runMethod": "single"
+    },
+    "map": {
+        "pixelSize": 0.05,
+        "m10PlusCriteria": true,
+        "largeScaleMapping": false
+    },
+    "preProcessor": {
+        "perform": false,
+        "scale": 6.0,
+        "modifiedScale": 0.0,
+        "receiver": "high",
+        "velocity": null,
+        "minFrequency": 1355.0,
+        "maxFrequency": 1435.0,
+        "modifiedBands": null,
+        "exclusionBands": [1380.0, 1382.0, 1399.0, 1401.0, 1419.0, 1421.0]
+    },
+    "processor": {
+        "raw": false,
+        "weightScale": 0.33333,
+        "background": {
+            "perform": true,
+            "scale": 6.0,
+            "maxThreads": 8
+        },
+        "rfi": {
+            "perform": true,
+            "scale": 0.35
+        },
+        "timeShift": {
+            "perform": true,
+            "strength": null
+        },
+        "scatter" : {
+            "maxThreads": 8
+        }
+    },
+    "survey": {
+        "fluxChannel": "composite",
+        "calibrationChannel": "interpolated",
+        "processingCoordinate": "equatorial"
+    },
+    "photometry": {
+        "perform": false,
+        "aperture": 1.25,
+        "annulus": 2.5,
+        "centroid": "center"
+    }
+}

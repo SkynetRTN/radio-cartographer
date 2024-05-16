@@ -1,8 +1,7 @@
 #include "PreProcessor.h"
-#include "BackgroundCUDA.h"
-#include "Debugger.h"
-#include "Tools.h"
-#include "RCR.h"
+#include "processor\BackgroundCUDA.h"
+#include "utils\Tools.h"
+#include "utils\RCR.h"
 #include <cmath>
 #include <future>
 #include <algorithm>
@@ -76,11 +75,9 @@ int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpect
 	// Declarations
 	std::vector<valarray<double>> vasTemp;
 	std::vector<std::vector<double>> inputTemp;
-	std::vector<double> MJDateHold;
 	std::vector<string> columns;
 
 	std::string hdu = "SINGLE DISH"; // name of binary table
-	Debugger::print("Info", "Accessing extension table ", file);
 
 	// Open the binary table
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
@@ -130,13 +127,6 @@ int PreProcessor::accessExtTable20m(std::vector<valarray<double>> &valArraySpect
 		}
 		valArraySpectra.insert(valArraySpectra.end(), vasTemp.begin(), vasTemp.end());
 	}
-	if (file == filename.size())
-	{
-		table.column("MJD").read(MJDateHold, 1, 1);
-		setMJD(MJDateHold);
-	}
-
-	Debugger::print("Info", inputData.size(), inputData[0].size());
 
 	return 0;
 }
@@ -144,11 +134,10 @@ int PreProcessor::accessExtTable40f(int file)
 {
 	// Declarations
 	std::vector<std::vector<double>> inputTemp;
-	std::vector<double> MJDateHold, ffdTemp;
+	std::vector<double> ffdTemp;
 	std::vector<string> columns;
 
 	std::string hdu = "SINGLE DISH"; // name of binary table
-	Debugger::print("Info", "Accessing extension table", file);
 
 	// Open the binary table
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
@@ -178,24 +167,18 @@ int PreProcessor::accessExtTable40f(int file)
 		}
 		continuum.insert(continuum.end(), ffdTemp.begin(), ffdTemp.end());
 	}
-	if (file == filename.size())
-	{
-		table.column("MJD").read(MJDateHold, 1, 1);
-		setMJD(MJDateHold);
-	}
 
 	return 0;
 }
 int PreProcessor::accessExtTableGBT(int file)
 {
 	//// Declarations
-	std::vector<double> freqGBT, utc, MJDateHold, gbdTemp;
+	std::vector<double> freqGBT, utc, gbdTemp;
 	std::vector<std::string> obsDateVec, odvTemp, obsMode, columns;
 	std::vector<std::vector<double>> inputTemp;
 
 	// Open the binary table
 	std::string hdu = "SINGLE DISH";
-	Debugger::print("Info", "Accessing extension table", file);
 
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(filename[file - 1], CCfits::Read, hdu, false));
 	CCfits::ExtHDU& table = pInfile->extension(hdu);
@@ -235,11 +218,8 @@ int PreProcessor::accessExtTableGBT(int file)
 		// Other
 		table.column("OBSMODE").read(obsMode, 1, 1);
 		table.column("OBSFREQ").read(freqGBT, 1, 1);
-		//table.column("MJD").read(MJDateHold, 1, 1);
 
-		// Define MJD and Frequency
-		//MJDate = (int)MJDateHold[0];
-		MJDate = 58708;
+		// Define Frequency
 		frequency = freqGBT[0];
 
 		// Format sweeps, pattern, and utc
@@ -263,7 +243,6 @@ int PreProcessor::primaryHeader()
 {
 	std::string obsDate;
 	std::string name = filename[0];
-	Debugger::print("Info", "Accessing the primary header");
 
 	// Open the primary header
 	std::unique_ptr<CCfits::FITS> pInfile(new CCfits::FITS(name, CCfits::Read, true));
@@ -383,7 +362,7 @@ void PreProcessor::buildSpectra(Spectra &spectra, SpectralParameters cParams)
 }
 void PreProcessor::performCleaningMulti(Spectra spectra, double baseline)
 {
-	int maxThreads = 50;
+	int maxThreads = 8;
 	int counter = 0, completedThreads = 0, liveThreads = 0;
 	std::vector<std::future<std::vector<double>>> futureVec;
 	std::vector<double> results;
@@ -397,7 +376,6 @@ void PreProcessor::performCleaningMulti(Spectra spectra, double baseline)
 	for (int i = 0; i < spectra20.size(); i++)
 	{
 		scCuda = BackgroundCUDA(spectra, i);
-		Debugger::print("Info", "Cleaning Spectrum", i);
 
 		futureVec[i] = std::async(std::launch::async, &BackgroundCUDA::calculateBG, scCuda, baseline);
 		counter++;
@@ -465,7 +443,7 @@ void PreProcessor::setScatterParams(Spectra spectra)
 }
 void PreProcessor::determineScatterMulti(Spectra &spectra)
 {
-	int maxThreads = 125;
+	int maxThreads = 8;
 	int counter = 0, completedThreads = 0, liveThreads = 0;
 	std::vector<std::future<double>> futureVec;
 	double result;
@@ -474,7 +452,6 @@ void PreProcessor::determineScatterMulti(Spectra &spectra)
 
 	for (int i = 0; i < spectra20.size(); i++)
 	{
-		Debugger::print("Info", i);
 		futureVec[i] = std::async(std::launch::async, &PreProcessor::calculateScatter, this, i);
 		counter++;
 		liveThreads++;
@@ -842,10 +819,6 @@ void PreProcessor::validateFrequency()
 }
 
 // Getters
-int PreProcessor::getMJDate()
-{
-	return this->MJDate;
-}
 bool PreProcessor::getScanningDirection()
 {
 	return this->scanningDirection;
@@ -872,11 +845,6 @@ std::string PreProcessor::getCoordinateSystem()
 }
 
 // Setters
-void PreProcessor::setMJD(std::vector<double> MJDHold)
-{
-	// Convert from double to int
-	MJDate = (int)MJDHold[0];
-}
 void PreProcessor::setResolution(std::string l)
 {
 	if (l.find("LOWRES") != l.npos)

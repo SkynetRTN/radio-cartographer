@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Structures.h"
+#include "utils\Structures.h"
 
 class ConfigParser {
 public:
@@ -11,13 +11,16 @@ public:
 		JSON,
 	};
 
+	std::string runMethod;
+	std::string configFilename;
+	std::vector<std::string> obsFilenames;
+
 	void parse();
 	bool exists(std::string);
 
-	std::string filename;
 	MapParameters map;
 	SurveyParameters survey;
-	PhotometryParams photomtery;
+	PhotometryParameters photometry;
 	ProcessorParameters processor;
 	PreProcessingParameters preProcessor;
 
@@ -30,5 +33,4 @@ private:
 	FileType fileType;
 
 	void setFileType(std::string);
-
 };
