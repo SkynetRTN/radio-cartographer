@@ -68,7 +68,7 @@ RUN make install
 WORKDIR /skynet
 
 ## Set environment
-ENV LD_LIBRARY_PATH /usr/local/lib
+ENV LD_LIBRARY_PATH=/usr/local/lib
 RUN ldconfig
 
 # Setup RC
