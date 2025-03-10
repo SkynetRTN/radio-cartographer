@@ -24,6 +24,8 @@ public:
 	//coordinate transforms
 	void convertToGalacticInitial(); //DYLAN
 	void zeroCrossCheck(); // DYLAN
+    // RA/DEC meridian edge case
+    void zeroRaCheck();
 
 	//data pre-processing
 	void setParams(SurveyParameters);
