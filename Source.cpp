@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
 		surveyHold[i].calculateEdgeParameters();
 	}
 
-	processor.levelLSSData(surveyHold);
+//	processor.levelLSSData(surveyHold);
 	surveys = surveyHold;
 	Composite composite(surveys);
 
