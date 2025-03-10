@@ -355,11 +355,14 @@ int main(int argc, char *argv[])
 	setInputProcessingParams(argv, procParams);
 
 	// SURVEY
-	// Survey survey(sParams, cParams, skynet_filename);
 	Survey survey(sParams, cParams, skynet_filename);
+//	Survey survey(sParams, cParams, "/skynet/radio-cartographer/testing/Temporary/barnard2.fits");
 	surveyHold.push_back(survey);
-	// Survey survey2(sParams, "Skynet_56812_Jupiter_8889_9652.txt");
-	// surveyHold.push_back(survey2);
+
+//    cParams.files.clear();
+//    cParams.files.emplace_back("/skynet/radio-cartographer/testing/Temporary/barnard.fits");
+//    Survey survey2(sParams, cParams, "/skynet/radio-cartographer/testing/Temporary/barnard.fits");
+//    surveyHold.push_back(survey2);
 
 	// OUTPUT
 	Output output;
