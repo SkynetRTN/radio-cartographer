@@ -820,7 +820,7 @@ void Processor::characterizeData(Survey &survey)
 			}
 			else
 			{
-				scans[i].cosDecTransform(survey.getTimeShift(), survey.getMedianDec(), survey.getMedianRa(), survey.getMedianDec());
+				scans[i].dynamicCosDecTransform(survey.getTimeShift(), survey.getMedianDec(), survey.getMedianRa(), scans[i].getDec());
 				scans[i].updateAngDistTemp(survey.getMedianDec());
 			}
 		}
@@ -833,7 +833,7 @@ void Processor::characterizeData(Survey &survey)
 			}
 			else
 			{
-				scans[i].cosDecTransform(survey.getTimeShift(), globalCenterDec, globalCenterRa, globalCenterDec);
+                scans[i].dynamicCosDecTransform(survey.getTimeShift(), globalCenterDec, globalCenterRa, scans[i].getDec());
 				scans[i].updateAngDistTemp(globalCenterDec);
 			}
 		}
