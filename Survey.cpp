@@ -404,7 +404,8 @@ void Survey::dataProc(std::vector<std::vector<double> > &data)
 	if (mCoordinate == "galactic")
 	{
 		convertToGalacticInitial();
-		zeroCrossCheck();
+//		zeroCrossCheck();
+        zeroRaCheck();
 	} else if (mCoordinate == "equatorial") {
         zeroRaCheck();
     }
@@ -2081,13 +2082,14 @@ void Survey::convertToGalacticInitial()
 }
 
 // if it's a raster map that wraps around ra=0, we need to adjust the ra values after passing 0
+// apparently it works for galactic too.
 void Survey::zeroRaCheck() {
     bool isCross = false;
     int maxIndex, minIndex;
     for (int i = 1; i < ras.size(); i++) {
-        maxIndex = std::min_element(ras[i - 1].begin(), ras[i - 1].end()) - ras[i - 1].begin();
-        minIndex = std::max_element(ras[i].begin(), ras[i].end()) - ras[i].begin();
-        if ((ras[i][maxIndex] > 180.0 && ras[i - 1][minIndex] < 180.0) || isCross) {
+        maxIndex = std::max_element(ras[i - 1].begin(), ras[i - 1].end()) - ras[i - 1].begin();
+        minIndex = std::min_element(ras[i].begin(), ras[i].end()) - ras[i].begin();
+        if ((ras[i][minIndex] < 180.0 && ras[i - 1][maxIndex] > 180.0) || isCross) {
             isCross = true;
             for (int j = 0; j < ras[i].size(); j++) {
                 if (ras[i][j] < 180.0) {
