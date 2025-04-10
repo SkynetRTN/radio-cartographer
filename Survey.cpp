@@ -2087,6 +2087,13 @@ void Survey::zeroRaCheck() {
     bool isCross = false;
     int maxIndex, minIndex;
     for (int i = 1; i < ras.size(); i++) {
+        int i_pre = i - 1;
+        while (i_pre > 0 && ras[i_pre].empty()) {
+             i_pre--;
+        }
+        if (ras[i].empty() || ras[i_pre].empty()) {
+            continue;
+        }
         maxIndex = std::max_element(ras[i - 1].begin(), ras[i - 1].end()) - ras[i - 1].begin();
         minIndex = std::min_element(ras[i].begin(), ras[i].end()) - ras[i].begin();
         if ((ras[i][minIndex] < 180.0 && ras[i - 1][maxIndex] > 180.0) || isCross) {
