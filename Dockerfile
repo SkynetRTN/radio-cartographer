@@ -1,6 +1,6 @@
 # docker build -t radio-cartographer .
 
-FROM ubuntu:22.04
+FROM ubuntu:latest
 
 #set up file system
 RUN mkdir /skynet
@@ -47,13 +47,14 @@ RUN ./configure --prefix=/usr/local
 RUN make
 RUN make install
 WORKDIR /skynet
-
+≤
 
 ## CCFits
-RUN curl https://heasarc.gsfc.nasa.gov/fitsio/CCfits/CCfits-2.6.tar.gz -o /skynet/CCfits-2.6.tar.gz
-RUN tar -xf CCfits-2.6.tar.gz
-WORKDIR /skynet/CCfits-2.6
-RUN ./configure --with-cfitsio=/usr/local --prefix=/usr/local
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/CCfits.tar.gz -o /skynet/CCfits-2.7.tar.gz
+
+RUN tar -xf CCfits-2.7.tar.gz
+WORKDIR /skynet/CCfits-2.7
+RUN ./configure --with-cfitsio=/usr/local/cfitsio --prefix=/usr/local
 RUN gmake
 RUN make install
 WORKDIR /skynet
