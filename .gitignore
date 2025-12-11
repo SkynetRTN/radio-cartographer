@@ -1,13 +1,37 @@
-**/.DS_Store
+# Build directories
+build/
+cmake-build-*/
 CMakeFiles/
-.cmake/
-cmake-build-debug
-cmake-build-debug-docker
-CMakeCache.txt
-main
-Makefile
-cmake_install.cmake
-testing/Temporary
 
-# ignore copilot files in .idea
-.idea/copilot.*
+# CMake cache
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Object files and libraries
+*.o
+*.a
+*.so
+*.dylib
+
+# Executables
+RDP.out
+RDP.out.bak
+radio-cartographer
+
+# Backups
+*.bak
+*.swp
+*~
+
+# Logs
+*.log
+
+# OS Specific
+.DS_Store
+
+# temp files
+testing/**/*.fits
+testing/**/*.txt
+testing/Temporary

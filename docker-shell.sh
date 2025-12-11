@@ -13,6 +13,18 @@ if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then
   docker build -t $IMAGE_NAME .
 fi
 
+# 1.5. FRESHNESS CHECK
+# Check if the running container is using the latest image.
+if [ ! -z "$(docker ps -qf "name=^${CONTAINER_NAME}$")" ]; then
+    CURRENT_IMAGE_ID=$(docker inspect --format '{{.Image}}' $CONTAINER_NAME)
+    LATEST_IMAGE_ID=$(docker inspect --format '{{.Id}}' $IMAGE_NAME)
+
+    if [ "$CURRENT_IMAGE_ID" != "$LATEST_IMAGE_ID" ]; then
+        echo "⚠️  Container is running an old image. Restarting..."
+        docker rm -f $CONTAINER_NAME
+    fi
+fi
+
 # 2. RUN CHECK (The "Persistent Sandbox")
 # Check if container is running. If not, start it in "Sleep Mode".
 # We use 'tail -f /dev/null' to keep the C++ environment alive indefinitely.
@@ -51,5 +63,9 @@ fi
 if [ $# -eq 0 ]; then
     docker exec $DOCKER_FLAGS "$CONTAINER_NAME" /bin/bash
 else
+    # Support "sh -c" style invocation by checking for -c
+    if [ "$1" == "-c" ]; then
+        shift
+    fi
     docker exec $DOCKER_FLAGS "$CONTAINER_NAME" /bin/bash -c "$*"
 fi

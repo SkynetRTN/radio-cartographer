@@ -1,0 +1,27 @@
+TELESCOP,20 meter,Telescope name
+FREQ,0,Frequency (GHz)
+BEAM,inf,Beam (deg)
+SMSCALE,0,Minimum surface modeling scale (beams)
+polarization channel and gain calibration:
+left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
+left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
+right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
+right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
+1	1	25469.53	0.43
+1	1	25740.27	0.08
+0	1	25469.71	20.62
+0	1	25739.98	19.82
+polarization channel and gain calibration:
+left channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
+left channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
+right channel (used = 1), pre-cal (used = 1), t (s), cal (V), cal (Jy) 
+right channel (used = 1), post-cal (used = 1), t (s), cal (V), cal (Jy) 
+1	1	25469.53	0.43
+1	1	25740.27	0.08
+0	1	25469.71	20.62
+0	1	25739.98	19.82
+BGSCALE,6,Background subtraction scale (beams)
+TIMESHIF,0,Time delay correction (s) (Used=false)
+BGSCALE,6,Background subtraction scale (beams)
+TIMESHIF,0,Time delay correction (s) (Used=false)
+RFISCALE,0.05,RFI removal scale (beams)

@@ -43,7 +43,7 @@ RUN apt-get -y install g++
 RUN export CXX=g++
 
 ## CFITSIO
-RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.6.3.tar.gz -o /skynet/cfitsio-4.6.3.tar.gz --retry 3
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.6.3.tar.gz -o /skynet/cfitsio-4.6.3.tar.gz --retry 10
 RUN tar -xf cfitsio-4.6.3.tar.gz
 WORKDIR /skynet/cfitsio-4.6.3
 # Set flags so configure can find the custom zlib headers and libs
@@ -56,7 +56,7 @@ WORKDIR /skynet
 
 
 ## CCFits
-RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/CCfits.tar.gz -o /skynet/CCfits-2.7.tar.gz --retry 3
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/CCfits.tar.gz -o /skynet/CCfits-2.7.tar.gz --retry 10
 
 RUN tar -xf CCfits-2.7.tar.gz
 WORKDIR /skynet/CCfits-2.7
