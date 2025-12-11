@@ -9,6 +9,9 @@ WORKDIR /skynet
 # Install dependencies
 RUN apt-get update
 
+# Python
+RUN apt-get -y install python3
+
 ## cmake
 RUN apt-get -y install cmake
 
@@ -40,17 +43,20 @@ RUN apt-get -y install g++
 RUN export CXX=g++
 
 ## CFITSIO
-RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3430.tar.gz -o /skynet/cfitsio3430.tar.gz
-RUN tar -xf cfitsio3430.tar.gz
-WORKDIR /skynet/cfitsio
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.6.3.tar.gz -o /skynet/cfitsio-4.6.3.tar.gz --retry 3
+RUN tar -xf cfitsio-4.6.3.tar.gz
+WORKDIR /skynet/cfitsio-4.6.3
+# Set flags so configure can find the custom zlib headers and libs
+ENV CPPFLAGS="-I/skynet/zlib/include"
+ENV LDFLAGS="-L/skynet/zlib/lib"
 RUN ./configure --prefix=/usr/local
 RUN make
 RUN make install
 WORKDIR /skynet
-≤
+
 
 ## CCFits
-RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/CCfits.tar.gz -o /skynet/CCfits-2.7.tar.gz
+RUN curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/CCfits.tar.gz -o /skynet/CCfits-2.7.tar.gz --retry 3
 
 RUN tar -xf CCfits-2.7.tar.gz
 WORKDIR /skynet/CCfits-2.7
