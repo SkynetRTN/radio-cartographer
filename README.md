@@ -206,3 +206,30 @@ it's the easiest to copy your file to /testing, and only modify the filename in 
 
 You can also modify all the other RC arguments. Good luck figure out what each of them does. :)
 
+## Antigravity Setup
+
+To configure Antigravity to use the Docker environment, use the provided `docker-shell.sh` script. This script acts as a bridge between the local filesystem and the Docker container's build environment.
+
+1. **Ensure the script is executable:**
+   ```bash
+   chmod +x docker-shell.sh
+   ```
+
+2. **Configure Antigravity Terminal Profile:**
+   Since Antigravity is based on VSCode, you can configure the integrated terminal to use the Docker environment automatically.
+
+   1. Open the Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux).
+   2. Type `Preferences: Open Settings (JSON)` and select it to open your `settings.json` file.
+   3. Add the following configuration to the file.
+
+   *Note: Change `osx` to `linux` or `windows` in the property keys depending on your operating system.*
+
+   ```json
+   "terminal.integrated.profiles.osx": {
+     "Docker Sandbox": {
+       "path": "${workspaceFolder}/docker-shell.sh",
+       "icon": "container"
+     }
+   },
+   "terminal.integrated.defaultProfile.osx": "Docker Sandbox"
+   ```
