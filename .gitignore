@@ -8,3 +8,6 @@ main
 Makefile
 cmake_install.cmake
 testing/Temporary
+
+# ignore copilot files in .idea
+.idea/copilot.*
