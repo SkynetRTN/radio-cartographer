@@ -1,1 +1,0 @@
-from astropy.io import fitsimport numpy as npimport globimport sysdef convertTXTtoFITS(filename):    imageData = np.genfromtxt(filename, delimiter='\t')    fits.writeto(filename+".fits", imageData, overwrite=True)def scribe():    for fn in glob.glob("*.txt"):        convertTXTtoFITS(fn)scribe();
