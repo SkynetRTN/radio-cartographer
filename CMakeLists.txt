@@ -62,6 +62,7 @@ if(NOT nlohmann_json_FOUND)
 
     FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
     FetchContent_MakeAvailable(json)
+    set(radio_cartographer_bundled_json TRUE)
 endif()
 
 find_package(Threads REQUIRED)
@@ -84,6 +85,13 @@ install(TARGETS radio_cartographer radio-cartographer
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+if(radio_cartographer_bundled_json)
+    install(TARGETS nlohmann_json
+        EXPORT radio_cartographerTargets
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+endif()
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
