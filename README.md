@@ -127,13 +127,40 @@ lib /machine:x64 /def:libfftw3l-3.def
 
 ### With Visual Studio
 
-Needs updating
+You can generate a Visual Studio solution with CMake. From a Developer Command Prompt, create a
+build directory (for example, `build`) parallel to the source tree and run:
+
+```
+cmake -S . -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+If your dependencies are installed outside the default search paths, add them to
+`CMAKE_PREFIX_PATH`, e.g. `-DCMAKE_PREFIX_PATH="C:/path/to/cfitsio;C:/path/to/fftw"`.
+The generated solution builds the `radio-cartographer` executable and the
+`radio_cartographer` library target.
 
 ### Without Visual Studio
 
-We have a (crude) compile script called `compileStandard.sh` that will compile the project. I often
-dream of writing a `makefile`, but until that day, we must recompile the entire project with the script
-even if we make a one-line change to a single file.
+Use the CMake-based build instead of the old `compileStandard.sh` script. A typical build looks like:
+
+```
+mkdir -p build
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_PREFIX_PATH="/path/to/fftw;/path/to/cfitsio" \
+  -DBUILD_PYTHON_BINDINGS=OFF
+cmake --build build
+```
+
+Key notes:
+
+- The project depends on FFTW3, CFITSIO, CCFITS, pthreads/Win32 threads, and nlohmann_json
+  (automatically fetched if not already available).
+- Set `BUILD_PYTHON_BINDINGS=ON` to build the shared library with position-independent code and
+  default symbol hiding for Python wrappers.
+- Run `cmake --install build --prefix /your/prefix` to install the executable, library, headers,
+  and CMake package config under the chosen prefix (`/usr/local` by default).
 
 ## Running
 
