@@ -1,9 +1,13 @@
 #include "Map.h"
-#include <iostream>
-#include <fstream>
-#include <math.h>
+#include <CCfits/CCfits>
 #include <float.h>
-#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <math.h>
+#include <memory>
+#include <valarray>
 
 Map::Map()
 {
@@ -497,63 +501,114 @@ void Map::printIndexNumberMap()
 	file.close();
 }
 
-void Map::printFits(const std::string fitsName, FitsFile fitsType)
+void Map::printFits(const std::string &fitsName, FitsFile fitsType,
+                    const std::vector<std::pair<std::string, double>> &headerDoubles,
+                    const std::vector<std::pair<std::string, std::string>> &headerStrings)
 {
-	/*
-	long naxis = 2;
-	long naxes[2] = {  grid[0].size(), grid.size() };
-	std::auto_ptr<FITS> pFits(0);
-	long& vectorLength = naxes[0];
-	long& numberOfRows = naxes[1];
-	long nelements(1);
-	long  fpixel(1);
-	nelements = naxes[0] * naxes[1];// Find the total size of the array. calculating naxes[0]*naxes[1])
+        if (grid.empty() || grid[0].empty())
+        {
+                std::cerr << "Map grid is empty; skipping FITS write for " << fitsName << std::endl;
+                return;
+        }
 
-	std::valarray<double> row(vectorLength);
-	std::valarray<double> array(nelements);
+        const long width = static_cast<long>(grid.front().size());
+        const long height = static_cast<long>(grid.size());
+        const long naxis = 2;
+        long naxes[2] = { width, height };
 
-	try
-	{
-		pFits.reset(new FITS(fitsName, DOUBLE_IMG, naxis, naxes));
-	}
-	catch (FITS::CantCreate)
-	{
-		return;
-	}
+        std::unique_ptr<CCfits::FITS> pFits;
+        try
+        {
+                pFits = std::make_unique<CCfits::FITS>(fitsName, CCfits::DOUBLE_IMG, naxis, naxes);
+        }
+        catch (const CCfits::FITS::CantCreate &)
+        {
+                std::cerr << "Unable to create FITS file: " << fitsName << std::endl;
+                return;
+        }
 
-	for (int i = 0; i < grid.size(); i++)
-	{
-		for (int j = 0; j < grid[0].size(); j++)
-		{
-			switch (fitsType)
-			{
-			case (MAIN_SMALL):
-				array[i*grid[0].size() + j] = getProcFlux(i, j);
-				break;
-			case (MAIN_LARGE) :
-				array[i*grid[0].size() + j] = getProcFlux(i, j);
-				break;
-			case (PATH) :
-				array[i*grid[0].size() + j] = getProcPath(i, j);
-				break;
-			case (SCALE) :
-				array[i*grid[0].size() + j] = getScale(i, j);
-				break;
-			case (WEIGHT) :
-				array[i*grid[0].size() + j] = getWeight(i, j);
-				break;
-			case (WEIGHT_TEMP) :
-				array[i*grid[0].size() + j] = getWeight2(i, j);
-				break;
-			}
-		}
-	}
+        std::valarray<double> array(static_cast<std::size_t>(width * height), std::numeric_limits<double>::quiet_NaN());
 
-	pFits->pHDU().write(fpixel, nelements, array);
+        auto valueForPixel = [this, fitsType](std::size_t decIdx, std::size_t raIdx) -> double
+        {
+                switch (fitsType)
+                {
+                case MAIN_SMALL:
+                        return getSSSProcFlux(decIdx, raIdx);
+                case MAIN_LARGE:
+                        return getLSSProcFlux(decIdx, raIdx);
+                case PATH:
+                        return getProcPath(decIdx, raIdx);
+                case SCALE:
+                        return getSSSScale(decIdx, raIdx);
+                case WEIGHT:
+                        return getSSSWeight(decIdx, raIdx);
+                case WEIGHT_TEMP:
+                        return getSSSWeight2(decIdx, raIdx);
+                case CORRELATION:
+                        return getSSSCorrelation(decIdx, raIdx);
+                default:
+                        return std::numeric_limits<double>::quiet_NaN();
+                }
+        };
 
-	std::cout << pFits->pHDU() << std::endl;
-	return;
-	*/
+        for (std::size_t decIdx = 0; decIdx < grid.size(); ++decIdx)
+        {
+                const std::size_t rowWidth = grid[decIdx].size();
+                for (std::size_t raIdx = 0; raIdx < rowWidth; ++raIdx)
+                {
+                        const double value = valueForPixel(decIdx, raIdx);
+                        array[decIdx * width + raIdx] = std::isfinite(value) ? value : std::numeric_limits<double>::quiet_NaN();
+                }
+        }
+
+        const long fpixel = 1;
+        pFits->pHDU().write(fpixel, static_cast<long>(array.size()), array);
+
+        auto centerPixel = [](long size) -> long
+        {
+                if (size % 2 == 0)
+                {
+                        return size / 2;
+                }
+                return (size - 1) / 2 + 1;
+        };
+
+        std::map<std::string, double> doubleKeys = {
+                {"CRPIX1", static_cast<double>(centerPixel(width))},
+                {"CRPIX2", static_cast<double>(centerPixel(height))},
+                {"CRVAL1", centerRa},
+                {"CRVAL2", centerDec},
+                {"CDELT1", resolution},
+                {"CDELT2", resolution},
+        };
+
+        for (const auto &entry : headerDoubles)
+        {
+                doubleKeys[entry.first] = entry.second;
+        }
+
+        std::map<std::string, std::string> stringKeys = {
+                {"CTYPE1", "RA---TAN"},
+                {"CTYPE2", "DEC--TAN"},
+                {"CUNIT1", "deg"},
+                {"CUNIT2", "deg"},
+        };
+
+        for (const auto &entry : headerStrings)
+        {
+                stringKeys[entry.first] = entry.second;
+        }
+
+        CCfits::PHDU &hdu = pFits->pHDU();
+        for (const auto &entry : doubleKeys)
+        {
+                hdu.addKey(entry.first, entry.second, "");
+        }
+        for (const auto &entry : stringKeys)
+        {
+                hdu.addKey(entry.first, entry.second, "");
+        }
 }
 
 // MAP GETTERS
@@ -589,16 +644,20 @@ double Map::getResolution()
 // GRID GETTERS
 int Map::getSize(int i)
 {
-	if (i == 0)
-	{
-		return grid.size();
-	}
-	else if (i == 1)
-	{
-		return grid[i].size();
-	}
-	else
-	{
+        if (i == 0)
+        {
+                return grid.size();
+        }
+        else if (i == 1)
+        {
+                if (grid.empty())
+                {
+                        return 0;
+                }
+                return grid[0].size();
+        }
+        else
+        {
 		std::cout << "ERROR: GRID INDEX OUT OF BOUNDS!\n";
 		std::cout << "PRESS ENTER TO ABORT\n";
 		// throw error here

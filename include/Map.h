@@ -1,15 +1,17 @@
 #pragma once
+#include <utility>
 #include <vector>
 #include <string>
 #include "Pixel.h"
 
 enum FitsFile {
-	MAIN_SMALL,
-	MAIN_LARGE,
-	PATH,
-	SCALE,
-	WEIGHT,
-	WEIGHT_TEMP
+        MAIN_SMALL,
+        MAIN_LARGE,
+        PATH,
+        SCALE,
+        WEIGHT,
+        WEIGHT_TEMP,
+        CORRELATION
 };
 
 class Map
@@ -38,7 +40,9 @@ public:
 	void printScanNumberMap();
 	void printIndexNumberMap();
 
-	void printFits(std::string, FitsFile);
+        void printFits(const std::string &fitsName, FitsFile fitsType,
+                       const std::vector<std::pair<std::string, double>> &headerDoubles = {},
+                       const std::vector<std::pair<std::string, std::string>> &headerStrings = {});
 
 	//MAP GETTERS
 	double getMaxDec();

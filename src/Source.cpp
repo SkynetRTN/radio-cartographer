@@ -5,10 +5,46 @@
 #include "Analysis.h"
 #include <stdexcept>
 #include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 double rfiMax;
 bool LSSProcessing;
 std::string skynet_filename;
+
+std::vector<std::pair<std::string, double>> buildDefaultFitsHeader(const Map &map)
+{
+        std::vector<std::pair<std::string, double>> header;
+
+        auto centerPixel = [](int size) -> double
+        {
+                if (size % 2 == 0)
+                {
+                        return size / 2.0;
+                }
+                return (size - 1) / 2.0 + 1.0;
+        };
+
+        header.push_back({"CRPIX1", centerPixel(map.getSize(1))});
+        header.push_back({"CRPIX2", centerPixel(map.getSize(0))});
+        header.push_back({"CRVAL1", map.getCenterRa()});
+        header.push_back({"CRVAL2", map.getCenterDec()});
+        header.push_back({"CDELT1", map.getResolution()});
+        header.push_back({"CDELT2", map.getResolution()});
+
+        return header;
+}
+
+std::vector<std::pair<std::string, std::string>> buildDefaultFitsStringHeader()
+{
+        return {
+                {"CTYPE1", "RA---TAN"},
+                {"CTYPE2", "DEC--TAN"},
+                {"CUNIT1", "deg"},
+                {"CUNIT2", "deg"},
+        };
+}
 
 double setRFIMaxVal(SurveyParameters sParams, int MJD)
 {
@@ -396,18 +432,21 @@ int main(int argc, char *argv[])
 
 	// RFI AND THETA GAP
 	processor.performRFIRejectionMulti(composite, surveys);
-	processor.calculateProcThetaGapMulti(composite);
+        processor.calculateProcThetaGapMulti(composite);
 
-	// PROCMAP
-	Cartographer cartographer(composite, mParams);
-	Map procMap = cartographer.generateProcMapsMulti();
-	procMap.printSSSProcFluxMap();
-	procMap.printProcPathMap();
+        // PROCMAP
+        Cartographer cartographer(composite, mParams);
+        Map procMap = cartographer.generateProcMapsMulti();
+        const auto fitsHeader = buildDefaultFitsHeader(procMap);
+        const auto fitsStringHeader = buildDefaultFitsStringHeader();
 
-	// PHOTOMETRY AND OUTPUT
-	if (pParams.perform && !(procParams.raw))
-	{
-		Analysis analysis(composite, mParams);
+        procMap.printFits("SSS_main.fits", MAIN_SMALL, fitsHeader, fitsStringHeader);
+        procMap.printFits("proc_path.fits", PATH, fitsHeader, fitsStringHeader);
+
+        // PHOTOMETRY AND OUTPUT
+        if (pParams.perform && !(procParams.raw))
+        {
+                Analysis analysis(composite, mParams);
 		analysis.photometryMulti(procMap, pParams);
 
 		// procMap.printSSSCorrelationMap();
@@ -415,13 +454,13 @@ int main(int argc, char *argv[])
 	if (!(pParams.perform) || procParams.raw)
 	{
 		output.printPhotometryHolder();
-	}
-	// if (!(procParams.raw))
-	// {
-	procMap.printSSSScaleMap();
-	procMap.printSSSWeightMap();
-	procMap.printSSSCorrelationMap();
-	// }
+        }
+        // if (!(procParams.raw))
+        // {
+        procMap.printFits("SSS_scale.fits", SCALE, fitsHeader, fitsStringHeader);
+        procMap.printFits("SSS_weight.fits", WEIGHT, fitsHeader, fitsStringHeader);
+        procMap.printFits("SSS_correlation.fits", CORRELATION, fitsHeader, fitsStringHeader);
+        // }
 
 	// EXIT
 	std::cout << "The code has exited successfully with return code 0" << std::endl;
