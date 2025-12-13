@@ -1,114 +1,105 @@
 #pragma once
-#include <vector>
-#include <string>
 #include "Pixel.h"
+#include <CCfits/CCfits>
+#include <map>
+#include <string>
+#include <vector>
 
-enum FitsFile {
-	MAIN_SMALL,
-	MAIN_LARGE,
-	PATH,
-	SCALE,
-	WEIGHT,
-	WEIGHT_TEMP
-};
+enum FitsFile { MAIN_SMALL, MAIN_LARGE, PATH, SCALE, WEIGHT, WEIGHT_TEMP };
 
-class Map
-{
+class Map {
 public:
-	Map();
-	
-	//MAP PREPROCESSING
-	void reserveGrid(double, double, double, double, double, double, double);
+  Map();
 
-	//MAP PRINTING
-	void printSSSProcFluxMap();
-	void printSSSWeightMap();
-	void printSSSWeight2Map();
-	void printSSSCorrelationMap();
-	void printSSSScaleMap();
+  // MAP PREPROCESSING
+  void reserveGrid(double, double, double, double, double, double, double);
 
-	void printLSSProcFluxMap();
-	void printLSSWeightMap();
-	void printLSSWeight2Map();
-	void printLSSCorrelationMap();
-	void printLSSScaleMap();
+  // MAP PRINTING
+  void printSSSProcFluxMap();
+  void printSSSWeightMap();
+  void printSSSWeight2Map();
+  void printSSSCorrelationMap();
+  void printSSSScaleMap();
 
-	void printProcPathMap();
-	void printLSSMap();
-	void printScanNumberMap();
-	void printIndexNumberMap();
+  void printLSSProcFluxMap();
+  void printLSSWeightMap();
+  void printLSSWeight2Map();
+  void printLSSCorrelationMap();
+  void printLSSScaleMap();
 
-	void printFits(std::string, FitsFile);
+  void printProcPathMap();
+  void printLSSMap();
+  void printScanNumberMap();
+  void printIndexNumberMap();
 
-	//MAP GETTERS
-	double getMaxDec();
-	double getMinDec();
-	double getMaxRa();
-	double getMinRa();
-	double getCenterDec();
-	double getCenterRa();
-	double getResolution();
-	
-	//GRID GETTERS
-	int getSize(int);
-	bool getCentroidFlag(int, int);
-	double getDec(int, int);
-	double getRa(int, int);
-	double getLSSFlux(int, int);
-	double getProcPath(int, int);
+  void printFits(std::string fitsName,
+                 std::map<std::string, std::string> headerInfo = {});
 
-	double getSSSProcFlux(int, int);
-	double getSSSScale(int, int);
-	double getSSSCorrelation(int, int); //DYLAN
-	double getSSSWeight(int, int);
-	double getSSSWeight2(int, int);
+  // MAP GETTERS
+  double getMaxDec();
+  double getMinDec();
+  double getMaxRa();
+  double getMinRa();
+  double getCenterDec();
+  double getCenterRa();
+  double getResolution();
 
-	double getLSSProcFlux(int, int);
-	double getLSSScale(int, int);
-	double getLSSCorrelation(int, int); //DYLAN
-	double getLSSWeight(int, int);
-	double getLSSWeight2(int, int);
+  // GRID GETTERS
+  int getSize(int);
+  bool getCentroidFlag(int, int);
+  double getDec(int, int);
+  double getRa(int, int);
+  double getLSSFlux(int, int);
+  double getProcPath(int, int);
 
+  double getSSSProcFlux(int, int);
+  double getSSSScale(int, int);
+  double getSSSCorrelation(int, int); // DYLAN
+  double getSSSWeight(int, int);
+  double getSSSWeight2(int, int);
 
-	int getScanNumber(int, int);
-	int getIndexNumber(int, int);
+  double getLSSProcFlux(int, int);
+  double getLSSScale(int, int);
+  double getLSSCorrelation(int, int); // DYLAN
+  double getLSSWeight(int, int);
+  double getLSSWeight2(int, int);
 
+  int getScanNumber(int, int);
+  int getIndexNumber(int, int);
 
-	//GRID SETTERS
-	void setCentroidFlag(int, int, bool);
-	void setDec(int, int, double);
-	void setRa(int, int, double);
-	void setLSSFlux(int, int, double);
-	void setProcPath(int, int, double);
+  // GRID SETTERS
+  void setCentroidFlag(int, int, bool);
+  void setDec(int, int, double);
+  void setRa(int, int, double);
+  void setLSSFlux(int, int, double);
+  void setProcPath(int, int, double);
 
-	void setSSSProcFlux(int, int, double);
-	void setSSSScale(int, int, double);
-	void setSSSCorrelation(int, int, double); //DYLAN
-	void setSSSWeight(int, int, double);
-	void setSSSWeight2(int, int, double);
+  void setSSSProcFlux(int, int, double);
+  void setSSSScale(int, int, double);
+  void setSSSCorrelation(int, int, double); // DYLAN
+  void setSSSWeight(int, int, double);
+  void setSSSWeight2(int, int, double);
 
-	void setLSSProcFlux(int, int, double);
-	void setLSSScale(int, int, double);
-	void setLSSCorrelation(int, int, double); //DYLAN
-	void setLSSWeight(int, int, double);
-	void setLSSWeight2(int, int, double);
-	
-	void setScanNumber(int, int, int);
-	void setIndexNumber(int, int, int);
+  void setLSSProcFlux(int, int, double);
+  void setLSSScale(int, int, double);
+  void setLSSCorrelation(int, int, double); // DYLAN
+  void setLSSWeight(int, int, double);
+  void setLSSWeight2(int, int, double);
 
-	~Map();
+  void setScanNumber(int, int, int);
+  void setIndexNumber(int, int, int);
+
+  ~Map();
 
 private:
-	std::vector<std::vector<Pixel> > grid;
+  std::vector<std::vector<Pixel>> grid;
 
-	double pixelSize;
-	double maxRa;
-	double minRa;
-	double maxDec;
-	double minDec;
-	double centerRa;
-	double centerDec;
-	double resolution;
-
+  double pixelSize;
+  double maxRa;
+  double minRa;
+  double maxDec;
+  double minDec;
+  double centerRa;
+  double centerDec;
+  double resolution;
 };
-
