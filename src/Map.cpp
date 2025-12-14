@@ -392,7 +392,9 @@ void getLayerData(Map *map, FitsFile type, long nelements, long naxes0,
       default:
         break;
       }
-      array[i * naxes0 + j] = val;
+      // Reverse j-index to match FITS convention (CDELT1 is negative)
+      int reversed_j = (map->getSize(1) - 1) - j;
+      array[i * naxes0 + reversed_j] = val;
     }
   }
 }
