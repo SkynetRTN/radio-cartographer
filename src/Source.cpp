@@ -381,6 +381,13 @@ int main(int argc, char *argv[]) {
 
   // Construct base filename
   std::string baseName = skynet_filename;
+
+  // Strip directory path
+  const size_t last_slash_idx = baseName.find_last_of("\\/");
+  if (std::string::npos != last_slash_idx) {
+    baseName.erase(0, last_slash_idx + 1);
+  }
+
   size_t lastindex = baseName.find_last_of(".");
   if (lastindex != std::string::npos)
     baseName = baseName.substr(0, lastindex);
