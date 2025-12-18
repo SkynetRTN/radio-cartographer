@@ -400,7 +400,8 @@ void getLayerData(Map *map, FitsFile type, long nelements, long naxes0,
 }
 
 void Map::printFits(const std::string fitsName,
-                    std::map<std::string, std::string> headerInfo) {
+                    std::map<std::string, std::string> headerInfo,
+                    Map *rawMap) {
   using namespace CCfits;
 
   if (grid.empty() || grid[0].empty()) {
@@ -490,6 +491,33 @@ void Map::printFits(const std::string fitsName,
                headerInfo.begin();
            it != headerInfo.end(); ++it) {
         imageExt->addKey(it->first, it->second, "");
+      }
+    }
+
+    if (rawMap != nullptr) {
+      long rawWidth = rawMap->getSize(1);
+      long rawHeight = rawMap->getSize(0);
+      long rawNelements = rawWidth * rawHeight;
+      std::valarray<double> rawArray(rawNelements);
+
+      getLayerData(rawMap, MAIN_SMALL, rawNelements, rawWidth, rawArray);
+
+      std::vector<long> rawExtNaxes;
+      rawExtNaxes.push_back(rawWidth);
+      rawExtNaxes.push_back(rawHeight);
+
+      ExtHDU *imageExt = pFits->addImage("raw", DOUBLE_IMG, rawExtNaxes);
+      imageExt->write(1, rawNelements, rawArray);
+      imageExt->addKey("AGCMAP", "Rainbow", "Map color for Afterglow");
+
+      for (std::map<std::string, std::string>::const_iterator it =
+               headerInfo.begin();
+           it != headerInfo.end(); ++it) {
+        if (it->first == "RCRAW") {
+          imageExt->addKey("RCRAW", 0, "RC:  Is this the raw file");
+        } else {
+          imageExt->addKey(it->first, it->second, "");
+        }
       }
     }
   } catch (FITS::CantCreate &e) {
