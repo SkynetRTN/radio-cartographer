@@ -260,3 +260,14 @@ To configure Antigravity to use the Docker environment, use the provided `docker
    },
    "terminal.integrated.defaultProfile.osx": "Docker Sandbox"
    ```
+
+## Standard Testing Files
+
+There is a standard set of testing files used for regression testing and validation. These files are automatically downloaded during the Docker build process and are located at:
+
+```
+/skynet/test_standards_static
+```
+
+If you are running the code locally without Docker, you can download these standard files from the following link:
+[Standard Testing Files (Dropbox)](https://www.dropbox.com/scl/fo/1jd5vl7gta57yngrxjlyr/ABl5GBK2wnjpBBS1tLAF3x4?rlkey=y3gv086i7ab06ncn0ydx0ijjb&st=b2wgwi0a&dl=1)
