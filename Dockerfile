@@ -73,7 +73,7 @@ RUN ldconfig
 # Setup RC
 # Download testing standards (To safe static location)
 RUN mkdir -p /skynet/test_standards_static
-RUN curl -L "https://www.dropbox.com/scl/fo/1jd5vl7gta57yngrxjlyr/ABl5GBK2wnjpBBS1tLAF3x4?rlkey=vtl73v70w00ejkvtznm66wju3&st=fggj0fem&dl=1" -o /skynet/test_standards.zip
+RUN curl -L "https://www.dropbox.com/scl/fo/1jd5vl7gta57yngrxjlyr/ABl5GBK2wnjpBBS1tLAF3x4?rlkey=y3gv086i7ab06ncn0ydx0ijjb&st=b2wgwi0a&dl=1" -o /skynet/test_standards.zip
 RUN 7z x /skynet/test_standards.zip -o/skynet/test_standards_static
 RUN rm /skynet/test_standards.zip
 
