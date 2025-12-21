@@ -24,6 +24,8 @@ RUN apt-get -y install curl
 ## unzip
 RUN apt-get -y install unzip
 
+RUN apt-get -y install p7zip-full
+
 ## zlib
 RUN curl https://zlib.net/zlib131.zip -o /skynet/zlib131.zip
 RUN unzip zlib131.zip
@@ -79,12 +81,20 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 RUN ldconfig
 
 # Setup RC
+# Download testing standards (To safe static location)
+RUN mkdir -p /skynet/test_standards_static
+RUN curl -L "https://www.dropbox.com/scl/fo/1jd5vl7gta57yngrxjlyr/ABl5GBK2wnjpBBS1tLAF3x4?rlkey=vtl73v70w00ejkvtznm66wju3&st=fggj0fem&dl=1" -o /skynet/test_standards.zip
+RUN 7z x /skynet/test_standards.zip -o/skynet/test_standards_static
+RUN rm /skynet/test_standards.zip
+
 ## Transfer files
 RUN mkdir /skynet/radio-cartographer
 COPY . /skynet/radio-cartographer/
+
 
 ## Build
 WORKDIR /skynet/radio-cartographer
 RUN cmake .
 RUN cmake --build .
 WORKDIR /skynet
+
