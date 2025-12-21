@@ -7,24 +7,18 @@ RUN mkdir /skynet
 WORKDIR /skynet
 
 # Install dependencies
-RUN apt-get update
-
-# Python
-RUN apt-get -y install python3
-
-## cmake
-RUN apt-get -y install cmake
-
-## gdb
-RUN apt-get -y install gdb
-
-## curl
-RUN apt-get -y install curl
-
-## unzip
-RUN apt-get -y install unzip
-
-RUN apt-get -y install p7zip-full
+# Install dependencies
+RUN apt-get update && apt-get -y install \
+    python3 \
+    python3-pip \
+    cmake \
+    gdb \
+    curl \
+    unzip \
+    p7zip-full \
+    tar \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 ## zlib
 RUN curl https://zlib.net/zlib131.zip -o /skynet/zlib131.zip
@@ -37,11 +31,7 @@ RUN cmake --build . --config Release
 RUN cmake --install .
 WORKDIR /skynet
 
-## tar
-RUN apt-get -y install tar
 
-## g++
-RUN apt-get -y install g++
 RUN export CXX=g++
 
 ## CFITSIO
@@ -90,6 +80,7 @@ RUN rm /skynet/test_standards.zip
 ## Transfer files
 RUN mkdir /skynet/radio-cartographer
 COPY . /skynet/radio-cartographer/
+RUN pip3 install -r /skynet/radio-cartographer/testing/scripts/requirements.txt --break-system-packages
 
 
 ## Build
