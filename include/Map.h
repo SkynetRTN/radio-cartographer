@@ -33,7 +33,8 @@ public:
   void printIndexNumberMap();
 
   void printFits(std::string fitsName,
-                 std::map<std::string, std::string> headerInfo = {});
+                 std::map<std::string, std::string> headerInfo = {},
+                 Map *rawMap = nullptr);
 
   // MAP GETTERS
   double getMaxDec();

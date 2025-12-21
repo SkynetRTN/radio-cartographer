@@ -306,6 +306,14 @@ int main(int argc, char *argv[]) {
   std::cout << "Out of Survey\n";
   rfiMax = setRFIMaxVal(sParams, (int)survey.getMJD());
 
+  // RAW PROCESSING PREP
+  bool generateRaw = procParams.raw;
+  procParams.raw = false; // Ensure main processor runs in normal mode
+  std::vector<Survey> rawSurveys;
+  if (generateRaw) {
+    rawSurveys = surveyHold;
+  }
+
   // PROCESSOR
   Processor processor(procParams);
 
@@ -334,6 +342,47 @@ int main(int argc, char *argv[]) {
   Cartographer cartographer(composite, mParams);
   Map procMap = cartographer.generateProcMapsMulti();
 
+  // GENERATE RAW MAP
+  Map rawMap;
+  Map *rawMapPtr = nullptr;
+  if (generateRaw) {
+    ProcessorParameters rawProcParams = procParams;
+    rawProcParams.bgScaleBW = 0;
+    rawProcParams.rfiScaleBW = 0;
+    rawProcParams.timeShift = "off";
+    rawProcParams.timeShiftValue = 0;
+    rawProcParams.wScaleBW = 0;
+    rawProcParams.raw = true;
+
+    Processor rawProcessor(rawProcParams);
+
+    for (int i = 0; i < rawSurveys.size(); i++) {
+      rawProcessor.determineDataBoundaries(rawSurveys[i]);
+    }
+    for (int i = 0; i < rawSurveys.size(); i++) {
+      rawProcessor.characterizeData(rawSurveys[i]);
+      rawProcessor.performBGSubtractionMulti(rawSurveys[i]);
+      rawProcessor.performTimeShifting(rawSurveys[i]);
+      rawProcessor.set2DScatter(rawSurveys[i]);
+      rawProcessor.processLargeScaleStructure(rawSurveys[i]);
+      rawSurveys[i].calculateEdgeParameters();
+    }
+
+    rawProcessor.levelLSSData(rawSurveys);
+    Composite rawComposite(rawSurveys);
+
+    rawProcessor.performRFIRejectionMulti(rawComposite, rawSurveys);
+    rawProcessor.calculateProcThetaGapMulti(rawComposite);
+
+    MapParameters rawMParams = mParams;
+    rawMParams.rfiScale = 0;
+    rawMParams.processedWeightScale = 0;
+
+    Cartographer rawCartographer(rawComposite, rawMParams);
+    rawMap = rawCartographer.generateProcMapsMulti();
+    rawMapPtr = &rawMap;
+  }
+
   // Prepare Metadata
   std::map<std::string, std::string> headerInfo;
 
@@ -358,6 +407,7 @@ int main(int argc, char *argv[]) {
                            ? "2"
                            : "0"; // Approximation: 0=OFF, 1=MANUAL, 2=AUTO
   // RCRAW set per-file in Map.cpp or implied
+  headerInfo["RCRAW"] = "1";
   headerInfo["RCMINFQ"] = std::to_string(cParams.inclusionBand[0]);
   headerInfo["RCMAXFQ"] = std::to_string(cParams.inclusionBand[1]);
   // Skipping SkipFrequencies for now as complex vector handling required
@@ -394,7 +444,7 @@ int main(int argc, char *argv[]) {
 
   // Single Multi-layer FITS write
   // Use _processed.fits to avoid overwriting input file if they are in same dir
-  procMap.printFits(baseName + "_processed.fits", headerInfo);
+  procMap.printFits(baseName + "_processed.fits", headerInfo, rawMapPtr);
 
   // PHOTOMETRY AND OUTPUT
   if (pParams.perform && !(procParams.raw)) {
