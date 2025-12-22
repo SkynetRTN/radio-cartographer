@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <math.h>
+#include <unistd.h>
 
 Map::Map() {}
 
@@ -404,6 +405,13 @@ void Map::printFits(const std::string fitsName,
                     Map *rawMap) {
   using namespace CCfits;
 
+  // Ensure fitsName is relative to working directory
+  std::string outputName = fitsName;
+  const size_t last_slash_idx = outputName.find_last_of("\\/");
+  if (std::string::npos != last_slash_idx) {
+    outputName.erase(0, last_slash_idx + 1);
+  }
+
   if (grid.empty() || grid[0].empty()) {
     std::cerr << "Map grid is empty, cannot write FITS." << std::endl;
     return;
@@ -418,7 +426,9 @@ void Map::printFits(const std::string fitsName,
   try {
     // ! overwrites existing file
     std::auto_ptr<FITS> pFits(
-        new FITS("!" + fitsName, DOUBLE_IMG, naxis, naxes));
+        new FITS("!" + outputName, DOUBLE_IMG, naxis, naxes));
+    // print output file path
+    std::cout << "Writing FITS file to: " << outputName << std::endl;
 
     // Write Primary HDU (Main Flux)
     getLayerData(this, MAIN_SMALL, nelements, naxes[0], array);
