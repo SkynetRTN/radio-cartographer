@@ -1317,39 +1317,39 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 		deltaEnd = 0;
 	}
 
-	if (chan == LEFT)
-	{
-		outputFile.open("Output.txt", std::ios_base::app);
-
-		outputFile << janskyLeft << "\t";
-		outputFile << CalMethodPreBool << "\t";
-		outputFile << std::setprecision(2) << std::fixed << averageTimeStart << "\t";
-		outputFile << deltaStart << "\n";
-
-		outputFile << janskyLeft << "\t";
-		outputFile << CalMethodPostBool << "\t";
-		outputFile << std::setprecision(2) << std::fixed << averageTimeEnd << "\t";
-		outputFile << deltaEnd << "\n";
-
-		outputFile.close();
-	}
-
-	if (chan == RIGHT)
-	{
-		outputFile.open("Output.txt", std::ios_base::app);
-
-		outputFile << janskyRight << "\t";
-		outputFile << CalMethodPreBool << "\t";
-		outputFile << std::setprecision(2) << std::fixed << averageTimeStart << "\t";
-		outputFile << deltaStart << "\n";
-
-		outputFile << janskyRight << "\t";
-		outputFile << CalMethodPostBool << "\t";
-		outputFile << std::setprecision(2) << std::fixed << averageTimeEnd << "\t";
-		outputFile << deltaEnd << "\n";
-
-		outputFile.close();
-	}
+	// if (chan == LEFT)
+	// {
+	// 	outputFile.open("Output.txt", std::ios_base::app);
+	//
+	// 	outputFile << janskyLeft << "\t";
+	// 	outputFile << CalMethodPreBool << "\t";
+	// 	outputFile << std::setprecision(2) << std::fixed << averageTimeStart << "\t";
+	// 	outputFile << deltaStart << "\n";
+	//
+	// 	outputFile << janskyLeft << "\t";
+	// 	outputFile << CalMethodPostBool << "\t";
+	// 	outputFile << std::setprecision(2) << std::fixed << averageTimeEnd << "\t";
+	// 	outputFile << deltaEnd << "\n";
+	//
+	// 	outputFile.close();
+	// }
+	//
+	// if (chan == RIGHT)
+	// {
+	// 	outputFile.open("Output.txt", std::ios_base::app);
+	//
+	// 	outputFile << janskyRight << "\t";
+	// 	outputFile << CalMethodPreBool << "\t";
+	// 	outputFile << std::setprecision(2) << std::fixed << averageTimeStart << "\t";
+	// 	outputFile << deltaStart << "\n";
+	//
+	// 	outputFile << janskyRight << "\t";
+	// 	outputFile << CalMethodPostBool << "\t";
+	// 	outputFile << std::setprecision(2) << std::fixed << averageTimeEnd << "\t";
+	// 	outputFile << deltaEnd << "\n";
+	//
+	// 	outputFile.close();
+	// }
 }
 void Survey::janskyCalibration(double calFactor, Channel chan)
 {

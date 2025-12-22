@@ -300,8 +300,8 @@ int main(int argc, char *argv[]) {
 
   // OUTPUT
   Output output;
-  output.printTelescopeInfo(sParams);
-  output.printWScale(mParams.processedWeightScale);
+  // output.printTelescopeInfo(sParams);
+  // output.printWScale(mParams.processedWeightScale);
 
   std::cout << "Out of Survey\n";
   rfiMax = setRFIMaxVal(sParams, (int)survey.getMJD());

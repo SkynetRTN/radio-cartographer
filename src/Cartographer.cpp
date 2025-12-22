@@ -59,21 +59,21 @@ Map Cartographer::generateProcMapsMulti() {
   }
 
   // Output file
-  std::ofstream outputFile;
-  outputFile.open("Output.txt", std::ios_base::app);
-
-  outputFile << "CENTERRA," << compPartSetProcSSS.centerRaDeg
-             << ",Center ra (deg)\n";
-  outputFile << "CENTERDE," << compPartSetProcSSS.centerDecDeg
-             << ",Center dec (deg)\n";
-
-  outputFile << "CENTERX," << centerPixelRa
-             << ",Center pixel along the x-axis\n";
-  outputFile << "CENTERY," << centerPixelDec
-             << ",Center pixel along the y-axis\n";
-  outputFile << "PIXLSIZE," << resolution / psfFWHM
-             << ",Size of single pixel (beams)\n";
-  outputFile.close();
+  // std::ofstream outputFile;
+  // outputFile.open("Output.txt", std::ios_base::app);
+  //
+  // outputFile << "CENTERRA," << compPartSetProcSSS.centerRaDeg
+  //            << ",Center ra (deg)\n";
+  // outputFile << "CENTERDE," << compPartSetProcSSS.centerDecDeg
+  //            << ",Center dec (deg)\n";
+  //
+  // outputFile << "CENTERX," << centerPixelRa
+  //            << ",Center pixel along the x-axis\n";
+  // outputFile << "CENTERY," << centerPixelDec
+  //            << ",Center pixel along the y-axis\n";
+  // outputFile << "PIXLSIZE," << resolution / psfFWHM
+  //            << ",Size of single pixel (beams)\n";
+  // outputFile.close();
 
   // std::cout << "Beginning Grid Interpolation\n";
 

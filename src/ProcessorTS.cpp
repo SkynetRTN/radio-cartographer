@@ -442,10 +442,10 @@ double ProcessorTS::find_tInt()
 	t_int = shift / rcr.result.mu;
 
 
-	std::ofstream outputFileAux;
-	outputFileAux.open("TS.txt", std::ios_base::app);
-	outputFileAux << t_int << "\n";
-	outputFileAux.close();
+	// std::ofstream outputFileAux;
+	// outputFileAux.open("TS.txt", std::ios_base::app);
+	// outputFileAux << t_int << "\n";
+	// outputFileAux.close();
 
 	return t_int;
 }
