@@ -1353,14 +1353,12 @@ PartitionSet Processor::determineProcSurveyDimensions(Survey &survey, bool LSS)
 			for (int j = 0; j < size; j++)
 			{
 				// distance = Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa, partSetProc.centerDecDeg)*toDeg;//LAST TERM SHOULD PROBABLY BE 0
-				// ONCE DAISY PATHS ARE CORRECTED THIS SHOULD NO LONGER BE MOD
-				if (LSS)
-				{
-					distance = Tools::getModGCDistance(scans[i].getLSSDec(j), scans[i].getLSSRa(j), partSetProc.medianDec, partSetProc.medianRa) * toDeg;
-				}
-				else
-				{
-					distance = Tools::getModGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.medianDec, partSetProc.medianRa) * toDeg;
+				// DAISY PATHS ARE CORRECTED THIS SHOULD NO LONGER BE MOD
+				if (LSS) {
+					distance = Tools::getGCDistance(
+								   scans[i].getLSSDec(j), scans[i].getLSSRa(j), partSetProc.centerDecDeg, partSetProc.centerRaDeg, partSetProc.centerDecDeg) * toDeg;
+				} else {
+					distance = Tools::getGCDistance(scans[i].getDec(j), scans[i].getRa(j), partSetProc.centerDecDeg, partSetProc.centerRaDeg, partSetProc.centerDecDeg) *toDeg;
 				}
 
 				radiiHold.push_back(distance);

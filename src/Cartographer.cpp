@@ -750,17 +750,25 @@ bool Cartographer::checkEdgeCriteria(double ra, double dec) {
         withinBounds = true;
       }
     } else {
+      // DAISY Logic
       double edgeRadius;
       double distance;
       double medianDec;
       double medianRa;
       double trimSize;
+
+      double centerDecDeg = compPartSetProcSSS.centerDecDeg;
+      double centerRaDeg = compPartSetProcSSS.centerRaDeg;
+      double toRad = M_PI / 180.0;
+
       edgeRadius = partSetVecSSS[i].edgeRadius;
       medianDec = partSetVecSSS[i].medianDec;
       medianRa = partSetVecSSS[i].medianRa;
       trimSize = partSetVecSSS[i].trimSize;
 
-      distance = Tools::getModGCDistance(dec, ra, medianDec, medianRa) * toDeg;
+      // For DAISY, dec and ra inputs are relative to center map coordinates.
+      // Therefore, we check distance from (0,0).
+      distance = Tools::getGCDistance(dec, ra, 0.0, 0.0, centerDecDeg) * toDeg;
 
       if ((distance / psfFWHM) <
           ((edgeRadius - trimSize * psfFWHM) / psfFWHM)) {
