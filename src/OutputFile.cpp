@@ -15,7 +15,7 @@ void Output::printTelescopeInfo(SurveyParameters sParams)
 	double psfFWHM;
 	std::string telescopeName;
 
-	outputFile.open("Output.txt", std::ofstream::out | std::ofstream::trunc);
+	// outputFile.open("Output.txt", std::ofstream::out | std::ofstream::trunc);
 	if (sParams.tele == 0)
 	{
 		telescopeName = "40 foot";
@@ -32,10 +32,10 @@ void Output::printTelescopeInfo(SurveyParameters sParams)
 		psfFWHM = 1.22*299792458.0*180.0 / (sParams.frequency* pow(10, 9) * 105.0 * M_PI);
 	}
 
-	outputFile << "TELESCOP," << telescopeName << ",Telescope name\n";
-	outputFile << "FREQ," << sParams.frequency << ",Frequency (GHz)\n";
-	outputFile << "BEAM," << psfFWHM << ",Beam (deg)\n";
-	outputFile.close();
+	// outputFile << "TELESCOP," << telescopeName << ",Telescope name\n";
+	// outputFile << "FREQ," << sParams.frequency << ",Frequency (GHz)\n";
+	// outputFile << "BEAM," << psfFWHM << ",Beam (deg)\n";
+	// outputFile.close();
 
 	parameters.push_back(telescopeName);
 	parameters.push_back(std::to_string(sParams.frequency));
@@ -53,7 +53,7 @@ void Output::printProcessingHeader()
 }
 void Output::printCalibrationHeader()
 {
-	
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 
 	outputFile << "polarization channel and gain calibration:\n";
@@ -65,7 +65,8 @@ void Output::printCalibrationHeader()
 	outputFile.close();
 }
 void Output::printWScale(double wScale)
-{    
+{
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 	outputFile << "SMSCALE," << wScale << ",Minimum surface modeling scale (beams)\n";
 	outputFile.close();
@@ -75,6 +76,7 @@ void Output::printWScale(double wScale)
 
 void Output::printPhotometryHolder()
 {
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 
 	outputFile << "(Photometry=off)\n";
@@ -85,7 +87,7 @@ void Output::printPhotometryHolder()
 void Output::printPhotometry(std::vector<double> results)
 {
 	int num = 12;
-	
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 	outputFile << "RAPIX\t" << "DECPIX\t" << "Mu   \t" << "Sigma\t\t" << "Uncrtnty_in_Mu\t" << "Aper_Pixels\t" << "Aper_Sigma\t" << "Mesred_Phtmtry\t" << "Internal_Err\t" << "Correctd_Phtmtry\t" << "Uncrtnty_in_Ap_w_Corr\t" << "Total_Error_Bar\t" << "\n";
 
@@ -108,7 +110,7 @@ void Output::printPhotometry(std::vector<double> results)
 }
 void Output::printBgSubtractionInfo(double bgScale)
 {
-	
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 
 	outputFile << "BGSCALE," << bgScale << ",Background subtraction scale (beams)\n";
@@ -117,6 +119,7 @@ void Output::printBgSubtractionInfo(double bgScale)
 }
 void Output::printTimeShiftInfo(bool ts, double t_int)
 {
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 
 	if (ts)
@@ -132,7 +135,7 @@ void Output::printTimeShiftInfo(bool ts, double t_int)
 }
 void Output::printRfiInfo(double rfiScale)
 {
-	
+	return;
 	outputFile.open("Output.txt", std::ios_base::app);
 
 	outputFile << "RFISCALE," << rfiScale << ",RFI removal scale (beams)\n";
