@@ -80,7 +80,8 @@ RUN rm /skynet/test_standards.zip
 ## Transfer files
 RUN mkdir /skynet/radio-cartographer
 COPY . /skynet/radio-cartographer/
-RUN pip3 install -r /skynet/radio-cartographer/testing/scripts/requirements.txt --break-system-packages
+RUN pip3 install -r /skynet/radio-cartographer/pyrc/requirements.txt --break-system-packages
+ENV PYTHONPATH="${PYTHONPATH}:/skynet/radio-cartographer/pyrc"
 
 
 ## Build
