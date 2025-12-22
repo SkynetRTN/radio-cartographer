@@ -35,3 +35,6 @@ radio-cartographer
 testing/**/*.fits
 testing/**/*.txt
 testing/Temporary
+
+# pyrc pycache
+pyrc/**/__pycache__/
