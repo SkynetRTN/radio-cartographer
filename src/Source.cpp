@@ -406,6 +406,7 @@ int main(int argc, char *argv[]) {
   headerInfo["RCTS"] = (procParams.timeShift == "auto")
                            ? "2"
                            : "0"; // Approximation: 0=OFF, 1=MANUAL, 2=AUTO
+  headerInfo["RCTMSFT"] = std::to_string(surveys[0].getTimeShift());
   // RCRAW set per-file in Map.cpp or implied
   headerInfo["RCRAW"] = "1";
   headerInfo["RCMINFQ"] = std::to_string(cParams.inclusionBand[0]);
