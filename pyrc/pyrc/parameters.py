@@ -64,6 +64,12 @@ class RadioCartographerConfig:
     time_shift_mode: TimeShiftMode = TimeShiftMode.AUTO
     time_shift_value: float = 0.0
 
+    # Skip Flags
+    skip_time_shift: bool = False
+    skip_background_subtraction: bool = False
+    skip_rfi_removal: bool = False
+    skip_surface_modeling: bool = False
+
     # Photometry Parameters
     photo_inner_radius: float = 1.25
     photo_outer_radius: float = 5.0
@@ -142,12 +148,18 @@ class RadioCartographerConfig:
         # Survey / Map (cont)
         arg_map[20] = str(self.trim_size)
         arg_map[21] = "1" if self.lss_mapping else "0"
+
+        # Skip Flags
+        arg_map[22] = "1" if self.skip_time_shift else "0"
+        arg_map[23] = "1" if self.skip_background_subtraction else "0"
+        arg_map[24] = "1" if self.skip_rfi_removal else "0"
+        arg_map[25] = "1" if self.skip_surface_modeling else "0"
         
         # Convert to list.
         # argv[2] is at index 0 of our result.
-        # Range is 2 to 21 inclusive.
+        # Check range 2 to 25.
         args_list = []
-        for i in range(2, 22):
+        for i in range(2, 26):
             val = arg_map.get(i, "0")
             args_list.append(str(val))
             
