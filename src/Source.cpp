@@ -113,6 +113,12 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams) {
   // MISC
   sParams.tracking = false;
 
+  // Gain Delta Overrides
+  sParams.gainDeltaStart1 = atof(argv[22]);
+  sParams.gainDeltaEnd1 = atof(argv[23]);
+  sParams.gainDeltaStart2 = atof(argv[24]);
+  sParams.gainDeltaEnd2 = atof(argv[25]);
+
   // SET FLUX CHANNEL
   if (inputChannel == "left") {
     sParams.channel = LEFT;
@@ -183,7 +189,8 @@ void setInputSpectralParams(int argc, char *argv[],
   double maxFreq = atof(argv[10]);
   cParams.inclusionBand = {minFreq, maxFreq}; // MHz
   cParams.exclusionBand = {};
-  for (int i = 22; i < argc; i++) {
+  // Exclusion bands follow the gain delta params (which are at 22,23,24,25)
+  for (int i = 26; i < argc; i++) {
     cParams.exclusionBand.push_back(atof(argv[i]));
   }
 

@@ -115,6 +115,11 @@ struct SurveyParameters
 	MapTypes mapType;
 	CalMethods calMethod;
 	Coordinates pCoordinate;
+
+    double gainDeltaStart1;
+    double gainDeltaEnd1;
+    double gainDeltaStart2;
+    double gainDeltaEnd2;
 };
 
 struct ProcessorParameters

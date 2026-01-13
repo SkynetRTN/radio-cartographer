@@ -2,7 +2,10 @@ import sys
 import os
 import argparse
 import subprocess
-
+from pyrc import utils
+from time import time
+from pyrc.gain_calibration import Gain_Calibration
+from pyrc.gain_calibration_validation import Validation
 # Add the project root to sys.path
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
@@ -23,7 +26,23 @@ def run_example(executable_path="radio-cartographer"):
     the parameters requested for verification.
     """
     print(f"Using executable: {executable_path}")
-    
+    start_time = time()
+    # Use the standard path provided in the request
+    filename = "testing/test_files/0144759.fits"
+    validated_path = "testing/test_files/0144759_validated.fits"
+    #with utils.validated_temp_path(filename) as validated_path:
+    time0 = time()
+    print("Validation time:", round((time0 - start_time), 3), "seconds")
+
+    g_c = Gain_Calibration(validated_path, 0, 0, None, None,
+                        None, None)
+    precaldelta2, postcaldelta2, method2 = g_c.Gain_calibration()
+
+    g_c_1 =     g_c = Gain_Calibration(validated_path, 0, 1, None, None,
+                                       None, None)
+    precaldelta1, postcaldelta1, method1 = g_c.Gain_calibration()
+
+    print(precaldelta1, precaldelta2, postcaldelta1, postcaldelta2)
     config = RadioCartographerConfig(
         channel=Channel.COMPOSITE,
         receiver=Receiver.HI,
@@ -43,13 +62,16 @@ def run_example(executable_path="radio-cartographer"):
         photo_outer_radius=5.0,
         photo_centroid_type=CentroidType.BRIGHTEST,
         trim_size=0.0,
-        lss_mapping=False
+        lss_mapping=False,
+        gain_delta_start_1= precaldelta1,
+        gain_delta_end_1=postcaldelta1,
+        gain_delta_start_2=precaldelta2,
+        gain_delta_end_2=postcaldelta2,
     )
 
-    # Use the standard path provided in the request
-    filename = "/skynet/test_standards_static/gbo20_L_lores_raster_orion.fits"
     
     # Initialize runner
+
     runner = RadioCartographerRunner(executable_path)
     
     try:

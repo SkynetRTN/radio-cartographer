@@ -4,7 +4,10 @@
 IMAGE_NAME="radio-cartographer"
 CONTAINER_NAME="radio-cartographer-sandbox"
 # Mapping the specific WORKDIR defined in your Dockerfile 
-WORK_DIR="/skynet/radio-cartographer"
+WORK_DIR="//skynet/radio-cartographer"
+
+export MSYS2_ARG_CONV_EXCL="*"
+export MSYS_NO_PATHCONV=1
 
 # 1. BUILD CHECK
 # Check if the image exists; if not, build it using the Dockerfile

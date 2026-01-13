@@ -158,7 +158,10 @@ LinearModel::~LinearModel()
 //constructors
 Survey::Survey()
 {
-
+    this->gainDeltaStart1 = -999.0;
+    this->gainDeltaEnd1 = -999.0;
+    this->gainDeltaStart2 = -999.0;
+    this->gainDeltaEnd2 = -999.0;
 }
 Survey::Survey(SurveyParameters &sParams, SpectralParameters cParams, std::string filename)
 {
@@ -225,6 +228,12 @@ void Survey::setParams(SurveyParameters params)
 	this->trimSize = params.trimSize;
 	this->pCoordinate = params.pCoordinate;
 	this->debugging = params.debug;
+
+    this->gainDeltaStart1 = params.gainDeltaStart1;
+    this->gainDeltaEnd1 = params.gainDeltaEnd1;
+    this->gainDeltaStart2 = params.gainDeltaStart2;
+    this->gainDeltaEnd2 = params.gainDeltaEnd2;
+
 }
 void Survey::setTwentyParams(GBParser &gb)
 {
@@ -1113,7 +1122,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeStart = Tools::getMean(cleanDumpStart, cleanTimeStart);
 		deltaStart = std::abs((mOnStart*(averageTimeStart - xBarOnStart) + bOnStart) - (mOffStart*(averageTimeStart - xBarOffStart) + bOffStart));
-
+		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaStart: " << deltaStart << std::defaultfloat << std::endl;
 		model = LinearModel(highDumpEnd, highTimeEnd, highFluxArrayEnd);
 
 		rcr.setParametricModel(model);
@@ -1152,6 +1161,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeEnd = Tools::getMean(cleanDumpEnd, cleanTimeEnd);
 		deltaEnd = std::abs((mOnEnd*(averageTimeEnd - xBarOnEnd) + bOnEnd) - (mOffEnd*(averageTimeEnd - xBarOffEnd) + bOffEnd));
+		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
 	}
 	else if (calMethod == PRE)
 	{
@@ -1195,7 +1205,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeStart = Tools::getMean(cleanDumpStart, cleanTimeStart);
 		deltaStart = std::abs((mOnStart*(averageTimeStart - xBarOnStart) + bOnStart) - (mOffStart*(averageTimeStart - xBarOffStart) + bOffStart));
-
+		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaStart: " << deltaStart << std::defaultfloat << std::endl;
 	}
 	else if (calMethod == POST)
 	{
@@ -1240,10 +1250,37 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeEnd = Tools::getMean(cleanDumpEnd, cleanTimeEnd);
 		deltaEnd = std::abs((mOnEnd*(averageTimeEnd - xBarOnEnd) + bOnEnd) - (mOffEnd*(averageTimeEnd - xBarOffEnd) + bOffEnd));
+		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
 	}
 
 
 	int CalMethodPostBool = 0, CalMethodPreBool = 0;
+    
+    // Override Deltas if requested
+    if (chan == LEFT) {
+        if (std::abs(gainDeltaStart1 - (-999.0)) > 1e-4) {
+            deltaStart = gainDeltaStart1;
+            Debugger::print("Info", "Overriding deltaStart for LEFT channel.");
+            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaStart: " << deltaStart << std::defaultfloat << std::endl;
+        }
+        if (std::abs(gainDeltaEnd1 - (-999.0)) > 1e-4) {
+            deltaEnd = gainDeltaEnd1;
+            Debugger::print("Info", "Overriding deltaEnd for LEFT channel.");
+            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
+        }
+    } else if (chan == RIGHT) {
+        if (std::abs(gainDeltaStart2 - (-999.0)) > 1e-4) {
+            deltaStart = gainDeltaStart2;
+            Debugger::print("Info", "Overriding deltaStart for RIGHT channel.");
+            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaStart: " << deltaStart << std::defaultfloat << std::endl;
+        }
+        if (std::abs(gainDeltaEnd2 - (-999.0)) > 1e-4) {
+            deltaEnd = gainDeltaEnd2;
+            Debugger::print("Info", "Overriding deltaEnd for RIGHT channel.");
+            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
+        }
+    }
+    
 	//check these interpolations
 	if (calMethod == INTERPOLATED)
 	{

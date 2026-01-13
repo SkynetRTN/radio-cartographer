@@ -746,7 +746,7 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies,
         inRangeSum++;
       }
     }
-    continuum[i] = spectraSum / inRangeSum;
+    continuum[i] = spectraSum ;
   }
 
   return 0;

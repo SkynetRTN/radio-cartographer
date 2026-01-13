@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Optional
 
 class Channel(Enum):
     LEFT = "left"
@@ -68,6 +68,12 @@ class RadioCartographerConfig:
     photo_inner_radius: float = 1.25
     photo_outer_radius: float = 5.0
     photo_centroid_type: CentroidType = CentroidType.BRIGHTEST
+    
+    # Gain Calibration Overrides
+    gain_delta_start_1: Optional[float] = None
+    gain_delta_end_1: Optional[float] = None
+    gain_delta_start_2: Optional[float] = None
+    gain_delta_end_2: Optional[float] = None
 
     def to_args(self) -> List[str]:
         """
@@ -150,6 +156,13 @@ class RadioCartographerConfig:
         for i in range(2, 22):
             val = arg_map.get(i, "0")
             args_list.append(str(val))
+        
+        # Add Gain Delta Overrides (Indices 22-25)
+        # Default to -999.0 if None
+        args_list.append(str(self.gain_delta_start_1 if self.gain_delta_start_1 is not None else -999.0))
+        args_list.append(str(self.gain_delta_end_1 if self.gain_delta_end_1 is not None else -999.0))
+        args_list.append(str(self.gain_delta_start_2 if self.gain_delta_start_2 is not None else -999.0))
+        args_list.append(str(self.gain_delta_end_2 if self.gain_delta_end_2 is not None else -999.0))
             
         # Append exclusion bands (argv[22]...)
         for band_edge in self.exclusion_bands:
