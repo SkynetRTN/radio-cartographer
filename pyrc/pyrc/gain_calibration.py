@@ -38,7 +38,6 @@ class Gain_Calibration:
             self.excluding_time_ranges = excluding_time_ranges
 
     def parse_calibration_spike(self, data):
-        print(data["CALSTATE"])
         on_mask = data[
             (data['CALSTATE'] == 1) &
             (data['SWPVALID'] == 0)
@@ -167,4 +166,4 @@ class Gain_Calibration:
             method = "post"
 
 
-        return deltapre, deltapost, method
+        return deltapre, deltapost

@@ -28,19 +28,16 @@ def run_example(executable_path="radio-cartographer"):
     print(f"Using executable: {executable_path}")
     start_time = time()
     # Use the standard path provided in the request
-    filename = "testing/test_files/0144759.fits"
-    validated_path = "testing/test_files/0144759_validated.fits"
-    #with utils.validated_temp_path(filename) as validated_path:
-    time0 = time()
-    print("Validation time:", round((time0 - start_time), 3), "seconds")
-
+    filename = "testing/test_files/raw_daisy_200s/0144858.fits"
+    v = Validation(filename)
+    validated_path = v.validate()
     g_c = Gain_Calibration(validated_path, 0, 0, None, None,
                         None, None)
-    precaldelta2, postcaldelta2, method2 = g_c.Gain_calibration()
+    precaldelta2, postcaldelta2 = g_c.Gain_calibration()
 
     g_c_1 =     g_c = Gain_Calibration(validated_path, 0, 1, None, None,
                                        None, None)
-    precaldelta1, postcaldelta1, method1 = g_c.Gain_calibration()
+    precaldelta1, postcaldelta1  = g_c.Gain_calibration()
 
     print(precaldelta1, precaldelta2, postcaldelta1, postcaldelta2)
     config = RadioCartographerConfig(
@@ -53,8 +50,9 @@ def run_example(executable_path="radio-cartographer"):
         generate_raw_map=False,
         min_freq=1350.0,
         max_freq=1750.0,
+        exclusion_bands=[],
         bg_scale=6.0,
-        rfi_scale=0.7,
+        rfi_scale=0.35,
         m10_plus_processing=False,
         weight_scale=0.333333,
         photometry_enabled=False,
@@ -92,6 +90,8 @@ def run_example(executable_path="radio-cartographer"):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         sys.exit(1)
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Radio Cartographer Example")

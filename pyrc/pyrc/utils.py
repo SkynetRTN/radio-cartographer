@@ -2,6 +2,7 @@ import os
 from contextlib import contextmanager
 import re
 from astropy.time import Time
+from astropy.io import fits
 import astropy.units as u
 import numpy as np
 from .gain_calibration_validation import Validation
@@ -9,13 +10,7 @@ from .gain_calibration_validation import Validation
 def validated_temp_path(filepath: str):
     v = Validation(filepath)
     validated_path = v.validate()  # temp path
-
     yield validated_path
-    '''finally:
-        try:
-            os.remove(validated_path)
-        except FileNotFoundError:
-            pass'''
 
 def parse_history(header):
     # Find all instances of the HISTORY card in the FITS header
@@ -277,3 +272,70 @@ def filter_frequency_ranges(header, data, ifnum, including_frequency_ranges, exc
         data['DATA'] = [row[exclude_freq_mask] for row in data['DATA']]
 
     return frequencies, data['DATA']
+
+def save(filepath, header, data, process, output_path=None):
+    '''
+    Saves the header and data contained in this class
+    to a new SDFITS file.
+    '''
+
+    if output_path is None:
+        base, ext = os.path.splitext(filepath)
+        output_path = f"{base}_{process}{ext}"
+        print(output_path)
+
+    # Create Primary HDU with updated header
+    primary_hdu = fits.PrimaryHDU(header=header)
+
+    # Convert Table back to FITS HDU
+    table_hdu = fits.BinTableHDU(data=data)
+
+    # Combine HDUs
+    hdulist = fits.HDUList([primary_hdu, table_hdu])
+
+    # Write to file
+    hdulist.writeto(output_path, overwrite=True)
+
+def delete_validated_files_recursive(input_dir: str, *, dry_run: bool = False) -> int:
+    """
+    Recursively delete all '*_validated.fits' files under input_dir.
+
+    Returns the number of files deleted (or that would be deleted in dry_run).
+    """
+    input_dir = os.path.abspath(input_dir)
+
+    if not os.path.isdir(input_dir):
+        print(f"[cleanup] Input dir does not exist: {input_dir}")
+        return 0
+
+    to_delete: list[str] = []
+    for root, _, files in os.walk(input_dir):
+        for name in files:
+            lower = name.lower()
+            if lower.endswith("_validated.fits"):
+                to_delete.append(os.path.join(root, name))
+
+    if not to_delete:
+        print(f"[cleanup] No validated files found under {input_dir}")
+        return 0
+
+    to_delete.sort()
+    print(f"[cleanup] Found {len(to_delete)} validated files under {input_dir}")
+
+    deleted = 0
+    for path in to_delete:
+        if dry_run:
+            print(f"[cleanup] Would delete: {path}")
+            deleted += 1
+            continue
+
+        try:
+            os.remove(path)
+            print(f"[cleanup] Deleted: {path}")
+            deleted += 1
+        except FileNotFoundError:
+            print(f"[cleanup] Skipped (missing): {path}")
+        except Exception as e:
+            print(f"[cleanup] Failed to delete {path}: {e}")
+
+    return deleted
