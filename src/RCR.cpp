@@ -37,6 +37,11 @@ void swap(int a, int b, std::vector<int> &y)
 }
 void QS(int left, int right, std::vector<double> &y)
 {
+	// If the range is invalid or the vector is empty, stop immediately.
+	if (left >= right || y.empty())
+	{
+		return;
+	}
 	int i = left, j = right;
 	double pivot = y[(left + right) / 2];
 
@@ -4903,6 +4908,11 @@ void RCR::performRejection(std::vector<double> &w, std::vector<double> &y)
 }
 void RCR::performBulkRejection(std::vector<double> &y)
 {
+	// If y is empty, any logic involving indices or sorting will crash.
+	// Exit immediately.
+	if (y.empty()) {
+		return;
+	}
 	this->result.flags.clear();
 	this->result.flags.resize(y.size(), true);
 	handleRCRLoopSelect(true, y);

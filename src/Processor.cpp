@@ -394,6 +394,7 @@ void Processor::set2DScatter(Survey &survey) {
                   ((1.0 / weightHigh) + (1.0 / weightLow));
         weights.push_back(1.0 / weight);
       }
+
       rcr.performBulkRejection(delta);
       scatter2dTemp.push_back(std::sqrt(rcr.result.mu * rcr.result.mu +
                                         rcr.result.sigma * rcr.result.sigma));

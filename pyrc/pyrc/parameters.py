@@ -45,8 +45,8 @@ class RadioCartographerConfig:
 
     # Spectral Parameters
     receiver: Receiver = Receiver.HI
-    min_freq: float = 1350.0
-    max_freq: float = 1435.0
+    min_freq: float = 8000.0
+    max_freq: float = 10000.0
     exclusion_bands: List[float] = field(default_factory=list)
 
     # Processor / Map Parameters

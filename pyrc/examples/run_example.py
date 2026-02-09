@@ -2,6 +2,11 @@ import sys
 import os
 import argparse
 import subprocess
+import sys, os, pyrc
+print("exe:", sys.executable)
+print("cwd:", os.getcwd())
+print("pyrc file:", getattr(pyrc, "__file__", None))
+print("sys.path[0:5]:", sys.path[:5])
 
 # Add the project root to sys.path
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -16,7 +21,6 @@ from pyrc import (
     Receiver,
     CentroidType
 )
-
 def run_example(executable_path="radio-cartographer"):
     """
     Runs the radio-cartographer on the 'orion' standard input file using
@@ -26,16 +30,16 @@ def run_example(executable_path="radio-cartographer"):
     
     config = RadioCartographerConfig(
         channel=Channel.COMPOSITE,
-        receiver=Receiver.HI,
+        receiver=Receiver.LO,
         calibration_method=CalibrationMethod.INTERPOLATED,
         coordinate_system=CoordinateSystem.EQUATORIAL,
-        time_shift_mode=TimeShiftMode.AUTO,
+        time_shift_mode=TimeShiftMode.OFF,
         time_shift_value=0.0,
-        generate_raw_map=False,
-        min_freq=1350.0,
-        max_freq=1750.0,
+        generate_raw_map=True,
+        min_freq=8000.0,
+        max_freq=10000.0,
         bg_scale=6.0,
-        rfi_scale=0.7,
+        rfi_scale=0,
         m10_plus_processing=False,
         weight_scale=0.333333,
         photometry_enabled=False,
@@ -47,7 +51,7 @@ def run_example(executable_path="radio-cartographer"):
     )
 
     # Use the standard path provided in the request
-    filename = "/skynet/test_standards_static/gbo20_L_lores_raster_orion.fits"
+    filename = "testing/test_files/Skynet_56870_survey_55_ra2_9650_10467.cybmerge2_interpolated.fits"
     
     # Initialize runner
     runner = RadioCartographerRunner(executable_path)
@@ -58,6 +62,7 @@ def run_example(executable_path="radio-cartographer"):
         # But here let's capture to show we can handle it.
         # Actually, let's stream it so the user sees progress if they run it.
         print("Starting execution...")
+        print(config)
         runner.run(config, filename, check=True, capture_output=False)
         print("Execution completed successfully.")
         
