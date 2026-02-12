@@ -51,7 +51,7 @@ def run_example(executable_path="radio-cartographer"):
     )
 
     # Use the standard path provided in the request
-    filename = "testing/test_files/Skynet_56870_survey_55_ra2_9650_10467.cybmerge2_interpolated.fits"
+    filename = "testing/test_files/Skynet_56870_survey_55_ra2_9650_10467.cybmerge3_interpolated.fits"
     
     # Initialize runner
     runner = RadioCartographerRunner(executable_path)

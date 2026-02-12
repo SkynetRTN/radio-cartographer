@@ -244,7 +244,7 @@ void Survey::setTwentyParams(GBParser &gb)
 
 	this->telescopeFrequency = obsTemp*pow(10, 9);
 	this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
-
+	std::cout << "psfFWHM 247" << psfFWHM << std::endl;
 	if (mapTypeStr == "DAISY")
 	{
 		this->mapType = DAISY;
@@ -283,7 +283,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 		this->telescope = TWENTY_METER;
 		this->telescopeFrequency = sdfits.getFrequency() * pow(10, 6);
 		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
-
+		std::cout << "psfFWHM 286" << psfFWHM << std::endl ;
 		setMappingCoordinate(sdfits.getCoordinateSystem());
 
 		if (mapPattern == "ralongmap")

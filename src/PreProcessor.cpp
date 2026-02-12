@@ -138,7 +138,7 @@ int PreProcessor::accessExtTable20m(
     table.column("MJD").read(MJDateHold, 1, 1);
     setMJD(MJDateHold);
   }
-
+  Debugger::print("Frequency", frequency );
   Debugger::print("Info", inputData.size(), inputData[0].size());
 
   return 0;
