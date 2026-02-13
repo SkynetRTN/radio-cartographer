@@ -38,3 +38,5 @@ testing/Temporary
 
 # pyrc pycache
 pyrc/**/__pycache__/
+/crownofthorns_nod_processed.fits
+.venv/

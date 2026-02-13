@@ -4202,6 +4202,7 @@ void Processor::levelLSSData(std::vector<Survey> &surveys)
 
 	for (int i = 0; i < surveys.size(); i++)
 	{
+		std::cout << "LevelLSSData: Processing survey " << i << std::endl;
 		scansI = surveys[i].getScans();
 		LSS2DScatter = surveys[i].getLSS2DScatter();
 		for (int j = 0; j < surveys.size(); j++)
@@ -4210,8 +4211,12 @@ void Processor::levelLSSData(std::vector<Survey> &surveys)
 			{
 				continue;
 			}
+			std::cout << "  Against survey " << j << std::endl;
 			scansJ = surveys[j].getScans();
 			partSetJ = surveys[j].getPartSetProcSSS();
+			
+			diff.clear();
+			weights.clear();
 
 			for (int k = 0; k < scansI.size(); k++)
 			{
@@ -4235,9 +4240,16 @@ void Processor::levelLSSData(std::vector<Survey> &surveys)
 				}
 			}
 
-			rcr.performBulkRejection(weights, diff);
-			mu_ij[i].push_back(rcr.result.mu);
-			sigma_ij[i].push_back(rcr.result.sigma);
+			std::cout << "  Weights size: " << weights.size() << std::endl;
+			if (weights.size() > 0) {
+				rcr.performBulkRejection(weights, diff);
+				mu_ij[i].push_back(rcr.result.mu);
+				sigma_ij[i].push_back(rcr.result.sigma);
+			} else {
+				std::cout << "  Skipping rejection due to empty weights" << std::endl;
+				mu_ij[i].push_back(0.0);
+				sigma_ij[i].push_back(1.0);
+			}
 		}
 	}
 

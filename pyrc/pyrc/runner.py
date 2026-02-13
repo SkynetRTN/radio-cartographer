@@ -1,6 +1,6 @@
 import subprocess
 import logging
-from typing import Optional, List
+from typing import Optional, List, Union
 from .parameters import RadioCartographerConfig
 
 class RadioCartographerRunner:
@@ -13,18 +13,21 @@ class RadioCartographerRunner:
         self.executable_path = executable_path
         self.logger = logging.getLogger(__name__)
 
-    def build_command(self, config: RadioCartographerConfig, input_file: str) -> List[str]:
+    def build_command(self, config: RadioCartographerConfig, input_file: Union[str, List[str]]) -> List[str]:
         """
         Constructs the full subprocess command list.
         :param config: The configuration object.
-        :param input_file: Path to the input FITS file (argv[1]).
+        :param input_file: Path to the input FITS file (argv[1]) or list of paths.
         :return: List of strings representing the command.
         """
+        if isinstance(input_file, list):
+            input_file = ",".join(input_file)
+            
         args = [self.executable_path, input_file]
         args.extend(config.to_args())
         return args
 
-    def run(self, config: RadioCartographerConfig, input_file: str, 
+    def run(self, config: RadioCartographerConfig, input_file: Union[str, List[str]], 
             cwd: Optional[str] = None, check: bool = True,
             capture_output: bool = False) -> subprocess.CompletedProcess:
         """

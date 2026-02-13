@@ -195,7 +195,7 @@ void setInputSpectralParams(int argc, char *argv[],
   }
 
   // FILENAME(S)
-  cParams.files.push_back(skynet_filename);
+  // cParams.files.push_back(skynet_filename); // MOVED TO MAIN LOOP
 
   /*cParams.files.push_back("Skynet_58397_fig16_2_36380_37171.cyb.fits");
   cParams.files.push_back("Skynet_58397_fig16_2_36380_37171.02.cyb.fits");
@@ -294,10 +294,19 @@ int main(int argc, char *argv[]) {
   setInputProcessingParams(argv, procParams);
 
   // SURVEY
-  Survey survey(sParams, cParams, skynet_filename);
-  //	Survey survey(sParams, cParams,
-  //"/skynet/radio-cartographer/testing/Temporary/barnard2.fits");
-  surveyHold.push_back(survey);
+  std::vector<std::string> filenames;
+  std::stringstream ss(skynet_filename);
+  std::string item;
+  while (std::getline(ss, item, ',')) {
+      filenames.push_back(item);
+  }
+
+  for (const auto& file : filenames) {
+      cParams.files.clear();
+      cParams.files.push_back(file);
+      Survey survey(sParams, cParams, file);
+      surveyHold.push_back(survey);
+  }
 
   //    cParams.files.clear();
   //    cParams.files.emplace_back("/skynet/radio-cartographer/testing/Temporary/barnard.fits");
@@ -311,7 +320,7 @@ int main(int argc, char *argv[]) {
   // output.printWScale(mParams.processedWeightScale);
 
   std::cout << "Out of Survey\n";
-  rfiMax = setRFIMaxVal(sParams, (int)survey.getMJD());
+  rfiMax = setRFIMaxVal(sParams, (int)surveyHold[0].getMJD());
 
   // RAW PROCESSING PREP
   bool generateRaw = procParams.raw;
@@ -337,17 +346,26 @@ int main(int argc, char *argv[]) {
     surveyHold[i].calculateEdgeParameters();
   }
 
+  std::cout << "Starting levelLSSData" << std::endl;
   processor.levelLSSData(surveyHold);
   surveys = surveyHold;
+  std::cout << "Creating Composite object" << std::endl;
   Composite composite(surveys);
+  std::cout << "Composite object created" << std::endl;
 
   // RFI AND THETA GAP
+  std::cout << "Starting performRFIRejectionMulti" << std::endl;
   processor.performRFIRejectionMulti(composite, surveys);
+  std::cout << "Finished performRFIRejectionMulti" << std::endl;
   processor.calculateProcThetaGapMulti(composite);
+  std::cout << "Finished calculateProcThetaGapMulti" << std::endl;
 
   // PROCMAP
+  std::cout << "Creating Cartographer" << std::endl;
   Cartographer cartographer(composite, mParams);
+  std::cout << "Generating ProcMapsMulti" << std::endl;
   Map procMap = cartographer.generateProcMapsMulti();
+  std::cout << "Finished generateProcMapsMulti" << std::endl;
 
   // GENERATE RAW MAP
   Map rawMap;
@@ -399,7 +417,7 @@ int main(int argc, char *argv[]) {
           ? "GreenBank-40"
           : (sParams.tele == TWENTY_METER ? "GreenBank-20" : "GBT");
   headerInfo["OBSFREQ"] = std::to_string(sParams.frequency);
-  headerInfo["MJD-OBS"] = std::to_string(survey.getMJD());
+  headerInfo["MJD-OBS"] = std::to_string(surveyHold[0].getMJD());
   headerInfo["ORIGIN"] = "Skynet RTN";
 
   // Radio Cartographer RC* Keys (Legacy Compatibility)

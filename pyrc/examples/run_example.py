@@ -28,16 +28,24 @@ def run_example(executable_path="radio-cartographer"):
     print(f"Using executable: {executable_path}")
     start_time = time()
     # Use the standard path provided in the request
-    filename = "testing/test_files/raw_daisy_200s/0144858.fits"
-    v = Validation(filename)
+    # Use the standard path provided in the request
+    filenames = [
+        "testing/test_files/crownofthorns_raster.fits",
+        "testing/test_files/crownofthorns_nod.fits"
+    ]
+    
+    # Validation
+    # Validate the first file for gain cal (assuming similar gain for both or just using one for this example)
+    # Ideally should validate both, but for this example we'll validate the first one to get gain params
+    v = Validation(filenames[0])
     validated_path = v.validate()
-    g_c = Gain_Calibration(validated_path, 0, 0, None, None,
-                        None, None)
+    
+    # Gain Calibration on the first file
+    g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
     precaldelta2, postcaldelta2 = g_c.Gain_calibration()
 
-    g_c_1 =     g_c = Gain_Calibration(validated_path, 0, 1, None, None,
-                                       None, None)
-    precaldelta1, postcaldelta1  = g_c.Gain_calibration()
+    g_c_1 = Gain_Calibration(validated_path, 0, 1, None, None, None, None)
+    precaldelta1, postcaldelta1  = g_c_1.Gain_calibration()
 
     print(precaldelta1, precaldelta2, postcaldelta1, postcaldelta2)
     config = RadioCartographerConfig(
@@ -52,7 +60,7 @@ def run_example(executable_path="radio-cartographer"):
         max_freq=1750.0,
         exclusion_bands=[],
         bg_scale=6.0,
-        rfi_scale=0.35,
+        rfi_scale=0.1,
         m10_plus_processing=False,
         weight_scale=0.333333,
         photometry_enabled=False,
@@ -78,7 +86,7 @@ def run_example(executable_path="radio-cartographer"):
         # But here let's capture to show we can handle it.
         # Actually, let's stream it so the user sees progress if they run it.
         print("Starting execution...")
-        runner.run(config, filename, check=True, capture_output=False)
+        runner.run(config, filenames, check=True, capture_output=False)
         print("Execution completed successfully.")
         
     except subprocess.CalledProcessError as e:

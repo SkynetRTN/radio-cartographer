@@ -1,0 +1,11 @@
+testing/test_files
+build
+.git
+.idea
+cmake-build-debug
+cmake-build-release
+legacy_backup
+cmake-build-debug-docker
+radio-cartographer
+*.fits
+*.log
