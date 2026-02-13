@@ -60,25 +60,25 @@ struct PartitionSet
 
 	// partSetProc ONLY REFERS TO THE GEOMETRY OF THE PROCESSED DATA
 
-	MapTypes mapType;
+  MapTypes mapType;
 
-	double subDecInc; // = subDecInc;
-	double subRaInc;  // = subRaInc;
-	double subDecRes; // = subDecRes;
-	double subRaRes;  // = subRaRes;
+  double subDecInc; // = subDecInc;
+  double subRaInc;  // = subRaInc;
+  double subDecRes; // = subDecRes;
+  double subRaRes;  // = subRaRes;
 
-	double maxDec; // = maxDec;
-	double maxRa;  // = maxRa;
-	double minDec; // = minDec;
-	double minRa;  // = minRa;
+  double maxDec; // = maxDec;
+  double maxRa;  // = maxRa;
+  double minDec; // = minDec;
+  double minRa;  // = minRa;
 
-	// ORIGINAL DEGREE VALUES OF THE CENTER OF THE OBSERVATION [NOT INTERNAL COORDINATES]
-	// USED FOR APPLYING AND INVERTING THE COSINE TRANSFORM
-	double centerDecDeg;
-	double centerRaDeg;
+  // ORIGINAL DEGREE VALUES OF THE CENTER OF THE OBSERVATION [NOT INTERNAL
+  // COORDINATES] USED FOR APPLYING AND INVERTING THE COSINE TRANSFORM
+  double centerDecDeg;
+  double centerRaDeg;
 
-	double centerLatProcDeg;  // DYLAN
-	double centerLongProcDeg; // DYLAN
+  double centerLatProcDeg;  // DYLAN
+  double centerLongProcDeg; // DYLAN
 
 	// MEDIAN COORDINATES ARE MEASURED BY PERFORMING RCR ON ALL RA AND DEC VALUES
 	// THEY REFLECT THE OBSERVATION'S CENTER IN INTERNAL COORDINATES CENTERED ABOUT THE MAP'S (0,0) COORDINATE
@@ -88,68 +88,73 @@ struct PartitionSet
 	double medianLatiMap; // DYLAN
 	double medianLongMap; // DYLAN
 
-	std::vector<double> edgeOneParameters;
-	std::vector<double> edgeTwoParameters;
-	std::vector<double> edgeThreeParameters;
-	std::vector<double> edgeFourParameters;
+  std::vector<double> edgeOneParameters;
+  std::vector<double> edgeTwoParameters;
+  std::vector<double> edgeThreeParameters;
+  std::vector<double> edgeFourParameters;
 
-	std::vector<std::vector<double>> edgeLocations; // DYLAN
+  std::vector<std::vector<double>> edgeLocations; // DYLAN
 
-	bool tracking; // DYLAN
-	double trimSize;
-	double edgeRadius;
+  bool tracking; // DYLAN
+  double trimSize;
+  double edgeRadius;
 };
 
-struct SurveyParameters
-{
-	bool tracking;
-	bool debug;
+struct SurveyParameters {
+  bool tracking;
+  bool debug;
 
-	double forcedTS;
-	double frequency;
-	double trimSize;
-	double weightScale;
+  double forcedTS;
+  double frequency;
+  double trimSize;
+  double weightScale;
 
 	Channel channel;
 	Telescopes tele;
 	MapTypes mapType;
 	CalMethods calMethod;
 	Coordinates pCoordinate;
+
+    double gainDeltaStart1;
+    double gainDeltaEnd1;
+    double gainDeltaStart2;
+    double gainDeltaEnd2;
 };
 
-struct ProcessorParameters
-{
-	double rfiScaleBW;
-	double bgScaleBW;
-	double wScaleBW;
-	std::string timeShift;
-	double timeShiftValue;
-	bool wCorrMap;
-	bool lssProc;
-	int raw;
+struct ProcessorParameters {
+  double rfiScaleBW;
+  double bgScaleBW;
+  double wScaleBW;
+  std::string timeShift;
+  double timeShiftValue;
+  bool wCorrMap;
+  bool lssProc;
+  int raw;
+  bool skipRFI;
+  bool skipBG;
+  bool skipTS;
 };
 
-struct MapParameters
-{
-	bool LSSMapping;
-	bool SSSMapping;
-	bool standardGapWScale;
-	bool rawProcessing;
-	bool m10PlusProcessing;
-	bool photometry;
-	bool correlatedWeightMap;
-	double pixelSize;
-	double rawWeightScale;
-	double processedWeightScale;
-	double edgeThreshold;
-	double rfiScale;
+struct MapParameters {
+  bool LSSMapping;
+  bool SSSMapping;
+  bool standardGapWScale;
+  bool rawProcessing;
+  bool m10PlusProcessing;
+  bool photometry;
+  bool correlatedWeightMap;
+  double pixelSize;
+  double rawWeightScale;
+  double processedWeightScale;
+  double edgeThreshold;
+  double rfiScale;
+  bool skipSurfaceModeling;
 };
 
-struct RFIParameters
-{
-	bool correlatedWeightMap;
-	double rfiScaleBW;
-	double psfFWHM;
-	double standardGap;
-	PartitionSet partSetProcSSS;
+struct RFIParameters {
+  bool correlatedWeightMap;
+  double rfiScaleBW;
+  double psfFWHM;
+  double standardGap;
+  PartitionSet partSetProcSSS;
 };

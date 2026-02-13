@@ -132,6 +132,11 @@ private:
 	std::string dataFile;
 	std::string interpolationMethod;
 
+    double gainDeltaStart1;
+    double gainDeltaEnd1;
+    double gainDeltaStart2;
+    double gainDeltaEnd2;
+
 	std::vector<double> scatter2d;
 	std::vector<double> LSS2DScatter;
 	std::vector<double> centroidLocations;

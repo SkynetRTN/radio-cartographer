@@ -1,2 +1,4 @@
 astropy==7.0.1
 numpy==2.2.3
+scipy
+rcr

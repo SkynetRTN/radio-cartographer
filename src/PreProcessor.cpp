@@ -138,7 +138,7 @@ int PreProcessor::accessExtTable20m(
     table.column("MJD").read(MJDateHold, 1, 1);
     setMJD(MJDateHold);
   }
-
+  Debugger::print("Frequency", frequency );
   Debugger::print("Info", inputData.size(), inputData[0].size());
 
   return 0;
@@ -746,7 +746,8 @@ int PreProcessor::averageSpectra(std::vector<std::vector<double>> frequencies,
         inRangeSum++;
       }
     }
-    continuum[i] = spectraSum / inRangeSum;
+    //Continuum should be the entire sum, not the average
+    continuum[i] = spectraSum ;
   }
 
   return 0;

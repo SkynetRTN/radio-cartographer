@@ -4,7 +4,10 @@
 IMAGE_NAME="radio-cartographer"
 CONTAINER_NAME="radio-cartographer-sandbox"
 # Mapping the specific WORKDIR defined in your Dockerfile 
-WORK_DIR="/skynet/radio-cartographer"
+WORK_DIR="//skynet/radio-cartographer"
+
+export MSYS2_ARG_CONV_EXCL="*"
+export MSYS_NO_PATHCONV=1
 
 # 1. BUILD CHECK
 # Check if the image exists; if not, build it using the Dockerfile
@@ -30,19 +33,20 @@ fi
 # We use 'tail -f /dev/null' to keep the C++ environment alive indefinitely.
 if [ -z "$(docker ps -qf "name=^${CONTAINER_NAME}$")" ]; then
   echo "⚠️  Sandbox container not running. Starting..."
-  
+
   # VOLUME MOUNT CRITICAL:
   # -v "$(pwd):$WORK_DIR" maps your host source code to the container.
-  # This overwrites the 'COPY' instruction from the Dockerfile 
+  # This overwrites the 'COPY' instruction from the Dockerfile
   # allowing Antigravity to edit files locally while compiling remotely.
   docker run -d \
     --rm \
     --name "$CONTAINER_NAME" \
+    -p 5678:5678 \
     -v "$(pwd):$WORK_DIR" \
     -w "$WORK_DIR" \
     "$IMAGE_NAME" \
     tail -f /dev/null
-    
+
   # Wait for container spin-up
   sleep 2
 fi

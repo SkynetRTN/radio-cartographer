@@ -35,6 +35,23 @@ radio-cartographer
 testing/**/*.fits
 testing/**/*.txt
 testing/Temporary
-
+testing/test_files
+testing/processed_test_files
 # pyrc pycache
 pyrc/**/__pycache__/
+.venv/
+
+# Python virtual env
+.venv/
+venv/
+ENV/
+
+# Python build/cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
