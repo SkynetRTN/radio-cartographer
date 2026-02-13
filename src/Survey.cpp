@@ -253,7 +253,7 @@ void Survey::setTwentyParams(GBParser &gb)
 
 	this->telescopeFrequency = obsTemp*pow(10, 9);
 	this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
-
+	std::cout << "psfFWHM 247" << psfFWHM << std::endl;
 	if (mapTypeStr == "DAISY")
 	{
 		this->mapType = DAISY;
@@ -292,7 +292,7 @@ void Survey::setSdfitsParams(SurveyParameters &params, PreProcessor sdfits)
 		this->telescope = TWENTY_METER;
 		this->telescopeFrequency = sdfits.getFrequency() * pow(10, 6);
 		this->psfFWHM = 1.22*299792458.0*180.0 / (telescopeFrequency * 20.0 * M_PI);
-
+		std::cout << "psfFWHM 286" << psfFWHM << std::endl ;
 		setMappingCoordinate(sdfits.getCoordinateSystem());
 
 		if (mapPattern == "ralongmap")
@@ -1122,7 +1122,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeStart = Tools::getMean(cleanDumpStart, cleanTimeStart);
 		deltaStart = std::abs((mOnStart*(averageTimeStart - xBarOnStart) + bOnStart) - (mOffStart*(averageTimeStart - xBarOffStart) + bOffStart));
-		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaStart: " << deltaStart << std::defaultfloat << std::endl;
+
 		model = LinearModel(highDumpEnd, highTimeEnd, highFluxArrayEnd);
 
 		rcr.setParametricModel(model);
@@ -1161,7 +1161,6 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeEnd = Tools::getMean(cleanDumpEnd, cleanTimeEnd);
 		deltaEnd = std::abs((mOnEnd*(averageTimeEnd - xBarOnEnd) + bOnEnd) - (mOffEnd*(averageTimeEnd - xBarOffEnd) + bOffEnd));
-		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
 	}
 	else if (calMethod == PRE)
 	{
@@ -1205,7 +1204,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeStart = Tools::getMean(cleanDumpStart, cleanTimeStart);
 		deltaStart = std::abs((mOnStart*(averageTimeStart - xBarOnStart) + bOnStart) - (mOffStart*(averageTimeStart - xBarOffStart) + bOffStart));
-		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaStart: " << deltaStart << std::defaultfloat << std::endl;
+
 	}
 	else if (calMethod == POST)
 	{
@@ -1250,12 +1249,11 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
 
 		averageTimeEnd = Tools::getMean(cleanDumpEnd, cleanTimeEnd);
 		deltaEnd = std::abs((mOnEnd*(averageTimeEnd - xBarOnEnd) + bOnEnd) - (mOffEnd*(averageTimeEnd - xBarOffEnd) + bOffEnd));
-		std::cout << std::fixed << std::setprecision(17) << "DEBUG: Calculated deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
 	}
 
 
 	int CalMethodPostBool = 0, CalMethodPreBool = 0;
-    
+
     // Override Deltas if requested
     if (chan == LEFT) {
         if (std::abs(gainDeltaStart1 - (-999.0)) > 1e-4) {
@@ -1280,7 +1278,7 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
             std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
         }
     }
-    
+
 	//check these interpolations
 	if (calMethod == INTERPOLATED)
 	{

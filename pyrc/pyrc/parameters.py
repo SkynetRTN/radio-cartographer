@@ -64,11 +64,17 @@ class RadioCartographerConfig:
     time_shift_mode: TimeShiftMode = TimeShiftMode.AUTO
     time_shift_value: float = 0.0
 
+    # Skip Flags
+    skip_time_shift: bool = False
+    skip_background_subtraction: bool = False
+    skip_rfi_removal: bool = False
+    skip_surface_modeling: bool = False
+
     # Photometry Parameters
     photo_inner_radius: float = 1.25
     photo_outer_radius: float = 5.0
     photo_centroid_type: CentroidType = CentroidType.BRIGHTEST
-    
+
     # Gain Calibration Overrides
     gain_delta_start_1: Optional[float] = None
     gain_delta_end_1: Optional[float] = None
@@ -148,7 +154,13 @@ class RadioCartographerConfig:
         # Survey / Map (cont)
         arg_map[20] = str(self.trim_size)
         arg_map[21] = "1" if self.lss_mapping else "0"
-        
+
+        # Skip Flags
+        arg_map[22] = "1" if self.skip_time_shift else "0"
+        arg_map[23] = "1" if self.skip_background_subtraction else "0"
+        arg_map[24] = "1" if self.skip_rfi_removal else "0"
+        arg_map[25] = "1" if self.skip_surface_modeling else "0"
+
         # Convert to list.
         # argv[2] is at index 0 of our result.
         # Range is 2 to 21 inclusive.
@@ -156,14 +168,14 @@ class RadioCartographerConfig:
         for i in range(2, 22):
             val = arg_map.get(i, "0")
             args_list.append(str(val))
-        
+
         # Add Gain Delta Overrides (Indices 22-25)
         # Default to -999.0 if None
         args_list.append(str(self.gain_delta_start_1 if self.gain_delta_start_1 is not None else -999.0))
         args_list.append(str(self.gain_delta_end_1 if self.gain_delta_end_1 is not None else -999.0))
         args_list.append(str(self.gain_delta_start_2 if self.gain_delta_start_2 is not None else -999.0))
         args_list.append(str(self.gain_delta_end_2 if self.gain_delta_end_2 is not None else -999.0))
-            
+
         # Append exclusion bands (argv[22]...)
         for band_edge in self.exclusion_bands:
             args_list.append(str(band_edge))

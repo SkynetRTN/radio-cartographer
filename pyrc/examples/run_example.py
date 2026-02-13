@@ -6,6 +6,12 @@ from pyrc import utils
 from time import time
 from pyrc.gain_calibration import Gain_Calibration
 from pyrc.gain_calibration_validation import Validation
+import sys, os, pyrc
+print("exe:", sys.executable)
+print("cwd:", os.getcwd())
+print("pyrc file:", getattr(pyrc, "__file__", None))
+print("sys.path[0:5]:", sys.path[:5])
+
 # Add the project root to sys.path
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
@@ -33,13 +39,13 @@ def run_example(executable_path="radio-cartographer"):
         "testing/test_files/crownofthorns_raster.fits",
         "testing/test_files/crownofthorns_nod.fits"
     ]
-    
+
     # Validation
     # Validate the first file for gain cal (assuming similar gain for both or just using one for this example)
     # Ideally should validate both, but for this example we'll validate the first one to get gain params
     v = Validation(filenames[0])
     validated_path = v.validate()
-    
+
     # Gain Calibration on the first file
     g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
     precaldelta2, postcaldelta2 = g_c.Gain_calibration()
@@ -48,6 +54,7 @@ def run_example(executable_path="radio-cartographer"):
     precaldelta1, postcaldelta1  = g_c_1.Gain_calibration()
 
     print(precaldelta1, precaldelta2, postcaldelta1, postcaldelta2)
+
     config = RadioCartographerConfig(
         channel=Channel.COMPOSITE,
         receiver=Receiver.HI,
@@ -60,7 +67,7 @@ def run_example(executable_path="radio-cartographer"):
         max_freq=1750.0,
         exclusion_bands=[],
         bg_scale=6.0,
-        rfi_scale=0.1,
+        rfi_scale=0.7,
         m10_plus_processing=False,
         weight_scale=0.333333,
         photometry_enabled=False,

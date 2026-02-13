@@ -92,12 +92,13 @@ void setInputMapParams(char *argv[], MapParameters &mParams) {
   } else {
     mParams.LSSMapping = false;
   }
-
   if (photometryOn) {
     mParams.correlatedWeightMap = true;
   } else {
     mParams.correlatedWeightMap = false;
   }
+
+  mParams.skipSurfaceModeling = (bool)atoi(argv[25]);
 }
 void setInputSurveyParams(char *argv[], SurveyParameters &sParams) {
   // TEMPORARY
@@ -224,6 +225,11 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams) {
 
   // HARD-CODED FOR NOW
   procParams.lssProc = false;
+
+  // SKIP FLAGS
+  procParams.skipTS = (bool)atoi(argv[22]);
+  procParams.skipBG = (bool)atoi(argv[23]);
+  procParams.skipRFI = (bool)atoi(argv[24]);
 }
 
 int main(int argc, char *argv[]) {

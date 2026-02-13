@@ -12,7 +12,8 @@ static double toDeg = 180.0 / M_PI;
 Cartographer::Cartographer() {}
 Cartographer::Cartographer(Composite composite, MapParameters params) {
   this->scans = composite.getScans();
-  this->m10PlusProcessing = params.m10PlusProcessing;
+  this->m10PlusProcessing =
+      params.m10PlusProcessing && !params.skipSurfaceModeling;
   this->partSetVecSSS = composite.getPartSetVecSSS();
   this->partSetVecLSS = composite.getPartSetVecLSS();
   this->psfFWHM = composite.getPSFFWHM();

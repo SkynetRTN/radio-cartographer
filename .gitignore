@@ -35,8 +35,23 @@ radio-cartographer
 testing/**/*.fits
 testing/**/*.txt
 testing/Temporary
-
+testing/test_files
+/crownofthorns_nod_processed.fits
 # pyrc pycache
 pyrc/**/__pycache__/
-/crownofthorns_nod_processed.fits
 .venv/
+
+# Python virtual env
+.venv/
+venv/
+ENV/
+
+# Python build/cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
