@@ -36,7 +36,7 @@ testing/**/*.fits
 testing/**/*.txt
 testing/Temporary
 testing/test_files
-/crownofthorns_nod_processed.fits
+testing/processed_test_files
 # pyrc pycache
 pyrc/**/__pycache__/
 .venv/

@@ -80,6 +80,10 @@ def run_example(executable_path="radio-cartographer"):
         gain_delta_end_1=postcaldelta1,
         gain_delta_start_2=precaldelta2,
         gain_delta_end_2=postcaldelta2,
+        skip_time_shift=False,
+        skip_background_subtraction=False,
+        skip_rfi_removal=False,
+        skip_surface_modeling=False,
     )
 
     
