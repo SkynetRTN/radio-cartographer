@@ -17,7 +17,7 @@ from pyrc import (
     Receiver,
     CentroidType,
 )
-from pyrc.gain_calibration import Gain_Calibration
+from pyrc.gain_calibration import GainCalibration
 from pyrc.gain_calibration_validation import Validation
 
 
@@ -58,13 +58,13 @@ def run_example(executable_path, config_file="run_config.toml"):
     # Gain Calibration on the first file
     # Note: Gain calibration logic remains hardcoded as per original example structure
     # unless we want to parameterize these steps too.
-    g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
-    precaldelta2, postcaldelta2 = g_c.Gain_calibration()
+    g_c = GainCalibration(validated_path, 0, 0, None, None, None, None)
+    pre_cal_delta_2, post_cal_delta_2 = g_c.calibrate_gain()
 
-    g_c_1 = Gain_Calibration(validated_path, 0, 1, None, None, None, None)
-    precaldelta1, postcaldelta1 = g_c_1.Gain_calibration()
+    g_c_1 = GainCalibration(validated_path, 0, 1, None, None, None, None)
+    pre_cal_delta_1, post_cal_delta_1 = g_c_1.calibrate_gain()
 
-    print(f"Gain deltas: {precaldelta1}, {precaldelta2}, {postcaldelta1}, {postcaldelta2}")
+    print(f"Gain deltas: {pre_cal_delta_1}, {pre_cal_delta_2}, {post_cal_delta_1}, {post_cal_delta_2}")
 
     # Map string enums to actual Enum values
     # Helper to map string to enum, default to provided default if not found or invalid
@@ -98,10 +98,10 @@ def run_example(executable_path, config_file="run_config.toml"):
         photo_centroid_type=get_enum(CentroidType, "photo_centroid_type", CentroidType.BRIGHTEST),
         trim_size=rc_config.get("trim_size", 0.0),
         lss_mapping=rc_config.get("lss_mapping", False),
-        gain_delta_start_1=precaldelta1,
-        gain_delta_end_1=postcaldelta1,
-        gain_delta_start_2=precaldelta2,
-        gain_delta_end_2=postcaldelta2,
+        gain_delta_start_1=pre_cal_delta_1,
+        gain_delta_end_1=post_cal_delta_1,
+        gain_delta_start_2=pre_cal_delta_2,
+        gain_delta_end_2=post_cal_delta_2,
         skip_time_shift=rc_config.get("skip_time_shift", False),
         skip_background_subtraction=rc_config.get("skip_background_subtraction", False),
         skip_rfi_removal=rc_config.get("skip_rfi_removal", False),

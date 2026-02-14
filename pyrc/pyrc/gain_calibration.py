@@ -6,7 +6,7 @@ import rcr
 from . import utils
 
 
-class Gain_Calibration:
+class GainCalibration:
     def __init__(self, file_path: str, ifnum, plnum, including_frequency_ranges, excluding_frequency_ranges, including_time_ranges, excluding_time_ranges):
         self.filepath = file_path
 
@@ -119,7 +119,7 @@ class Gain_Calibration:
         else:
             return None, None
 
-    def Gain_calibration(self):
+    def calibrate_gain(self):
         if self.including_time_ranges or self.excluding_time_ranges:
             self.data = utils.filter_time_ranges(self.header, self.data, self.including_time_ranges, self.excluding_time_ranges)
         if self.including_frequency_ranges or self.excluding_frequency_ranges:
@@ -143,27 +143,27 @@ class Gain_Calibration:
         post_calibration_intensity, post_calibration_uncertainty = self.calculate_calibration_height(post_calibration)
 
         continuum = utils.integrate_data(self.header, self.data[self.data_start_index:self.post_cal_start_index], "continuum")
-        deltapre = "None"
-        deltapost = "None"
-        cal_method = "None"
+        delta_pre = None
+        delta_post = None
+        cal_method = None
         if pre_calibration_intensity and post_calibration_intensity:
             z_score = abs(pre_calibration_intensity - post_calibration_intensity) / np.sqrt(pre_calibration_uncertainty ** 2 + post_calibration_uncertainty ** 2)
-            deltapre = pre_calibration_intensity
-            deltapost = post_calibration_intensity
+            delta_pre = pre_calibration_intensity
+            delta_post = post_calibration_intensity
             if z_score >= 1.96:
                 cal_method = "interpolated"
             else:
                 cal_method = "average"
         elif pre_calibration_intensity:
             continuum[1] /= pre_calibration_intensity
-            deltapre = pre_calibration_intensity
-            deltapost = "None"
+            delta_pre = pre_calibration_intensity
+            delta_post = None
             method = "pre"
         elif post_calibration_intensity:
             continuum[1] /= post_calibration_intensity
-            deltapost = post_calibration_intensity
-            deltapre = "None"
+            delta_post = post_calibration_intensity
+            delta_pre = None
             method = "post"
 
 
-        return deltapre, deltapost
+        return delta_pre, delta_post

@@ -126,8 +126,8 @@ def find_calibrations(header, data, channel_count):
     '''
 
     # Initialize necessary indices
-    data_start_ind = None
-    post_cal_start_ind = None
+    data_start_index = None
+    post_cal_start_index = None
     off_start_index = None
 
     # Create a counter for valid data
@@ -144,18 +144,18 @@ def find_calibrations(header, data, channel_count):
 
         # If data begins being collected (CALSTATE = 0 and SWPVALID = 1) then state that pre calibration has started and the first data index can be recorded
         if cal_started and i["CALSTATE"] == 0 and i["SWPVALID"] == 1 and not pre_cal_complete:
-            data_start_ind = ind
+            data_start_index = ind
             pre_cal_complete = True
 
         # If the pre calibration is complete and the sweep is no longer valid then keep track of this as the post calibration start
         if ind > 0 and pre_cal_complete and i["SWPVALID"] == 0 and data[ind - 1]["SWPVALID"] == 0:
-            if post_cal_start_ind is None:
-                post_cal_start_ind = ind - 1
+            if post_cal_start_index is None:
+                post_cal_start_index = ind - 1
 
         # Reset the post cal index to None if the above condition is False.
         # This allows for sweeps to be invalid within the observation such as during on/off transition or invalid data blips.
         else:
-            post_cal_start_ind = None
+            post_cal_start_index = None
 
         # Keep track of contiguous data points
         if pre_cal_complete and i['CALSTATE'] == 0 and i['SWPVALID'] == 1:
@@ -163,8 +163,8 @@ def find_calibrations(header, data, channel_count):
 
         # If 3 or less valid data points across all channels have been collected and the sweep becomes
         # invalid then treat this section of data as invalid and reset necessary params.
-        if counter <= 3 * channel_count and i['SWPVALID'] == 0 and data_start_ind:
-            data_start_ind = None
+        if counter <= 3 * channel_count and i['SWPVALID'] == 0 and data_start_index:
+            data_start_index = None
             pre_cal_complete = False
 
         # When pre calibration is complete and a new cal spike begins,
@@ -174,26 +174,26 @@ def find_calibrations(header, data, channel_count):
 
     if not pre_cal_complete:
         pre_cal_complete = True
-        data_start_ind = 0
+        data_start_index = 0
 
         for ind, i in enumerate(data):
             # If the pre calibration is complete and the sweep is no longer valid then keep track of this as the post calibration start
             if ind > 0 and pre_cal_complete and i["SWPVALID"] == 0 and data[ind - 1]["SWPVALID"] == 0:
-                if post_cal_start_ind is None:
-                    post_cal_start_ind = ind - 1
+                if post_cal_start_index is None:
+                    post_cal_start_index = ind - 1
 
             # Reset the post cal index to None if the above condition is False.
             # This allows for sweeps to be invalid within the observation such as during on/off transition or invalid data blips.
             else:
-                post_cal_start_ind = None
+                post_cal_start_index = None
 
             # When pre calibration is complete and a new cal spike begins,
             # break the loop (post cal index will already be recorded if available)
             if i['SWPVALID'] == 0 and i['CALSTATE'] == 1:
                 break
 
-    if not post_cal_start_ind:
-        post_cal_start_ind = len(data) - 1
+    if not post_cal_start_index:
+        post_cal_start_index = len(data) - 1
 
     # If the file is an on/off file then find when the transition occurs and store an additional index
     if header['OBSMODE'] == 'onoff':
@@ -206,7 +206,7 @@ def find_calibrations(header, data, channel_count):
 
                 break
 
-    return data_start_ind, post_cal_start_ind, off_start_index
+    return data_start_index, post_cal_start_index, off_start_index
 
 
 def filter_time_ranges(header, data, including_time_ranges, excluding_time_ranges):

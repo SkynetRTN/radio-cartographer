@@ -5,7 +5,7 @@ import glob
 from time import time
 
 from pyrc import utils
-from pyrc.gain_calibration import Gain_Calibration
+from pyrc.gain_calibration import GainCalibration
 from pyrc.gain_calibration_validation import Validation
 from pyrc.utils import delete_validated_files_recursive
 from pyrc import (
@@ -44,17 +44,17 @@ def process_fits_file(executable_path: str, input_path: str, output_dir: str) ->
 
     # Gain calibration
     t0 = time()
-    g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
-    precaldelta2, postcaldelta2 = g_c.Gain_calibration()
+    g_c = GainCalibration(validated_path, 0, 0, None, None, None, None)
+    pre_cal_delta_2, post_cal_delta_2 = g_c.calibrate_gain()
 
-    g_c_1 = Gain_Calibration(validated_path, 0, 1, None, None, None, None)
-    precaldelta1, postcaldelta1 = g_c_1.Gain_calibration()
+    g_c_1 = GainCalibration(validated_path, 0, 1, None, None, None, None)
+    pre_cal_delta_1, post_cal_delta_1 = g_c_1.calibrate_gain()
 
     print("  Gain calibration deltas:")
-    print(f"    precal 1:  {precaldelta1}")
-    print(f"    precal 2:  {precaldelta2}")
-    print(f"    postcal 1: {postcaldelta1}")
-    print(f"    postcal 2: {postcaldelta2}")
+    print(f"    precal 1:  {pre_cal_delta_1}")
+    print(f"    precal 2:  {pre_cal_delta_2}")
+    print(f"    postcal 1: {post_cal_delta_1}")
+    print(f"    postcal 2: {post_cal_delta_2}")
     print("  Validation+calibration time:", round(time() - t0, 3), "seconds")
 
     config = RadioCartographerConfig(
@@ -77,10 +77,10 @@ def process_fits_file(executable_path: str, input_path: str, output_dir: str) ->
         photo_centroid_type=CentroidType.BRIGHTEST,
         trim_size=0.0,
         lss_mapping=False,
-        gain_delta_start_1=precaldelta1,
-        gain_delta_end_1=postcaldelta1,
-        gain_delta_start_2=precaldelta2,
-        gain_delta_end_2=postcaldelta2,
+        gain_delta_start_1=pre_cal_delta_1,
+        gain_delta_end_1=post_cal_delta_1,
+        gain_delta_start_2=pre_cal_delta_2,
+        gain_delta_end_2=post_cal_delta_2,
     )
 
     runner = RadioCartographerRunner(executable_path)
