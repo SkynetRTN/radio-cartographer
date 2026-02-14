@@ -1,0 +1,33 @@
+[input]
+filenames = [
+    "/skynet/test_standards_static/gbo20_L_lores_daisy_cyga.fits",
+]
+
+[radio_cartographer]
+channel = "COMPOSITE"
+receiver = "HI"
+calibration_method = "INTERPOLATED"
+coordinate_system = "EQUATORIAL"
+time_shift_mode = "AUTO"
+time_shift_value = 0.0
+generate_raw_map = false
+min_freq = 1350.0
+max_freq = 1750.0
+exclusion_bands = []
+bg_scale = 6.0
+rfi_scale = 0.7
+m10_plus_processing = false
+weight_scale = 0.333333
+photometry_enabled = false
+photo_inner_radius = 1.25
+photo_outer_radius = 5.0
+photo_centroid_type = "BRIGHTEST"
+trim_size = 0.0
+lss_mapping = false
+skip_time_shift = false
+skip_background_subtraction = false
+skip_rfi_removal = false
+skip_surface_modeling = false
+
+# Gain parameters are calculated dynamically in the script unless specified here.
+# Keeping defaults placeholders for clarity if needed, but not strictly required by toml loader if script handles defaults.
