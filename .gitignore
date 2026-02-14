@@ -37,6 +37,7 @@ testing/**/*.txt
 testing/Temporary
 testing/test_files
 testing/processed_test_files
+testing/profile/results
 # pyrc pycache
 pyrc/**/__pycache__/
 .venv/

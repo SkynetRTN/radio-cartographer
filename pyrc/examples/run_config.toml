@@ -1,6 +1,6 @@
 [input]
 filenames = [
-    "/skynet/test_standards_static/gbo20_L_lores_daisy_cyga.fits",
+    "/skynet/test_standards_static/gbo20_L_lores_raster_orion.fits",
 ]
 
 [radio_cartographer]
