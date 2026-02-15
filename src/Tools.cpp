@@ -4,6 +4,8 @@
 #include <fftw3.h>
 #include <float.h>
 #include <math.h>
+#include <algorithm>
+#include <numeric>
 
 
 //correlation
@@ -148,59 +150,7 @@ double shiftCalculator(std::vector<std::vector<double> > maxIfftInfo) {
 
 
 //sorting
-void swapa(int a, int b, std::vector<double> &y) {
-    double tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
 
-void swapCircle(int a, int b, std::vector<double> &y) {
-    double tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
-
-void swapCircle(int a, int b, std::vector<int> &y) {
-    double tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
-
-void swapCircle(int a, int b, std::vector<bool> &y) {
-    double tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
-
-void QSa(int left, int right, std::vector<double> &y) {
-    int i = left, j = right;
-    double pivot = y[(left + right) / 2];
-
-    while (i <= j) {
-        while (y[i] < pivot) {
-            i++;
-        }
-        while (y[j] > pivot) {
-            j--;
-        }
-        if (i <= j) {
-            swapa(i, j, y);
-            i++;
-            j--;
-        }
-    };
-
-    if (left < j) {
-        QSa(left, j, y);
-    }
-    if (i < right) {
-        QSa(i, right, y);
-    }
-}
 
 
 //linear algebra
@@ -265,90 +215,74 @@ std::vector<double> performPivot(int columnCount, std::vector<double> A, std::ve
 namespace Tools {
     //sorters
     void sort(std::vector<double> &y) {
-        QSa(0, y.size() - 1, y);
+        std::sort(y.begin(), y.end());
     }
 
     void sortAll(int left, int right, std::vector<double> &a, std::vector<double> &b, std::vector<double> &c) {
-        int i = left, j = right;
-        double pivot = a[(left + right) / 2];
+        if (left >= right) return;
+        int n = right - left + 1;
+        std::vector<int> p(n);
+        std::iota(p.begin(), p.end(), left);
+        std::sort(p.begin(), p.end(), [&](int i, int j) {
+            return a[i] < a[j];
+        });
 
-        while (i <= j) {
-            while (a[i] < pivot) {
-                i++;
-            }
-            while (a[j] > pivot) {
-                j--;
-            }
-            if (i <= j) {
-                swapCircle(i, j, a);
-                swapCircle(i, j, b);
-                swapCircle(i, j, c);
-                i++;
-                j--;
-            }
-        };
-
-        if (left < j) {
-            sortAll(left, j, a, b, c);
+        std::vector<double> a_sorted(n), b_sorted(n), c_sorted(n);
+        for (int k = 0; k < n; ++k) {
+            a_sorted[k] = a[p[k]];
+            b_sorted[k] = b[p[k]];
+            c_sorted[k] = c[p[k]];
         }
-        if (i < right) {
-            sortAll(i, right, a, b, c);
+        for (int k = 0; k < n; ++k) {
+            a[left + k] = a_sorted[k];
+            b[left + k] = b_sorted[k];
+            c[left + k] = c_sorted[k];
         }
     }
 
     void sortAll(int left, int right, std::vector<double> &a, std::vector<int> &b, std::vector<int> &c) {
-        int i = left, j = right;
-        double pivot = a[(left + right) / 2];
+        if (left >= right) return;
+        int n = right - left + 1;
+        std::vector<int> p(n);
+        std::iota(p.begin(), p.end(), left);
+        std::sort(p.begin(), p.end(), [&](int i, int j) {
+            return a[i] < a[j];
+        });
 
-        while (i <= j) {
-            while (a[i] < pivot) {
-                i++;
-            }
-            while (a[j] > pivot) {
-                j--;
-            }
-            if (i <= j) {
-                swapCircle(i, j, a);
-                swapCircle(i, j, b);
-                swapCircle(i, j, c);
-                i++;
-                j--;
-            }
-        };
-
-        if (left < j) {
-            sortAll(left, j, a, b, c);
+        std::vector<double> a_sorted(n);
+        std::vector<int> b_sorted(n), c_sorted(n);
+        for (int k = 0; k < n; ++k) {
+            a_sorted[k] = a[p[k]];
+            b_sorted[k] = b[p[k]];
+            c_sorted[k] = c[p[k]];
         }
-        if (i < right) {
-            sortAll(i, right, a, b, c);
+        for (int k = 0; k < n; ++k) {
+            a[left + k] = a_sorted[k];
+            b[left + k] = b_sorted[k];
+            c[left + k] = c_sorted[k];
         }
     }
 
     void sortAll(int left, int right, std::vector<int> &a, std::vector<int> &b, std::vector<bool> &c) {
-        int i = left, j = right;
-        double pivot = a[(left + right) / 2];
+        if (left >= right) return;
+        int n = right - left + 1;
+        std::vector<int> p(n);
+        std::iota(p.begin(), p.end(), left);
+        std::sort(p.begin(), p.end(), [&](int i, int j) {
+            return a[i] < a[j];
+        });
 
-        while (i <= j) {
-            while (a[i] < pivot) {
-                i++;
-            }
-            while (a[j] > pivot) {
-                j--;
-            }
-            if (i <= j) {
-                swapCircle(i, j, a);
-                swapCircle(i, j, b);
-                swapCircle(i, j, c);
-                i++;
-                j--;
-            }
-        };
-
-        if (left < j) {
-            sortAll(left, j, a, b, c);
+        std::vector<int> a_sorted(n), b_sorted(n);
+        std::vector<bool> c_sorted(n);
+        for (int k = 0; k < n; ++k) {
+            a_sorted[k] = a[p[k]];
+            b_sorted[k] = b[p[k]];
+            c_sorted[k] = c[p[k]];
         }
-        if (i < right) {
-            sortAll(i, right, a, b, c);
+        for (int k = 0; k < n; ++k) {
+            a[left + k] = a_sorted[k];
+            b[left + k] = b_sorted[k];
+            c[left + k] = c_sorted[k];
         }
     }
 
