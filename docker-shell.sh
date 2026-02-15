@@ -43,7 +43,6 @@ if [ -z "$(docker ps -qf "name=^${CONTAINER_NAME}$")" ]; then
     --name "$CONTAINER_NAME" \
     -p 5678:5678 \
     -v "$(pwd):$WORK_DIR" \
-    -v "$WORK_DIR/build" \
     -w "$WORK_DIR" \
     "$IMAGE_NAME" \
     tail -f /dev/null

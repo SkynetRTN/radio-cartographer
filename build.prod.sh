@@ -1,21 +1,34 @@
 #!/bin/bash
 set -e
 
+PROJECT_ROOT="$(pwd)"
+BUILD_DIR="build/release"
+
+# Argument parsing
+for arg in "$@"
+do
+    case $arg in
+        --docker)
+        BUILD_DIR="/skynet/tmp/build/release"
+        shift
+        ;;
+    esac
+done
+
 # Detect number of cores (macOS/Linux)
 num_cores=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 1)
-echo "Building in Release mode with native optimizations using $num_cores cores..."
 
-# Create separate build directory for Release builds
-mkdir -p build/release
-cd build/release
+# Create build directory
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 
 # Run CMake for Release build with optimizations
-cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE_OPTIMIZATION=ON ../..
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE_OPTIMIZATION=ON "$PROJECT_ROOT"
 
 # Parallel compilation
 make -j"$num_cores"
 
 # Copy executable to project root
-cp radio-cartographer ../..
+cp radio-cartographer "$PROJECT_ROOT"
 
 echo "Done. Executable 'radio-cartographer' (Release, Optimized) is ready."
