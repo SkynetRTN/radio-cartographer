@@ -12,8 +12,8 @@ namespace Tools
 	void sortAll(int, int, std::vector<double>&, std::vector<double>&, std::vector<double>&);
 	void sortAll(int, int, std::vector<double>&, std::vector<int>&, std::vector<int>&);
 	void sortAll(int, int, std::vector<int>&, std::vector<int>&, std::vector<bool>&);
-	void bubbleSort2(std::vector<double> &, std::vector<int> &, std::vector<double> &, std::vector<int> &, std::vector<int> &, std::vector<double> &);
-	void bubbleSort3(std::vector<std::vector<double> > &);
+	// void bubbleSort2(std::vector<double> &, std::vector<int> &, std::vector<double> &, std::vector<int> &, std::vector<int> &, std::vector<double> &);
+	// void bubbleSort3(std::vector<std::vector<double> > &);
 
 	//coordinate conversions
 	double convertToDec(double, double); //DYLAN

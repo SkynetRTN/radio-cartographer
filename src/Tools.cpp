@@ -411,60 +411,60 @@ namespace Tools
 			sortAll(i, right, a, b, c);
 		}
 	}
-	void bubbleSort2(std::vector<double> &sort, std::vector<int> &piggyBack1, std::vector<double> &piggyBack2, std::vector<int> &piggyBack3, std::vector<int> &piggyBack4, std::vector<double> &piggyBack5)
-	{
-		int intSwap;
-		double swap;
-		for (int i = 0; i < sort.size() - 1; i++)
-		{
-			for (int j = 0; j < sort.size() - i - 1; j++)
-			{
-				if (sort[j] > sort[j + 1]) // For decreasing order use <
-				{
-					intSwap = piggyBack1[j];
-					piggyBack1[j] = piggyBack1[j + 1];
-					piggyBack1[j + 1] = intSwap;
-
-					intSwap = piggyBack3[j];
-					piggyBack3[j] = piggyBack3[j + 1];
-					piggyBack3[j + 1] = intSwap;
-
-					intSwap = piggyBack4[j];
-					piggyBack4[j] = piggyBack4[j + 1];
-					piggyBack4[j + 1] = intSwap;
-
-					swap = piggyBack2[j];
-					piggyBack2[j] = piggyBack2[j + 1];
-					piggyBack2[j + 1] = swap;
-
-					swap = piggyBack5[j];
-					piggyBack5[j] = piggyBack5[j + 1];
-					piggyBack5[j + 1] = swap;
-
-					swap = sort[j];
-					sort[j] = sort[j + 1];
-					sort[j + 1] = swap;
-				}
-			}
-		}
-	}
-	void bubbleSort3(std::vector<std::vector<double> > &sort)
-	{
-		int intSwap;
-		std::vector<double> swap;
-		for (int i = 0; i < sort.size() - 1; i++)
-		{
-			for (int j = 0; j < sort.size() - i - 1; j++)
-			{
-				if (sort[j][0] > sort[j + 1][0]) // For decreasing order use <
-				{
-					swap = sort[j];
-					sort[j] = sort[j + 1];
-					sort[j + 1] = swap;
-				}
-			}
-		}
-	}
+	// void bubbleSort2(std::vector<double> &sort, std::vector<int> &piggyBack1, std::vector<double> &piggyBack2, std::vector<int> &piggyBack3, std::vector<int> &piggyBack4, std::vector<double> &piggyBack5)
+	// {
+	// 	int intSwap;
+	// 	double swap;
+	// 	for (int i = 0; i < sort.size() - 1; i++)
+	// 	{
+	// 		for (int j = 0; j < sort.size() - i - 1; j++)
+	// 		{
+	// 			if (sort[j] > sort[j + 1]) // For decreasing order use <
+	// 			{
+	// 				intSwap = piggyBack1[j];
+	// 				piggyBack1[j] = piggyBack1[j + 1];
+	// 				piggyBack1[j + 1] = intSwap;
+	//
+	// 				intSwap = piggyBack3[j];
+	// 				piggyBack3[j] = piggyBack3[j + 1];
+	// 				piggyBack3[j + 1] = intSwap;
+	//
+	// 				intSwap = piggyBack4[j];
+	// 				piggyBack4[j] = piggyBack4[j + 1];
+	// 				piggyBack4[j + 1] = intSwap;
+	//
+	// 				swap = piggyBack2[j];
+	// 				piggyBack2[j] = piggyBack2[j + 1];
+	// 				piggyBack2[j + 1] = swap;
+	//
+	// 				swap = piggyBack5[j];
+	// 				piggyBack5[j] = piggyBack5[j + 1];
+	// 				piggyBack5[j + 1] = swap;
+	//
+	// 				swap = sort[j];
+	// 				sort[j] = sort[j + 1];
+	// 				sort[j + 1] = swap;
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// void bubbleSort3(std::vector<std::vector<double> > &sort)
+	// {
+	// 	int intSwap;
+	// 	std::vector<double> swap;
+	// 	for (int i = 0; i < sort.size() - 1; i++)
+	// 	{
+	// 		for (int j = 0; j < sort.size() - i - 1; j++)
+	// 		{
+	// 			if (sort[j][0] > sort[j + 1][0]) // For decreasing order use <
+	// 			{
+	// 				swap = sort[j];
+	// 				sort[j] = sort[j + 1];
+	// 				sort[j + 1] = swap;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	//coordinate conversions
 	double convertToB(double ra, double dec)
