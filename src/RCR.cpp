@@ -1,13 +1,15 @@
 #include "RCR.h"
-#include <cmath>
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 #include <float.h>
+#include <math.h>
 #include <mutex>
+#include <numeric>
+
 
 std::mutex m;
 
-//Non-member Functions
+// Non-member Functions
 
 bool RCR::unityTablesLoaded = false;
 std::vector<double> RCR::ESUnity;
@@ -19,120 +21,51 @@ std::vector<double> RCR::LS68UnityCF;
 std::vector<double> RCR::SSDLUnityCF;
 std::vector<std::vector<double> > RCR::SSConstants;
 
+// manipulation tools:
 
-//manipulation tools:
-void swap(int a, int b, std::vector<double> &y) {
-    double tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
-
-void swap(int a, int b, std::vector<int> &y) {
-    int tmp;
-    tmp = y[a];
-    y[a] = y[b];
-    y[b] = tmp;
-}
-
-void QS(int left, int right, std::vector<double> &y) {
-    // If the range is invalid or the vector is empty, stop immediately.
-    if (left >= right || y.empty()) {
-        return;
-    }
-    int i = left, j = right;
-    double pivot = y[(left + right) / 2];
-
-    while (i <= j) {
-        while (y[i] < pivot) {
-            i++;
-        }
-        while (y[j] > pivot) {
-            j--;
-        }
-        if (i <= j) {
-            swap(i, j, y);
-            i++;
-            j--;
-        }
-    }
-
-    if (left < j) {
-        QS(left, j, y);
-    }
-    if (i < right) {
-        QS(i, right, y);
-    }
-}
-
-void QS(int left, int right, std::vector<double> &w, std::vector<double> &y) {
-    int i = left, j = right;
-    double pivot = y[(left + right) / 2];
-
-    while (i <= j) {
-        while (y[i] < pivot) {
-            i++;
-        }
-        while (y[j] > pivot) {
-            j--;
-        }
-        if (i <= j) {
-            swap(i, j, y);
-            swap(i, j, w);
-            i++;
-            j--;
-        }
-    }
-
-    if (left < j) {
-        QS(left, j, w, y);
-    }
-    if (i < right) {
-        QS(i, right, w, y);
-    }
-}
-
-void QS(int left, int right, std::vector<int> &w, std::vector<double> &y) {
-    int i = left, j = right;
-    double pivot = y[(left + right) / 2];
-
-    while (i <= j) {
-        while (y[i] < pivot) {
-            i++;
-        }
-        while (y[j] > pivot) {
-            j--;
-        }
-        if (i <= j) {
-            swap(i, j, y);
-            swap(i, j, w);
-            i++;
-            j--;
-        }
-    }
-
-    if (left < j) {
-        QS(left, j, w, y);
-    }
-    if (i < right) {
-        QS(i, right, w, y);
-    }
-}
-
-void sort(std::vector<double> &y) {
-    QS(0, y.size() - 1, y);
-}
+void sort(std::vector<double> &y) { std::sort(y.begin(), y.end()); }
 
 void sort(std::vector<double> &w, std::vector<double> &y) {
-    QS(0, y.size() - 1, w, y);
+    if (w.size() != y.size() || y.empty())
+        return;
+
+    std::vector<size_t> p(y.size());
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+              [&](size_t i, size_t j) { return y[i] < y[j]; });
+
+    std::vector<double> sorted_w(w.size());
+    std::vector<double> sorted_y(y.size());
+    for (size_t i = 0; i < p.size(); ++i) {
+        sorted_w[i] = w[p[i]];
+        sorted_y[i] = y[p[i]];
+    }
+
+    w = sorted_w;
+    y = sorted_y;
 }
 
 void sort(std::vector<int> &w, std::vector<double> &y) {
-    QS(0, y.size() - 1, w, y);
+    if (w.size() != y.size() || y.empty())
+        return;
+
+    std::vector<size_t> p(y.size());
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+              [&](size_t i, size_t j) { return y[i] < y[j]; });
+
+    std::vector<int> sorted_w(w.size());
+    std::vector<double> sorted_y(y.size());
+    for (size_t i = 0; i < p.size(); ++i) {
+        sorted_w[i] = w[p[i]];
+        sorted_y[i] = y[p[i]];
+    }
+
+    w = sorted_w;
+    y = sorted_y;
 }
 
-
-//FN & CF Models:
+// FN & CF Models:
 double getCFRatio(std::vector<double> &w) {
     int size = w.size();
     double mean = 0, stDev = 0;
