@@ -1,15 +1,21 @@
 #!/bin/bash
 set -e
 
-# Create build directory
-mkdir -p build
-cd build
+# Detect number of cores (macOS/Linux)
+num_cores=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 1)
+echo "Building in Release mode with native optimizations using $num_cores cores..."
 
-# Run CMake and Make with Release build type
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
+# Create separate build directory for Release builds
+mkdir -p build/release
+cd build/release
 
-# Copy executable to root
-cp radio-cartographer ..
+# Run CMake for Release build with optimizations
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE_OPTIMIZATION=ON ../..
 
-echo "Production build successful. Executable 'radio-cartographer' is ready."
+# Parallel compilation
+make -j"$num_cores"
+
+# Copy executable to project root
+cp radio-cartographer ../..
+
+echo "Done. Executable 'radio-cartographer' (Release, Optimized) is ready."

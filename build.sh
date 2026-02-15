@@ -1,15 +1,20 @@
 #!/bin/bash
 set -e
 
-# Create build directory
-mkdir -p build
-cd build
+# Detect number of cores (macOS/Linux)
+num_cores=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 1)
 
-# Run CMake and Make
-cmake ..
-make
+# Create separate build directory for Debug builds
+mkdir -p build/debug
+cd build/debug
 
-# Copy executable to root
-cp radio-cartographer ..
+# Run CMake for Debug build
+cmake -DCMAKE_BUILD_TYPE=Debug ../..
 
-echo "Build successful. Executable 'radio-cartographer' is ready."
+# Parallel compilation
+make -j"$num_cores"
+
+# Copy executable to project root
+cp radio-cartographer ../..
+
+echo "Done. Executable 'radio-cartographer' (Debug) is ready."

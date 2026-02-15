@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(radio_cartographer)
 
 include(GNUInstallDirs)
@@ -9,6 +9,15 @@ set(CMAKE_BUILD_TYPE Debug)
 
 option(BUILD_PYTHON_BINDINGS "Build shared library for Python bindings" OFF)
 option(ENABLE_PROFILING "Enable profiling with gprof" OFF)
+option(ENABLE_NATIVE_OPTIMIZATION "Enable architecture-specific optimizations" OFF)
+
+if(ENABLE_NATIVE_OPTIMIZATION)
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2") # Valid for most modern CPUs, auto-detection on MSVC is harder
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    endif()
+endif()
 
 if(ENABLE_PROFILING)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
