@@ -40,6 +40,8 @@ def configure_and_build(rebuild=False):
     cmd_cmake = [
         "cmake",
         "-DENABLE_PROFILING=ON",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DENABLE_NATIVE_OPTIMIZATION=ON",
         "-DBUILD_PYTHON_BINDINGS=OFF", 
         ".."
     ]
