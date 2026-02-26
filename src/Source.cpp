@@ -113,11 +113,11 @@ void setInputSurveyParams(char *argv[], SurveyParameters &sParams) {
   // MISC
   sParams.tracking = false;
 
-  // Gain Delta Overrides
-  sParams.gainDeltaStart1 = atof(argv[22]);
-  sParams.gainDeltaEnd1 = atof(argv[23]);
-  sParams.gainDeltaStart2 = atof(argv[24]);
-  sParams.gainDeltaEnd2 = atof(argv[25]);
+  // Gain Delta Overrides (parsed outside)
+  sParams.gainDeltaStart1 = -999.0;
+  sParams.gainDeltaEnd1 = -999.0;
+  sParams.gainDeltaStart2 = -999.0;
+  sParams.gainDeltaEnd2 = -999.0;
 
   // SET FLUX CHANNEL
   if (inputChannel == "left") {
@@ -226,6 +226,28 @@ void setInputProcessingParams(char *argv[], ProcessorParameters &procParams) {
   procParams.lssProc = false;
 }
 
+std::vector<double> parseDoubleList(const std::string& str) {
+    std::vector<double> result;
+    std::stringstream ss(str);
+    std::string item;
+    while (std::getline(ss, item, ',')) {
+        if (!item.empty() && item != "None" && item != "null") {
+            try {
+                result.push_back(std::stod(item));
+            } catch (...) {
+                result.push_back(-999.0);
+            }
+        } else {
+            result.push_back(-999.0);
+        }
+    }
+    if (result.empty()) {
+        result.push_back(-999.0);
+    }
+    return result;
+}
+
+
 int main(int argc, char *argv[]) {
   /*
   The inputs are as follows:
@@ -301,11 +323,25 @@ int main(int argc, char *argv[]) {
       filenames.push_back(item);
   }
 
+  std::vector<double> gainDeltaStart1List = parseDoubleList(argv[22]);
+  std::vector<double> gainDeltaEnd1List = parseDoubleList(argv[23]);
+  std::vector<double> gainDeltaStart2List = parseDoubleList(argv[24]);
+  std::vector<double> gainDeltaEnd2List = parseDoubleList(argv[25]);
+
+  int fileIndex = 0;
   for (const auto& file : filenames) {
       cParams.files.clear();
       cParams.files.push_back(file);
-      Survey survey(sParams, cParams, file);
+      
+      SurveyParameters sParamsForFile = sParams;
+      sParamsForFile.gainDeltaStart1 = (fileIndex < gainDeltaStart1List.size()) ? gainDeltaStart1List[fileIndex] : -999.0;
+      sParamsForFile.gainDeltaEnd1 = (fileIndex < gainDeltaEnd1List.size()) ? gainDeltaEnd1List[fileIndex] : -999.0;
+      sParamsForFile.gainDeltaStart2 = (fileIndex < gainDeltaStart2List.size()) ? gainDeltaStart2List[fileIndex] : -999.0;
+      sParamsForFile.gainDeltaEnd2 = (fileIndex < gainDeltaEnd2List.size()) ? gainDeltaEnd2List[fileIndex] : -999.0;
+      
+      Survey survey(sParamsForFile, cParams, file);
       surveyHold.push_back(survey);
+      fileIndex++;
   }
 
   //    cParams.files.clear();

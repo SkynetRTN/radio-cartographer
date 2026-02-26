@@ -1259,25 +1259,21 @@ void Survey::gainCalibration(Channel chan, Channel janskyChan)
     // Override Deltas if requested
     if (chan == LEFT) {
         if (std::abs(gainDeltaStart1 - (-999.0)) > 1e-4) {
+            std::cout << "Overwritting pre cal for channel left: " << deltaStart << " is being overwritten by " << gainDeltaStart1 << std::endl;
             deltaStart = gainDeltaStart1;
-            Debugger::print("Info", "Overriding deltaStart for LEFT channel.");
-            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaStart: " << deltaStart << std::defaultfloat << std::endl;
         }
         if (std::abs(gainDeltaEnd1 - (-999.0)) > 1e-4) {
+            std::cout << "Overwritting post cal for channel left: " << deltaEnd << " is being overwritten by " << gainDeltaEnd1 << std::endl;
             deltaEnd = gainDeltaEnd1;
-            Debugger::print("Info", "Overriding deltaEnd for LEFT channel.");
-            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
         }
     } else if (chan == RIGHT) {
         if (std::abs(gainDeltaStart2 - (-999.0)) > 1e-4) {
+            std::cout << "Overwritting pre cal for channel right: " << deltaStart << " is being overwritten by " << gainDeltaStart2 << std::endl;
             deltaStart = gainDeltaStart2;
-            Debugger::print("Info", "Overriding deltaStart for RIGHT channel.");
-            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaStart: " << deltaStart << std::defaultfloat << std::endl;
         }
         if (std::abs(gainDeltaEnd2 - (-999.0)) > 1e-4) {
+            std::cout << "Overwritting post cal for channel right: " << deltaEnd << " is being overwritten by " << gainDeltaEnd2 << std::endl;
             deltaEnd = gainDeltaEnd2;
-            Debugger::print("Info", "Overriding deltaEnd for RIGHT channel.");
-            std::cout << std::fixed << std::setprecision(17) << "DEBUG: Overridden deltaEnd: " << deltaEnd << std::defaultfloat << std::endl;
         }
     }
     

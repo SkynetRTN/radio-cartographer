@@ -38,5 +38,5 @@ testing/Temporary
 
 # pyrc pycache
 pyrc/**/__pycache__/
-/crownofthorns_nod_processed.fits
+/testing/test_files/supernova/processed/crownofthorns_oldcommit_processed.fits
 .venv/

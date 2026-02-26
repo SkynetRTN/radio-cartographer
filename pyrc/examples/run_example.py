@@ -30,24 +30,33 @@ def run_example(executable_path="radio-cartographer"):
     # Use the standard path provided in the request
     # Use the standard path provided in the request
     filenames = [
-        "testing/test_files/crownofthorns_raster.fits",
-        "testing/test_files/crownofthorns_nod.fits"
+        "testing/test_files/supernova/crownofthorns_raster.fits",
+        "testing/test_files/supernova/crownofthorns_nod.fits"
     ]
     
-    # Validation
-    # Validate the first file for gain cal (assuming similar gain for both or just using one for this example)
-    # Ideally should validate both, but for this example we'll validate the first one to get gain params
-    v = Validation(filenames[0])
-    validated_path = v.validate()
-    
-    # Gain Calibration on the first file
-    g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
-    precaldelta2, postcaldelta2 = g_c.Gain_calibration()
+    precaldelta1_list = []
+    postcaldelta1_list = []
+    precaldelta2_list = []
+    postcaldelta2_list = []
 
-    g_c_1 = Gain_Calibration(validated_path, 0, 1, None, None, None, None)
-    precaldelta1, postcaldelta1  = g_c_1.Gain_calibration()
+    for filename in filenames:
+        v = Validation(filename)
+        validated_path = v.validate()
+        
+        # Right channel mapping is typically 0 for channel arg
+        g_c = Gain_Calibration(validated_path, 0, 0, None, None, None, None)
+        precaldelta2, postcaldelta2 = g_c.Gain_calibration()
 
-    print(precaldelta1, precaldelta2, postcaldelta1, postcaldelta2)
+        # Left channel mapping
+        g_c_1 = Gain_Calibration(validated_path, 0, 1, None, None, None, None)
+        precaldelta1, postcaldelta1  = g_c_1.Gain_calibration()
+        
+        precaldelta1_list.append(precaldelta1)
+        postcaldelta1_list.append(postcaldelta1)
+        precaldelta2_list.append(precaldelta2)
+        postcaldelta2_list.append(postcaldelta2)
+
+    print("Pre1:", precaldelta1_list, "Pre2:", precaldelta2_list, "Post1:", postcaldelta1_list, "Post2:", postcaldelta2_list)
     config = RadioCartographerConfig(
         channel=Channel.COMPOSITE,
         receiver=Receiver.HI,
@@ -69,10 +78,10 @@ def run_example(executable_path="radio-cartographer"):
         photo_centroid_type=CentroidType.BRIGHTEST,
         trim_size=0.0,
         lss_mapping=False,
-        gain_delta_start_1= precaldelta1,
-        gain_delta_end_1=postcaldelta1,
-        gain_delta_start_2=precaldelta2,
-        gain_delta_end_2=postcaldelta2,
+        gain_delta_start_1=precaldelta1_list,
+        gain_delta_end_1=postcaldelta1_list,
+        gain_delta_start_2=precaldelta2_list,
+        gain_delta_end_2=postcaldelta2_list,
     )
 
     

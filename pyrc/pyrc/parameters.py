@@ -70,10 +70,10 @@ class RadioCartographerConfig:
     photo_centroid_type: CentroidType = CentroidType.BRIGHTEST
     
     # Gain Calibration Overrides
-    gain_delta_start_1: Optional[float] = None
-    gain_delta_end_1: Optional[float] = None
-    gain_delta_start_2: Optional[float] = None
-    gain_delta_end_2: Optional[float] = None
+    gain_delta_start_1: List[float] = field(default_factory=list)
+    gain_delta_end_1: List[float] = field(default_factory=list)
+    gain_delta_start_2: List[float] = field(default_factory=list)
+    gain_delta_end_2: List[float] = field(default_factory=list)
 
     def to_args(self) -> List[str]:
         """
@@ -158,11 +158,15 @@ class RadioCartographerConfig:
             args_list.append(str(val))
         
         # Add Gain Delta Overrides (Indices 22-25)
-        # Default to -999.0 if None
-        args_list.append(str(self.gain_delta_start_1 if self.gain_delta_start_1 is not None else -999.0))
-        args_list.append(str(self.gain_delta_end_1 if self.gain_delta_end_1 is not None else -999.0))
-        args_list.append(str(self.gain_delta_start_2 if self.gain_delta_start_2 is not None else -999.0))
-        args_list.append(str(self.gain_delta_end_2 if self.gain_delta_end_2 is not None else -999.0))
+        def list_to_str(lst):
+            if not lst:
+                return "-999.0"
+            return ",".join(str(x if x is not None else -999.0) for x in lst)
+
+        args_list.append(list_to_str(self.gain_delta_start_1))
+        args_list.append(list_to_str(self.gain_delta_end_1))
+        args_list.append(list_to_str(self.gain_delta_start_2))
+        args_list.append(list_to_str(self.gain_delta_end_2))
             
         # Append exclusion bands (argv[22]...)
         for band_edge in self.exclusion_bands:
