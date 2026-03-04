@@ -45,6 +45,7 @@ set(radio_cartographer_sources
     src/ProcessorThetaGap.cpp
     src/RCR.cpp
     src/Scan.cpp
+    src/SpectralBackground.cpp
     src/Survey.cpp
     src/Tools.cpp
     src/timer.cpp
@@ -95,7 +96,10 @@ target_link_libraries(radio_cartographer
 add_executable(radio-cartographer src/Source.cpp)
 target_link_libraries(radio-cartographer PRIVATE radio_cartographer)
 
-install(TARGETS radio_cartographer radio-cartographer
+add_executable(spectral-cleaner src/SpectralCleanerMain.cpp)
+target_link_libraries(spectral-cleaner PRIVATE radio_cartographer)
+
+install(TARGETS radio_cartographer radio-cartographer spectral-cleaner
     EXPORT radio_cartographerTargets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

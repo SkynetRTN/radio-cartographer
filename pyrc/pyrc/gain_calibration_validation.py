@@ -2,7 +2,8 @@ import numpy as np
 from astropy.io import fits
 from astropy.table import Table
 from astropy.time import Time
-from . import utils
+from typing import Optional
+import utils
 import os
 
 class Validation:
@@ -101,7 +102,7 @@ class Validation:
 
         self.data['DATA'] = [row[start_channel:stop_channel + 1] for row in self.data['DATA']]
 
-    def validate(self, output_path: str | None = None) -> str:
+    def validate(self, output_path: Optional[str] = None) -> str:
         '''
         Validates the data in a file. Ensures all date cards
         comply to the datetime library standard and that
