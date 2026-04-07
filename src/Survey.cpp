@@ -2119,23 +2119,26 @@ void Survey::convertToGalacticInitial()
 // if it's a raster map that wraps around ra=0, we need to adjust the ra values after passing 0
 // apparently it works for galactic too.
 void Survey::zeroRaCheck() {
-    bool isCross = false;
-    int maxIndex, minIndex;
-    for (int i = 1; i < ras.size(); i++) {
-        int i_pre = i - 1;
-        while (i_pre > 0 && ras[i_pre].empty()) {
-             i_pre--;
+    double minRa = 999999;
+    double maxRa = -999999;
+    
+    // First pass: Calculate global min and max RA across ALL scans
+    for (int i = 0; i < scans.size(); ++i) {
+        for (int k = 0; k < scans[i].getSize(); ++k) {
+            double raTemp = scans[i].getRa(k);
+            if (raTemp > maxRa) maxRa = raTemp;
+            if (raTemp < minRa) minRa = raTemp;
         }
-        if (ras[i].empty() || ras[i_pre].empty()) {
-            continue;
-        }
-        maxIndex = std::max_element(ras[i - 1].begin(), ras[i - 1].end()) - ras[i - 1].begin();
-        minIndex = std::min_element(ras[i].begin(), ras[i].end()) - ras[i].begin();
-        if ((ras[i][minIndex] < 180.0 && ras[i - 1][maxIndex] > 180.0) || isCross) {
-            isCross = true;
-            for (int j = 0; j < ras[i].size(); j++) {
-                if (ras[i][j] < 180.0) {
-                    ras[i][j] = ras[i][j] + 360.0;
+    }
+    
+    double raSpread = maxRa - minRa;
+
+    // Second pass: Conditionally wrap RA coordinates if they dangerously straddle the 0/360 boundary
+    if (raSpread > 180.0) {
+        for (int i = 0; i < scans.size(); ++i) {
+            for (int k = 0; k < scans[i].getSize(); ++k) {
+                if (scans[i].getRa(k) < 180.0) {
+                    scans[i].updateRawRa(scans[i].getRa(k) + 360.0, k);
                 }
             }
         }

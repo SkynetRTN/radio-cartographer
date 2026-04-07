@@ -463,6 +463,12 @@ void Scan::cosDecTransform(double t_int, double centerDec, double centerRa, doub
 	int jMin, jMax;
 	for (int j = 0; j < scanProperties.size; j++)
 	{
+		if (t_int == 0.0) {
+			decHold[j] = coordinates.workingDec[j] - centerDec;
+			raHold[j] = (coordinates.workingRa[j] - centerRa) * cos(centerDec * M_PI / 180.0);
+			continue;
+		}
+
 		if (t_int >= 0)
 		{
 			jMin = j;
@@ -482,9 +488,14 @@ void Scan::cosDecTransform(double t_int, double centerDec, double centerRa, doub
 			jMin = jMax - 1;
 		}
 
-		decHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin])) - centerDec;
-		//raHold[j] = (workingRa[jMin] + (time[j] - t_int - time[jMin])*(workingRa[jMax] - workingRa[jMin]) / (time[jMax] - time[jMin]))*cos(centerDec*M_PI / 180.0);
-		raHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin])) - centerRa)*cos(centerDec*M_PI / 180.0);
+		double timeDiff = dataProperties.time[jMax] - dataProperties.time[jMin];
+		if (timeDiff == 0.0) {
+			decHold[j] = coordinates.workingDec[jMin] - centerDec;
+			raHold[j] = (coordinates.workingRa[jMin] - centerRa) * cos(centerDec * M_PI / 180.0);
+		} else {
+			decHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / timeDiff) - centerDec;
+			raHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / timeDiff) - centerRa)*cos(centerDec*M_PI / 180.0);
+		}
 	}
 
 	this->coordinates.workingDec = decHold;
@@ -503,6 +514,12 @@ void Scan::undoCosTransform(double t_int, double centerDec, double centerRa)
 	int jMin, jMax;
 	for (int j = 0; j < scanProperties.size; j++)
 	{
+		if (t_int == 0.0) {
+			decHold[j] = coordinates.workingDec[j] + centerDec;
+			raHold[j] = (coordinates.workingRa[j] / cos(centerDec * M_PI / 180.0)) + centerRa;
+			continue;
+		}
+
 		if (t_int >= 0)
 		{
 			jMin = j;
@@ -522,9 +539,14 @@ void Scan::undoCosTransform(double t_int, double centerDec, double centerRa)
 			jMin = jMax - 1;
 		}
 
-		decHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin])) + centerDec;
-		//raHold[j] = (workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(workingRa[jMax] - workingRa[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin]))*cos(centerDec*M_PI / 180.0);
-		raHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin]))) / cos(centerDec*M_PI / 180.0) + centerRa;
+		double timeDiff = dataProperties.time[jMax] - dataProperties.time[jMin];
+		if (timeDiff == 0.0) {
+			decHold[j] = coordinates.workingDec[jMin] + centerDec;
+			raHold[j] = (coordinates.workingRa[jMin] / cos(centerDec * M_PI / 180.0)) + centerRa;
+		} else {
+			decHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / timeDiff) + centerDec;
+			raHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / timeDiff)) / cos(centerDec*M_PI / 180.0) + centerRa;
+		}
 	}
 
 	this->coordinates.workingDec = decHold;
@@ -542,6 +564,12 @@ void Scan::dynamicCosDecTransform(double t_int, double CENTERLATI, double CENTER
 	int jMin, jMax;
 	for (int j = 0; j < scanProperties.size; j++)
 	{
+		if (t_int == 0.0) {
+			bHold[j] = coordinates.workingDec[j] - CENTERLATI;
+			lHold[j] = (coordinates.workingRa[j] - CENTERLONG) * cos(LATITUDES[j] * M_PI / 180.0);
+			continue;
+		}
+
 		if (t_int >= 0)
 		{
 			jMin = j;
@@ -561,8 +589,14 @@ void Scan::dynamicCosDecTransform(double t_int, double CENTERLATI, double CENTER
 			jMin = jMax - 1;
 		}
 
-		bHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin])) - CENTERLATI;
-		lHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / (dataProperties.time[jMax] - dataProperties.time[jMin])) - CENTERLONG)*cos((LATITUDES[jMax])*M_PI / 180.0);
+		double timeDiff = dataProperties.time[jMax] - dataProperties.time[jMin];
+		if (timeDiff == 0.0) {
+			bHold[j] = coordinates.workingDec[jMin] - CENTERLATI;
+			lHold[j] = (coordinates.workingRa[jMin] - CENTERLONG) * cos(LATITUDES[jMax] * M_PI / 180.0);
+		} else {
+			bHold[j] = (coordinates.workingDec[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingDec[jMax] - coordinates.workingDec[jMin]) / timeDiff) - CENTERLATI;
+			lHold[j] = ((coordinates.workingRa[jMin] + (dataProperties.time[j] - t_int - dataProperties.time[jMin])*(coordinates.workingRa[jMax] - coordinates.workingRa[jMin]) / timeDiff) - CENTERLONG)*cos((LATITUDES[jMax])*M_PI / 180.0);
+		}
 	}
 
 	this->coordinates.workingDec = bHold;
@@ -581,6 +615,12 @@ void Scan::undoDynamicCosDecTransform(double t_int, double CENTERLATI, double CE
 	int jMin, jMax;
 	for (int j = 0; j < scanProperties.size; j++)
 	{
+		if (t_int == 0.0) {
+			decHold[j] = coordinates.workingDec[j] + CENTERLATI;
+			raHold[j] = (coordinates.workingRa[j] / cos(LATITUDES[j] * M_PI / 180.0)) + CENTERLONG;
+			continue;
+		}
+
 		if (t_int >= 0)
 		{
 			jMin = j;
