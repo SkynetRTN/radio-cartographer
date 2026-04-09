@@ -5,9 +5,13 @@ from astropy.time import Time
 from astropy.io import fits
 import astropy.units as u
 import numpy as np
-from .gain_calibration_validation import Validation
+
 @contextmanager
 def validated_temp_path(filepath: str):
+    try:
+        from gain_calibration_validation import Validation
+    except ImportError:
+        from .gain_calibration_validation import Validation
     v = Validation(filepath)
     validated_path = v.validate()  # temp path
     yield validated_path

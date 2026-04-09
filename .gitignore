@@ -38,6 +38,7 @@ testing/Temporary
 testing/test_files
 testing/processed_test_files
 testing/profile/results
+pyrc/pyrc/spectral_testing
 # pyrc pycache
 pyrc/**/__pycache__/
 .venv/

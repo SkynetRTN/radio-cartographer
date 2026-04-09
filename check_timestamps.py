@@ -21,7 +21,7 @@ def check_timestamps(file_path):
         print(f"Error reading file: {e}")
 
 if __name__ == "__main__":
-    target_file = '/skynet/radio-cartographer/testing/test_files/0144845_validated.fits'
+    target_file = '/skynet/radio-cartographer/testing/test_files/0144845.fits'
     if len(sys.argv) > 1:
         target_file = sys.argv[1]
         
