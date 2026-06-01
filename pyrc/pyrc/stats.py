@@ -597,9 +597,9 @@ chauvenet3 = njit(nogil=True, cache=True)(chauvenet3py)
 
 
 def chauvenet(data: np.ndarray, mask: Optional[np.ndarray] = None,
-              nu: int = 0, min_vals: int = 10, mean_type: int = 0,
+              nu: int = 0, min_vals: int = 10, mean_type: int = 1,
               mean_override: Optional[Union[np.ndarray, float, int]] = None,
-              sigma_type: int = 0,
+              sigma_type: int = 1,
               sigma_override: Optional[Union[np.ndarray, float, int]] = None,
               clip_lo: bool = True, clip_hi: bool = True,
               max_iter: int = 0,

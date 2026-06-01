@@ -118,7 +118,7 @@ def process_file(fits_file):
     diff = intensities - modeled_spectrum
 
     try:
-        mask, mu, gamma = stats.chauvenet(diff, clip_lo = False)
+        mask, mu, gamma = stats.chauvenet(diff, clip_lo = False, mean_type=0, sigma_type=0)
     except Exception as e:
         print(f"Error performing RCR chauvenet: {e}")
         mask = np.zeros_like(diff, dtype=bool)
@@ -155,7 +155,7 @@ def process_file(fits_file):
     plt.tight_layout()
 
     root_name = fits_file.stem
-    plot_name = f"{root_name}_plotting.png"
+    plot_name = f"{root_name}_plotting_mean.png"
 
     # Save plots to spectral_testing/plots
     plot_dir = fits_file.parent / "plots"

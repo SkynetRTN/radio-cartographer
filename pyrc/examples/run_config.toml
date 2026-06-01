@@ -1,6 +1,6 @@
 [input]
 filenames = [
-    "/skynet/test_standards_static/gbo20_L_lores_raster_orion.fits",
+    "testing/test_files/0152177.fits",
 ]
 
 [radio_cartographer]
@@ -26,7 +26,7 @@ trim_size = 0.0
 lss_mapping = false
 skip_time_shift = false
 skip_background_subtraction = false
-skip_rfi_removal = false
+skip_rfi_removal = true
 skip_surface_modeling = false
 
 # Gain parameters are calculated dynamically in the script unless specified here.
