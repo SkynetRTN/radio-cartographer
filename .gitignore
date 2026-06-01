@@ -55,3 +55,68 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# -----------------------------------------------------------------
+# rcpy runner directories
+# -----------------------------------------------------------------
+
+# Users drop their own FITS files into input/. The folder is tracked
+# (so it exists on clone) but its contents are not.
+input/*
+!input/README.md
+!input/.gitkeep
+
+# All run outputs.
+output/
+
+# -----------------------------------------------------------------
+# Data, diagnostic, and developer scratch files (not committed)
+# -----------------------------------------------------------------
+
+# Raw + reference FITS datasets live locally; do not commit them.
+data/
+*.fits
+*.sdfits
+
+# Diagnostic / preview images.
+*.png
+*.jpg
+*.jpeg
+
+# One-off scratch / diagnostic scripts (kept locally but not pushed).
+# Anything in scripts/ that starts with an underscore or one of the
+# usual dev prefixes is treated as scratch.
+scripts/_*.py
+scripts/check_*.py
+scripts/diag_*.py
+scripts/debug_*.py
+scripts/dump_*.py
+scripts/compare_*.py
+scripts/cpp_vs_py_*.py
+scripts/exp_*.py
+scripts/fit_*.py
+scripts/inspect_*.py
+scripts/test_*.py
+scripts/verify_*.py
+scripts/audit_*.py
+scripts/find_*.py
+scripts/build_*.py
+scripts/measure_*.py
+scripts/path_*.py
+scripts/swap_*.py
+scripts/rotation_*.py
+scripts/overlay_*.py
+scripts/empirical_*.py
+scripts/layer_*.py
+scripts/make_*.py
+scripts/theta_gap_cpp.*
+scripts/bgsub_cpp.*
+scripts/weight_*.py
+scripts/*.exe
+scripts/*.log
+scripts/__pycache__/
+
+# Audit / planning notes that aren't part of the shipped package.
+PARITY_AUDIT_*.txt
+PIPELINE_STAGES.txt
+OVERVIEW.txt

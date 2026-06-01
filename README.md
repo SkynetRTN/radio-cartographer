@@ -6,6 +6,25 @@ Virginia. It has been integrated into the Skynet and automatically processes rad
 For a full description of the algorithm, see our systems paper:
 [SKYNET ALGORITHM FOR SINGLE-DISH RADIO MAPPING](https://arxiv.org/abs/1808.06128).
 
+# rcpy — Python port (quick start)
+
+`rcpy/` is the Python port of the C++ pipeline. Lab members testing
+local changes can use the runner at the repo root:
+
+```bash
+pip install -r rcpy/requirements.txt   # numpy, scipy, astropy, matplotlib
+# Drop your SDFITS files into input/, then:
+python run.py                          # processes every .fits in input/
+python run.py input/my_target.fits     # or a specific file
+```
+
+Outputs go to `output/`: a multi-extension FITS (`<name>_rcpy.fits`)
+and a 6-panel diagnostic PNG (`<name>_rcpy.png`).
+
+The job settings (channel, calibration method, time shift, BG/RFI/
+weight scales, frequency range) are defined in the `JOB` dataclass at
+the top of `run.py` — edit that to change the preset.
+
 # Local Installation
 
 The Radio Development Project (RDP) will run on both Windows and Linux. It's possible that it will run
