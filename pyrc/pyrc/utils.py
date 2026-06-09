@@ -102,7 +102,7 @@ def get_frequency_range(header, ifnum):
 def integrate_data(header, data, mode, frequencies=None):
     if mode == "continuum":
         intensities = np.array(data['DATA'])
-        intensities = np.sum(intensities, axis=1)
+        intensities = np.average(intensities, axis=1)
 
         times = Time(data["DATE-OBS"], format='isot')
         t0 = Time(header["DATE"], format="isot")
